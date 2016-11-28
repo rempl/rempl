@@ -1,0 +1,3 @@
+- `session` - remote inspector ui connections
+- `connected` - flag to represent connection state to remote end point (dev-server, browser's developer tools)
+- `features` - available host feature list
