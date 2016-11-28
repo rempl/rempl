@@ -31,5 +31,8 @@
     "eslint": "^2.13.1",
     "jscs": "~3.0.7",
     "uglify-js": "^2.6.1"
+  },
+  "dependencies": {
+    "socket.io-client": "^1.7.1"
   }
 }
