@@ -1,7 +1,7 @@
 var Value = require('../../utils/Value.js');
 var pluginSync = require('./sync-devtools.js');
 var serverSync = require('./sync-server.js');
-var noop = function(){};
+var noop = function() {};
 
 module.exports = function createSync(observer) {
     function processCommand(command, callback){

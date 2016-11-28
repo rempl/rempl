@@ -1,4 +1,9 @@
-function complete(dest, source){
+'use strict';
+
+var global = new Function('return this')();
+var document = global.document;
+
+function complete(dest, source) {
     for (var key in source) {
         if (key in dest == false) {
             dest[key] = source[key];
@@ -8,12 +13,30 @@ function complete(dest, source){
     return dest;
 }
 
-/**
-  * Attach document ready handlers
-  * @param {function()} callback
-  * @param {*} context Context for handler
-  */
-var ready = (function(){
+function slice(src, offset) {
+    return Array.prototype.slice.call(src, offset);
+}
+
+function genUID(len){
+    function base36(val){
+        return Math.round(val).toString(36);
+    }
+
+    // uid should starts with alpha
+    var result = base36(10 + 25 * Math.random());
+
+    if (!len) {
+        len = 16;
+    }
+
+    while (result.length < len) {
+        result += base36(new Date * Math.random());
+    }
+
+    return result.substr(0, len);
+}
+
+var ready = (function() {
     var eventFired = !document || document.readyState == 'complete';
     var readyHandlers = [];
     var timer;
@@ -97,6 +120,38 @@ var ready = (function(){
     };
 })();
 
+var consoleMethods = (function(){
+    var console = global.console;
+    var methods = {
+        log: function() {},
+        info: function() {},
+        warn: function() {},
+        error: function() {}
+    };
+
+    if (console) {
+        for (var methodName in methods) {
+            methods[methodName] = 'bind' in Function.prototype && typeof console[methodName] == 'function'
+                ? Function.prototype.bind.call(console[methodName], console)
+                // IE8 and lower solution. It's also more safe when Function.prototype.bind
+                // defines by other libraries (like es5-shim).
+                : function(){
+                    Function.prototype.apply.call(console[methodName], console, arguments);
+                };
+        }
+    }
+
+    return methods;
+})();
+
 module.exports = {
-    complete: complete
+    Value: require('./Value.js'),
+    complete: complete,
+    slice: slice,
+    genUID: genUID,
+    ready: ready,
+    log: consoleMethods.log,
+    info: consoleMethods.info,
+    warn: consoleMethods.warn,
+    error: consoleMethods.error
 };
