@@ -1,0 +1,35 @@
+{
+  "name": "rempl",
+  "version": "1.0.0",
+  "description": "Remote platform",
+  "main": "index.js",
+  "author": "Roman Dvornov",
+  "repository": "lahmatiy/rempl",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lahmatiy/rempl/issues"
+  },
+  "homepage": "https://github.com/lahmatiy/rempl",
+  "eslintConfig": {
+    "env": {
+      "node": true,
+      "mocha": true,
+      "es6": true
+    },
+    "rules": {
+      "no-duplicate-case": 2,
+      "no-undef": 2,
+      "no-unused-vars": [2, {"vars": "all", "args": "after-used"}]
+    }
+  },
+  "scripts": {
+    "codestyle": "jscs src && eslint src",
+    "build": "browserify --standalone rempl src/observer/browser/index.js | uglifyjs --compress --mangle -o dist/rempl-observer-browser.js"
+  },
+  "devDependencies": {
+    "browserify": "^13.0.0",
+    "eslint": "^2.13.1",
+    "jscs": "~3.0.7",
+    "uglify-js": "^2.6.1"
+  }
+}
