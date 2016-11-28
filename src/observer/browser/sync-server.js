@@ -5,14 +5,14 @@ var features = require('api').features;    // FIXME
 var initCallbacks = [];
 var remplDevServer = null;
 
-function init(callback){
+function init(observer, callback){
     if (!remplDevServer) {
-        initCallbacks.push(callback);
+        initCallbacks.push(arguments);
         return;
     }
 
     if (typeof remplDevServer.initRemoteDevtoolAPI === 'function') {
-        callback(remplDevServer.initRemoteDevtoolAPI(getInspectorUI));
+        callback(remplDevServer.initRemoteDevtoolAPI(observer.id, observer.getRemoteUI));
     }
 }
 
@@ -42,7 +42,9 @@ utils.ready(function(){
     }
 
     // invoke onInit callbacks
-    initCallbacks.splice(0).forEach(init);
+    initCallbacks.splice(0).forEach(function(args) {
+        init.apply(null, args);
+    });
 });
 
 module.exports = {

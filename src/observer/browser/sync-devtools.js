@@ -1,5 +1,6 @@
 var DEBUG = false;
-var PREFIX = 'basisjsDevpanel';
+var PREFIX = 'basisjsDevpanel';  // TODO: rename to rempl
+var DEVTOOL_PREFIX = 'basisjs-devpanel'; // TODO: rename to rempl
 var utils = require('../../utils/index.js');
 var document = global.document;
 var connected = new utils.Value(false);
@@ -21,7 +22,7 @@ var send = function() {
     }
 };
 
-function init(callback) {
+function init(observer, callback) {
     if (inited) {
         callback({
             setFeatures: features.set.bind(features),
@@ -62,7 +63,7 @@ function wrapCallback(callback) {
 }
 
 function handshake() {
-    emitEvent('basisjs-devpanel:init', {
+    emitEvent(DEVTOOL_PREFIX + ':init', {
         input: inputChannelId,
         output: outputChannelId,
         features: features.value
@@ -70,7 +71,7 @@ function handshake() {
 }
 
 if (document.createEvent) {
-    document.addEventListener('basisjs-devpanel:connect', function(e) {
+    document.addEventListener(DEVTOOL_PREFIX + ':connect', function(e) {
         if (outputChannelId) {
             return;
         }
@@ -88,7 +89,7 @@ if (document.createEvent) {
             var callback = false;
 
             if (args.length && typeof args[args.length - 1] === 'function') {
-                // TODO: deprecate (srop) callback after some time to avoid memory leaks
+                // TODO: deprecate (drop) callback after some time to avoid memory leaks
                 callback = utils.genUID();
                 callbacks[callback] = args.pop();
             }
