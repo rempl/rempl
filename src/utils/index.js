@@ -1,4 +1,4 @@
-function complete(dest, source){
+function complete(dest, source) {
     for (var key in source) {
         if (key in dest == false) {
             dest[key] = source[key];
@@ -13,13 +13,13 @@ function complete(dest, source){
   * @param {function()} callback
   * @param {*} context Context for handler
   */
-var ready = (function(){
+var ready = (function() {
     var eventFired = !document || document.readyState == 'complete';
     var readyHandlers = [];
     var timer;
 
-    function processReadyHandler(){
-      var handler;
+    function processReadyHandler() {
+        var handler;
 
         // if any timer - reset it
         if (timer) {
@@ -42,20 +42,20 @@ var ready = (function(){
         timer = clearTimeout(timer);
     }
 
-    function fireHandlers(){
+    function fireHandlers() {
         if (!eventFired++) {
             processReadyHandler();
         }
     }
 
     // the DOM ready check for Internet Explorer
-    function doScrollCheck(){
+    function doScrollCheck() {
         try {
             // use the trick by Diego Perini
             // http://javascript.nwbox.com/IEContentLoaded/
             document.documentElement.doScroll('left');
             fireHandlers();
-        } catch(e) {
+        } catch (e) {
             setTimeout(doScrollCheck, 1);
         }
     }
@@ -80,12 +80,12 @@ var ready = (function(){
                 if (!global.frameElement && document.documentElement.doScroll) {
                     doScrollCheck();
                 }
-            } catch(e) {}
+            } catch (e) {}
         }
     }
 
     // return attach function
-    return function(callback, context){
+    return function(callback, context) {
         // if no ready handlers yet and no event fired,
         // set timer to run handlers async
         if (!readyHandlers.length && eventFired && !timer) {
@@ -97,6 +97,26 @@ var ready = (function(){
     };
 })();
 
+function genUID(len) {
+    function base36(val) {
+        return Math.round(val).toString(36);
+    }
+
+    // uid should starts with alpha
+    var result = base36(10 + 25 * Math.random());
+
+    if (!len) {
+        len = 16;
+    }
+
+    while (result.length < len) {
+        result += base36(new Date * Math.random());
+    }
+
+    return result.substr(0, len);
+}
+
 module.exports = {
+    genUID: genUID,
     complete: complete
 };

@@ -205,5 +205,7 @@
 
     "validateParameterSeparator": ", ",
 
-    "validateQuoteMarks": { "mark": "'", "escape": true }
+    "validateQuoteMarks": { "mark": "'", "escape": true },
+
+    "maxErrors": 1000
 }
