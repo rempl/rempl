@@ -1,4 +1,5 @@
 var GLOBAL_NAME = 'basisjsToolsFileSync';
+var utils = require('../../utils/index.js');
 var connected = require('api').connected;  // FIXME
 var features = require('api').features;    // FIXME
 var initCallbacks = [];
@@ -24,11 +25,11 @@ function link(basisValue, btValue){
 // init part
 // run via basis.ready to ensure GLOBAL_NAME is loaded
 //
-basis.ready(function(){
+utils.ready(function(){
     remplDevServer = global[GLOBAL_NAME];
 
     if (!remplDevServer) {
-        basis.dev.warn('[rempl] ' + GLOBAL_NAME + ' is not found');
+        utils.warn('[rempl] ' + GLOBAL_NAME + ' is not found');
         return;
     }
 

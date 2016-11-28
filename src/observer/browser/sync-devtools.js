@@ -1,9 +1,10 @@
 var DEBUG = false;
 var PREFIX = 'basisjsDevpanel';
+var utils = require('../../utils/index.js');
 var document = global.document;
-var connected = new Value(false);
-var features = new Value([]);
-var inputChannelId = PREFIX + ':' + basis.genUID();
+var connected = new utils.Value(false);
+var features = new utils.Value([]);
+var inputChannelId = PREFIX + ':' + utils.genUID();
 var outputChannelId;
 var initCallbacks = [];
 var callbacks = {};
@@ -16,7 +17,7 @@ var subscribe = function(fn) {
 };
 var send = function() {
     if (!inited) {
-        basis.dev.warn('[rempl][sync-devtools] Cross-process messaging is not inited');
+        utils.warn('[rempl][sync-devtools] Cross-process messaging is not inited');
     }
 };
 
@@ -55,7 +56,7 @@ function wrapCallback(callback) {
         emitEvent(outputChannelId, {
             event: 'callback',
             callback: callback,
-            data: basis.array(arguments)
+            data: utils.slice(arguments)
         });
     };
 }
@@ -83,12 +84,12 @@ if (document.createEvent) {
 
         send = function() {
             // console.log('[devpanel] send to devtools', arguments);
-            var args = basis.array(arguments);
+            var args = utils.slice(arguments);
             var callback = false;
 
             if (args.length && typeof args[args.length - 1] === 'function') {
                 // TODO: deprecate (srop) callback after some time to avoid memory leaks
-                callback = basis.genUID();
+                callback = utils.genUID();
                 callbacks[callback] = args.pop();
             }
 
@@ -138,7 +139,7 @@ if (document.createEvent) {
 
 
             case 'data':
-                var args = basis.array(data.data);
+                var args = utils.slice(data.data);
                 var callback = data.callback;
 
                 if (callback) {
@@ -153,20 +154,20 @@ if (document.createEvent) {
             case 'getInspectorUI': // legacy of basis.js plugin // TODO: remove
             case 'getRemoteUI':
                 getRemoteUI(
-                    basis.array(data.data)[0] || false,
+                    utils.slice(data.data)[0] || false,
                     data.callback ? wrapCallback(data.callback) : Function
                 );
                 break;
 
             default:
-                basis.dev.warn('[rempl][sync-devtools] Unknown message type `' + data.event + '`', data);
+                utils.warn('[rempl][sync-devtools] Unknown message type `' + data.event + '`', data);
         }
     });
 
     handshake();
 } else {
     send = function() {
-        basis.dev.warn('[rempl][sync-devtools] Cross-process messaging is not supported');
+        utils.warn('[rempl][sync-devtools] Cross-process messaging is not supported');
     };
 }
 
