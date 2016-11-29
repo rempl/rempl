@@ -17,8 +17,8 @@ function slice(src, offset) {
     return Array.prototype.slice.call(src, offset);
 }
 
-function genUID(len){
-    function base36(val){
+function genUID(len) {
+    function base36(val) {
         return Math.round(val).toString(36);
     }
 
@@ -41,8 +41,8 @@ var ready = (function() {
     var readyHandlers = [];
     var timer;
 
-    function processReadyHandler(){
-      var handler;
+    function processReadyHandler() {
+        var handler;
 
         // if any timer - reset it
         if (timer) {
@@ -65,20 +65,20 @@ var ready = (function() {
         timer = clearTimeout(timer);
     }
 
-    function fireHandlers(){
+    function fireHandlers() {
         if (!eventFired++) {
             processReadyHandler();
         }
     }
 
     // the DOM ready check for Internet Explorer
-    function doScrollCheck(){
+    function doScrollCheck() {
         try {
             // use the trick by Diego Perini
             // http://javascript.nwbox.com/IEContentLoaded/
             document.documentElement.doScroll('left');
             fireHandlers();
-        } catch(e) {
+        } catch (e) {
             setTimeout(doScrollCheck, 1);
         }
     }
@@ -103,12 +103,12 @@ var ready = (function() {
                 if (!global.frameElement && document.documentElement.doScroll) {
                     doScrollCheck();
                 }
-            } catch(e) {}
+            } catch (e) {}
         }
     }
 
     // return attach function
-    return function(callback, context){
+    return function(callback, context) {
         // if no ready handlers yet and no event fired,
         // set timer to run handlers async
         if (!readyHandlers.length && eventFired && !timer) {
@@ -120,7 +120,7 @@ var ready = (function() {
     };
 })();
 
-var consoleMethods = (function(){
+var consoleMethods = (function() {
     var console = global.console;
     var methods = {
         log: function() {},
@@ -135,7 +135,7 @@ var consoleMethods = (function(){
                 ? Function.prototype.bind.call(console[methodName], console)
                 // IE8 and lower solution. It's also more safe when Function.prototype.bind
                 // defines by other libraries (like es5-shim).
-                : function(){
+                : function() {
                     Function.prototype.apply.call(console[methodName], console, arguments);
                 };
         }

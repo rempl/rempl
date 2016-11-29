@@ -138,7 +138,6 @@ if (document.createEvent) {
                 }
                 break;
 
-
             case 'data':
                 var args = utils.slice(data.data);
                 var callback = data.callback;

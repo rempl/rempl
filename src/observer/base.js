@@ -9,5 +9,5 @@ module.exports = function createObserverFactory(Observer) {
         }
 
         return observer;
-    }
+    };
 };

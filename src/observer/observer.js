@@ -1,13 +1,8 @@
 var complete = require('../utils/index.js').complete;
 var Value = require('../utils/Value.js');
-var inspect = new Value({
-  proxy: function(value){
-    return value || false;
-  }
-});
 
-function createOutputChannel(observer, ns, channel, send){
-    function sendData(){
+function createOutputChannel(observer, ns, channel, send) {
+    function sendData() {
         send({
             type: ns,
             payload: channel.value
@@ -17,7 +12,7 @@ function createOutputChannel(observer, ns, channel, send){
     channel.link(null, sendData, true);
 
     this.api[ns].channel = channel;
-    this.api[ns].init = this.api[ns].init || function(callback){
+    this.api[ns].init = this.api[ns].init || function(callback) {
         callback(channel.value);
     };
 
@@ -36,10 +31,10 @@ var Observer = function(id, getRemoteUI) {
 };
 
 Observer.prototype = {
-    ns: function getNamespace(name){
+    ns: function getNamespace(name) {
         if (!this.api[name]) {
             this.api[name] = {
-                channel: function(channel, send){
+                channel: function(channel, send) {
                     return createOutputChannel.call(this, name, channel || new Value(), send);
                 }.bind(this)
             };
@@ -48,7 +43,7 @@ Observer.prototype = {
         return this.api[name];
     },
 
-    define: function(ns, extension){
+    define: function(ns, extension) {
         return complete(this.ns(ns), extension);
     }
 };

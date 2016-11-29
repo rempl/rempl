@@ -5,7 +5,7 @@ var features = require('api').features;    // FIXME
 var initCallbacks = [];
 var remplDevServer = null;
 
-function init(observer, callback){
+function init(observer, callback) {
     if (!remplDevServer) {
         initCallbacks.push(arguments);
         return;
@@ -16,7 +16,7 @@ function init(observer, callback){
     }
 }
 
-function link(basisValue, btValue){
+function link(basisValue, btValue) {
     btValue.attach(basisValue.set, basisValue);
     basisValue.set(btValue.value);
 }
@@ -25,7 +25,7 @@ function link(basisValue, btValue){
 // init part
 // run via basis.ready to ensure GLOBAL_NAME is loaded
 //
-utils.ready(function(){
+utils.ready(function() {
     remplDevServer = global[GLOBAL_NAME];
 
     if (!remplDevServer) {
