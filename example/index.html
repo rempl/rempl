@@ -1,0 +1,51 @@
+<!doctype html>
+
+<html>
+<head>
+  <title>Rempl test</title>
+</head>
+<body>
+  Rempl test
+  <script>
+    setTimeout(function() {
+      console.log(window.basisjsToolsFileSync);
+      var api = window.basisjsToolsFileSync;
+
+      var sub = function(){
+        var host = parent;
+        var getRemoteAPI = window.name || location.hash.substr(1);
+        var remoteAPI = typeof host[getRemoteAPI] === 'function' ? host[getRemoteAPI]() : null;
+        remoteAPI.subscribe(function(){
+          console.log('from observer:', arguments);
+        });
+        var idx = 1;
+        setInterval(function(){
+          remoteAPI.send(N + ' back ' + (idx++));
+        }, 2000);
+      }.toString().replace(/^function.+\{/, '').replace(/\}$/, '');
+
+      var fooidx = 1;
+      var foo = api.initRemoteObserver('foo', function(s, cb) {
+        cb(null, 'script', 'var N = "foo";' + sub + 'var x = document.createElement("div");x.innerHTML = "foo interface";document.body.appendChild(x);console.log("!foo remote tool inited")');
+      });
+      setInterval(function() {
+        foo.send('foo' + (fooidx++));
+      }, 2000);
+      foo.subscribe(function(){
+        console.log('foo recieve', arguments);
+      });
+
+      var baridx = 1;
+      var bar = api.initRemoteObserver('bar', function(s, cb) {
+        cb(null, 'script', 'var N = "bar";' + sub + 'var x = document.createElement("div");x.innerHTML = "bar interface";document.body.appendChild(x);console.log("!bar remote tool inited")');
+      });
+      setInterval(function() {
+        bar.send('bar' + (baridx++));
+      }, 2500);
+      bar.subscribe(function(){
+        console.log('bar recieve', arguments);
+      })
+    }, 50);
+  </script>
+</body>
+</html>
