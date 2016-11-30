@@ -1,8 +1,10 @@
+/* eslint-env browser */
+/* global CustomEvent */
+
 var DEBUG = false;
 var PREFIX = 'basisjsDevpanel';  // TODO: rename to rempl
 var DEVTOOL_PREFIX = 'basisjs-devpanel'; // TODO: rename to rempl
 var utils = require('../../utils/index.js');
-var document = global.document;
 var connected = new utils.Value(false);
 var features = new utils.Value([]);
 var inputChannelId = PREFIX + ':' + utils.genUID();
