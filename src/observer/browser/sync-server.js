@@ -1,32 +1,27 @@
 var GLOBAL_NAME = 'basisjsToolsFileSync';  // TODO: rename
 var utils = require('../../utils/index.js');
 var initCallbacks = [];
-var remplWsServer = null;
+var onInit = function() {
+    initCallbacks.push(arguments);
+};
 
-function init(observer, callback) {
-    if (!remplWsServer) {
-        initCallbacks.push(arguments);
-        return;
-    }
-
+// run via utils.waitForGlobal to ensure GLOBAL_NAME is available
+utils.waitForGlobal(GLOBAL_NAME, function(remplWsServer) {
     if (typeof remplWsServer.initRemoteObserver === 'function') {
-        callback(remplWsServer.initRemoteObserver(observer.id, observer.getRemoteUI));
-    }
-}
-
-// run via basis.ready to ensure GLOBAL_NAME is loaded
-utils.ready(function() {
-    remplWsServer = global[GLOBAL_NAME];
-
-    if (!remplWsServer) {
-        utils.warn('[rempl] ' + GLOBAL_NAME + ' is not found');
+        onInit = function(observer, callback) {
+            callback(remplWsServer.initRemoteObserver(observer.id, observer.getRemoteUI));
+        };
+    } else {
+        utils.warn('[rempl][sync-server] initRemoteObserver method doesn\'t implemented in rempl server API');
         return;
     }
 
     // invoke onInit callbacks
     initCallbacks.splice(0).forEach(function(args) {
-        init.apply(null, args);
+        onInit.apply(null, args);
     });
 });
 
-module.exports = init;
+module.exports = function() {
+    onInit.apply(this, arguments);
+};

@@ -120,6 +120,24 @@ var ready = (function() {
     };
 })();
 
+function waitForGlobal(name, onDetect) {
+    var detectRetry = 50;
+    ready(function tryToDetect() {
+        if (name in global === false) {
+            if (detectRetry < 500) {
+                setTimeout(tryToDetect, detectRetry);
+            } else {
+                consoleMethods.warn('[rempl][waitForGlobal] `' + name + '` doesn\'t detected');
+            }
+
+            detectRetry += 100;
+            return;
+        }
+
+        onDetect(global[name]);
+    });
+}
+
 var consoleMethods = (function() {
     var console = global.console;
     var methods = {
@@ -145,11 +163,11 @@ var consoleMethods = (function() {
 })();
 
 module.exports = {
-    Value: require('./Value.js'),
     complete: complete,
     slice: slice,
     genUID: genUID,
     ready: ready,
+    waitForGlobal: waitForGlobal,
     log: consoleMethods.log,
     info: consoleMethods.info,
     warn: consoleMethods.warn,
