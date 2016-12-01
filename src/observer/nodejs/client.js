@@ -87,7 +87,7 @@ function Client(uri) {
         .on('disconnect', function() {
             console.log('[rempl] disconnected');
             this.isOnline.set(false);
-            this.features.set([]);
+            this.setFeatures([]);
 
             clearInterval(this.sendInfoTimer);
             this.stopIdentify();
