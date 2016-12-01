@@ -2,50 +2,60 @@
 
 <html>
 <head>
-  <title>Rempl test</title>
+    <title>Rempl test</title>
 </head>
 <body>
-  Rempl test
-  <script>
-    setTimeout(function() {
-      console.log(window.basisjsToolsFileSync);
-      var api = window.basisjsToolsFileSync;
+    Rempl test
+    <script src="../dist/rempl-observer-browser.js"></script>
+    <script src="../dist/rempl-dom-event-transport.js"></script>
+    <script>
+        (function(){
+            var createRemplObserver = rempl;
 
-      var sub = function(){
-        var host = parent;
-        var getRemoteAPI = window.name || location.hash.substr(1);
-        var remoteAPI = typeof host[getRemoteAPI] === 'function' ? host[getRemoteAPI]() : null;
-        remoteAPI.subscribe(function(){
-          console.log('from observer:', arguments);
-        });
-        var idx = 1;
-        setInterval(function(){
-          remoteAPI.send(N + ' back ' + (idx++));
-        }, 2000);
-      }.toString().replace(/^function.+\{/, '').replace(/\}$/, '');
+            var sub = function(){
+                var host = parent;
+                var getRemoteAPI = window.name || location.hash.substr(1);
+                var remoteAPI = typeof host[getRemoteAPI] === 'function' ? host[getRemoteAPI]() : null;
+                remoteAPI.subscribe(function(){
+                    console.log('from observer:', arguments);
+                });
+                var idx = 1;
+                setInterval(function(){
+                    remoteAPI.send(N + ' back ' + (idx++));
+                }, 2000);
+            }.toString().replace(/^function.+\{/, '').replace(/\}$/, '');
 
-      var fooidx = 1;
-      var foo = api.initRemoteObserver('foo', function(s, cb) {
-        cb(null, 'script', 'var N = "foo";' + sub + 'var x = document.createElement("div");x.innerHTML = "foo interface";document.body.appendChild(x);console.log("!foo remote tool inited")');
-      });
-      setInterval(function() {
-        foo.send('foo' + (fooidx++));
-      }, 2000);
-      foo.subscribe(function(){
-        console.log('foo recieve', arguments);
-      });
+            var fooidx = 1;
+            var foo = createRemplObserver('foo', function(s, cb) {
+                cb(null, 'script', 'var N = "foo";' + sub + 'var x = document.createElement("div");x.innerHTML = "foo interface";document.body.appendChild(x);console.log("!foo remote tool inited")');
+            });
+            setInterval(function() {
+                foo.send('foo' + (fooidx++));
+            }, 2000);
+            // foo.subscribe(function(){
+            //     console.log('foo recieve', arguments);
+            // });
 
-      var baridx = 1;
-      var bar = api.initRemoteObserver('bar', function(s, cb) {
-        cb(null, 'script', 'var N = "bar";' + sub + 'var x = document.createElement("div");x.innerHTML = "bar interface";document.body.appendChild(x);console.log("!bar remote tool inited")');
-      });
-      setInterval(function() {
-        bar.send('bar' + (baridx++));
-      }, 2500);
-      bar.subscribe(function(){
-        console.log('bar recieve', arguments);
-      })
-    }, 50);
-  </script>
+            // var baridx = 1;
+            // var bar = api.initRemoteObserver('bar', function(s, cb) {
+            //     cb(null, 'script', 'var N = "bar";' + sub + 'var x = document.createElement("div");x.innerHTML = "bar interface";document.body.appendChild(x);console.log("!bar remote tool inited")');
+            // });
+            // setInterval(function() {
+            //     bar.send('bar' + (baridx++));
+            // }, 2500);
+            // bar.subscribe(function(){
+            //     console.log('bar recieve', arguments);
+            // })
+
+            new DomEventTransport('rempl-customer', 'rempl-provider').onInit({}, function(api) {
+                debugger;
+                console.log('!!! in-page connected');
+                setTimeout(_=>api.send('customer->provider'), 0);
+                api.subscribe(function() {
+                    console.log('!!! customer recieve:', arguments);
+                });
+            });
+        })();
+    </script>
 </body>
 </html>
