@@ -1,0 +1,27 @@
+<!doctype html>
+
+<html>
+<head>
+    <title>Rempl event transport test</title>
+</head>
+<body>
+    Rempl event transport test
+    <script src="../dist/rempl-dom-event-transport.js"></script>
+    <script>
+        new DomEventTransport('provider', 'customer').onInit({}, function(api) {
+            console.log('provider->customer inited');
+            api.send('provider->customer');
+            api.subscribe(function() {
+                console.log('!!! provider recieve:', arguments);
+            });
+        });
+        new DomEventTransport('customer', 'provider').onInit({}, function(api) {
+            console.log('customer->provider inited');
+            api.send('customer->provider');
+            api.subscribe(function() {
+                console.log('!!! customer recieve:', arguments);
+            });
+        });
+    </script>
+</body>
+</html>
