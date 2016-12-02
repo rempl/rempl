@@ -177,7 +177,23 @@ DomEventTransport.prototype = {
                 // setFeatures: features.set.bind(features),
                 connected: this.connected,
                 subscribe: subscribe.bind(this, observer),
-                send: send.bind(this, observer)
+                send: send.bind(this, observer),
+                invoke: function(method) {
+                    var args = Array.prototype.slice.call(arguments);
+                    var callback = function() {};
+                    var method = args.shift();
+
+                    if (args.length && typeof args[args.length - 1] === 'function') {
+                        callback = args.pop();
+                    }
+
+                    send.call(this, observer, {
+                        ns: '*',
+                        type: 'call',
+                        method: method,
+                        args: args
+                    }, callback);
+                }.bind(this)
             });
         } else {
             this.initCallbacks.push(arguments);

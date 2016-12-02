@@ -9,18 +9,18 @@
     <script src="../dist/rempl-observer-browser.js"></script>
     <script src="../dist/rempl-dom-event-transport.js"></script>
     <script>
-        (function(){
+        (function() {
             var createRemplObserver = rempl;
 
-            var sub = function(){
+            var sub = function() {
                 var host = parent;
                 var getRemoteAPI = window.name || location.hash.substr(1);
                 var remoteAPI = typeof host[getRemoteAPI] === 'function' ? host[getRemoteAPI]() : null;
-                remoteAPI.subscribe(function(){
+                remoteAPI.subscribe(function() {
                     console.log('from observer:', arguments);
                 });
                 var idx = 1;
-                setInterval(function(){
+                setInterval(function() {
                     remoteAPI.send(N + ' back ' + (idx++));
                 }, 2000);
             }.toString().replace(/^function.+\{/, '').replace(/\}$/, '');
@@ -32,9 +32,11 @@
             setInterval(function() {
                 foo.send('foo' + (fooidx++));
             }, 2000);
-            // foo.subscribe(function(){
-            //     console.log('foo recieve', arguments);
-            // });
+            foo.define({
+                test: function() {
+                    console.log('foo recieve', arguments);
+                }
+            });
 
             // var baridx = 1;
             // var bar = api.initRemoteObserver('bar', function(s, cb) {
@@ -48,9 +50,8 @@
             // })
 
             new DomEventTransport('rempl-customer', 'rempl-provider').onInit({}, function(api) {
-                debugger;
                 console.log('!!! in-page connected');
-                setTimeout(_=>api.send('customer->provider'), 0);
+                setTimeout(_=>api.invoke('test', 'customer->provider'), 0);
                 api.subscribe(function() {
                     console.log('!!! customer recieve:', arguments);
                 });
