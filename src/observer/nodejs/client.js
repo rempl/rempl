@@ -7,14 +7,56 @@ var clients = Object.create(null);
 
 var CLIENT_ID_FILENAME = '.rempl_client_id';
 
-/**
- * node.js remote client
- *
- * @param {string} uri
- * @param {string} name
- * @constructor
- * @extends {EventEmitter}
- */
+function onConnect() {
+    console.log('[rempl][ws-transport] connected');
+    clearInterval(this.sendInfoTimer);
+
+    this.isOnline.set(true);
+    this.clientInfo = this.getInfo();
+
+    this.send('devtool:client connect', this.clientInfo, function(data) {
+        if ('clientId' in data) {
+            this.clientId = data.clientId;
+            fs.writeFileSync(CLIENT_ID_FILENAME, this.clientId);
+        }
+
+        this.sendInfoTimer = setInterval(this.sendInfo.bind(this), this.sendInfoTimerTTL);
+    }.bind(this));
+}
+
+function onGetUI(id, settings, callback) {
+    if (!this.observersMap.hasOwnProperty(id)) {
+        console.error('[rempl][ws-transport] Observer `' + id + '` isn\'t registered on page');
+        callback('[rempl][ws-transport] Observer `' + id + '` isn\'t registered on page');
+        return;
+    }
+
+    this.observersMap[id].getRemoteUI.call(null, settings, callback);
+}
+
+function onData(id) {
+    if (!this.observersMap.hasOwnProperty(id)) {
+        console.error('[rempl][ws-transport] Observer `' + id + '` isn\'t registered on page');
+        return;
+    }
+
+    var subscribers = this.observersMap[id].subscribers;
+    var args = Array.prototype.slice.call(arguments, 1);
+
+    for (var i = 0; i < subscribers.length; i++) {
+        subscribers[i].apply(null, args);
+    }
+}
+
+function onDisconnect() {
+    console.log('[rempl] disconnected');
+    this.isOnline.set(false);
+    this.setFeatures([]);
+
+    clearInterval(this.sendInfoTimer);
+    this.stopIdentify();
+}
+
 function Client(uri) {
     this.url = uri;
     this.name = process.title;
@@ -36,62 +78,16 @@ function Client(uri) {
     this.isOnline = new Token(false);
     this.features = [];
 
-    this.transport = socketIO.connect(uri);
-    this.transport
-        .on('connect', function() {
-            console.log('[rempl] connected');
-            clearInterval(this.sendInfoTimer);
+    this.transport = socketIO.connect(uri)
+        .on('connect', onConnect.bind(this))
+        .on('disconnect', onDisconnect.bind(this))
+        .on('features', this.setFeatures.bind(this))
 
-            this.isOnline.set(true);
-            this.clientInfo = this.getInfo();
-
-            this.send('devtool:client connect', this.clientInfo, function(data) {
-                if ('clientId' in data) {
-                    this.clientId = data.clientId;
-                    fs.writeFileSync(CLIENT_ID_FILENAME, this.clientId);
-                }
-
-                this.sendInfoTimer = setInterval(this.sendInfo.bind(this), this.sendInfoTimerTTL);
-            }.bind(this));
-        }.bind(this))
-        .on('features', function(features) {
-            this.setFeatures(features);
-        }.bind(this))
-
-        .on('devtool:get ui', function(id, settings, callback) {
-            if (!this.observersMap.hasOwnProperty(id)) {
-                console.error('[rempl][ws-transport] Observer `' + id + '` isn\'t registered on page');
-                callback('[rempl][ws-transport] Observer `' + id + '` isn\'t registered on page');
-                return;
-            }
-
-            this.observersMap[id].getRemoteUI.call(null, settings, callback);
-        }.bind(this))
-        .on('devtool:to session', function(id) {
-            if (!this.observersMap.hasOwnProperty(id)) {
-                console.error('[rempl][ws-transport] Observer `' + id + '` isn\'t registered on page');
-                return;
-            }
-
-            var subscribers = this.observersMap[id].subscribers;
-            var args = Array.prototype.slice.call(arguments, 1);
-
-            for (var i = 0; i < subscribers.length; i++) {
-                subscribers[i].apply(null, args);
-            }
-        }.bind(this))
+        .on('devtool:get ui', onGetUI.bind(this))
+        .on('devtool:to session', onData.bind(this))
 
         .on('devtool:identify', this.startIdentify.bind(this))
-        .on('devtool:stop identify', this.stopIdentify.bind(this))
-
-        .on('disconnect', function() {
-            console.log('[rempl] disconnected');
-            this.isOnline.set(false);
-            this.setFeatures([]);
-
-            clearInterval(this.sendInfoTimer);
-            this.stopIdentify();
-        }.bind(this));
+        .on('devtool:stop identify', this.stopIdentify.bind(this));
 }
 
 Client.create = function(endpoint) {

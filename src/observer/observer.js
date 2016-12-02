@@ -1,39 +1,63 @@
-var complete = require('../utils/index.js').complete;
-// var Value = require('../utils/Value.js');
+var utils = require('../utils/index.js');
 var instances = Object.create(null);
 
-function send(observer, ns, payload) {
+function send(observer, args) {
     for (var channel in observer.channels) {
-        observer.channels[channel].call(null, {
-            ns: ns,
-            payload: payload
-        });
+        observer.channels[channel].apply(null, args);
     }
+}
+
+function invoke(method, args, callback) {
+    if (!this.hasMethod(method)) {
+        return utils.warn('[rempl] Unknown method:', method, this.methods);
+    }
+
+    if (typeof callback === 'function') {
+        args = args.concat(callback);
+    }
+
+    this.methods[method].apply(null, args);
 }
 
 var Namespace = function(name, observer) {
     this.name = name;
     this.observer = observer;
     this.methods = Object.create(null);
+    this.subscribers = [];
 };
 
 Namespace.prototype = {
-    define: function(methods) {
-        console.log('define', this.name, methods);
-        complete(this.methods, methods);
+    send: function(payload) {
+        send(this.observer, [{
+            type: 'data',
+            ns: this.name,
+            payload: payload
+        }]);
     },
-    has: function(method) {
+    subscribe: function(fn) {
+        this.subscibers.push(fn);
+    },
+
+    hasMethod: function(method) {
         return method in this.methods;
     },
-    invoke: function(method, args, callback) {
-        if (!this.has(method)) {
-            return console.warn('[rempl] Unknown method:', method, this.methods);
+    define: function(methods) {
+        utils.complete(this.methods, methods);
+    },
+    invoke: function(method/*, ...args, callback*/) {
+        var args = Array.prototype.slice.call(arguments, 1);
+        var callback = null;
+
+        if (args.length && typeof args[args.length - 1] === 'function') {
+            callback = args.pop();
         }
 
-        this.methods[method].apply(null, args.concat(callback));
-    },
-    send: function(payload) {
-        send(this.observer, this.name, payload);
+        send(this.observer, [{
+            type: 'call',
+            ns: this.name,
+            method: method,
+            args: args
+        }, callback]);
     }
 };
 
@@ -42,6 +66,7 @@ var Observer = function(id, getRemoteUI) {
     this.getRemoteUI = getRemoteUI;
     this.namespaces = Object.create(null);
     this.channels = Object.create(null);
+    this.processInput = this.processInput.bind(this);
 
     var defaultNS = this.ns('*');
     for (var method in defaultNS) {
@@ -58,6 +83,15 @@ Observer.prototype = {
         }
 
         return this.namespaces[name];
+    },
+    processInput: function(packet, callback) {
+        var ns = packet.ns || '*';
+
+        if (!this.ns(ns).hasMethod(packet.method)) {
+            return console.warn('[rempl][sync] Observer `' + this.name + '` has no remote command:', packet.method);
+        }
+
+        invoke.call(this.ns(ns), packet.method, packet.args, callback);
     }
 };
 

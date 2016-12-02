@@ -11,6 +11,9 @@ setInterval(function() {
 }, 1000);
 
 foo.define({
+    test: function(msg) {
+        console.log('foo recieve "test"', msg);
+    },
     reset: function(cb) {
         fooidx = 1;
         foo.send('foo/' + fooidx);

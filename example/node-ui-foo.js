@@ -12,12 +12,12 @@ remoteAPI.subscribe(function(data) {
 
 var idx = 1;
 setInterval(function() {
-    remoteAPI.send(N + ' back ' + (idx++));
+    remoteAPI.invoke('test', N + ' back ' + (idx++));
 }, 2000);
 
 function reset() {
     remoteAPI.invoke('reset', function(x) {
-        console.log('callback ok:', x);
+        console.log('reset callback ok:', x);
     });
 }
 
