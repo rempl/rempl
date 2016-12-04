@@ -3,7 +3,7 @@ var createRemplObserver = require('../src/observer/nodejs');
 
 var foo = createRemplObserver('foo', function(settings, callback) {
     callback(null, 'script', fs.readFileSync(__dirname + '/node-ui-foo.js', 'utf-8'));
-}, 'ws://localhost:8888');
+}, 'ws://localhost:8000');
 
 var fooidx = 1;
 setInterval(function() {

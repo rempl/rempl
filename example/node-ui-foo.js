@@ -1,22 +1,18 @@
 /* eslint-env browser */
-/* global CustomEvent */
+/* global rempl */
 
-var host = parent;
-var getRemoteAPI = window.name || location.hash.substr(1);
-var remoteAPI = typeof host[getRemoteAPI] === 'function' ? host[getRemoteAPI]() : null;
-
-remoteAPI.subscribe(function(data) {
+rempl.subscribe(function(counter) {
     console.log('from observer:', arguments);
-    document.getElementById('counter').innerHTML = data.payload;
+    document.getElementById('counter').innerHTML = counter;
 });
 
 var idx = 1;
 setInterval(function() {
-    remoteAPI.invoke('test', N + ' back ' + (idx++));
+    rempl.invoke('test', N + ' back ' + (idx++));
 }, 2000);
 
-function reset() {
-    remoteAPI.invoke('reset', function(x) {
+this.reset = function() {
+    rempl.invoke('reset', function(x) {
         console.log('reset callback ok:', x);
     });
 }

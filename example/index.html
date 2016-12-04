@@ -6,35 +6,51 @@
 </head>
 <body>
     Rempl test
-    <script src="../dist/rempl-observer-browser.js"></script>
-    <script src="../dist/rempl-dom-event-transport.js"></script>
+    <script src="../node_modules/basisjs/src/basis.js" basis-config="devpanel:false"></script>
     <script>
-        (function() {
-            var createRemplObserver = rempl;
+        /* eslint-env browser */
+        /* global basis */
+        var createRemplObserver = basis.require('../src/observer/browser/index.js');
+        // var DomEventTransport = basis.require('../src/utils/DomEventTransport.js');
 
-            var sub = function() {
-                var host = parent;
-                var getRemoteAPI = window.name || location.hash.substr(1);
-                var remoteAPI = typeof host[getRemoteAPI] === 'function' ? host[getRemoteAPI]() : null;
-                remoteAPI.subscribe(function() {
-                    console.log('from observer:', arguments);
-                });
-                var idx = 1;
-                setInterval(function() {
-                    remoteAPI.send(N + ' back ' + (idx++));
-                }, 2000);
-            }.toString().replace(/^function.+\{/, '').replace(/\}$/, '');
+        (function() {
+            // var createRemplObserver = rempl;
+            var foo = createRemplObserver('foo', function(s, cb) {
+                fetch('browser-ui-foo.js')
+                    .then(res => {
+                        if (res.ok) return res.text();
+                        throw new Error(res.statusText + ' (' + res.url + ')');
+                    })
+                    .then(res => cb(null, 'script', res))
+                    .catch(er => cb(er.message));
+            });
 
             var fooidx = 1;
-            var foo = createRemplObserver('foo', function(s, cb) {
-                cb(null, 'script', 'var N = "foo";' + sub + 'var x = document.createElement("div");x.innerHTML = "foo interface";document.body.appendChild(x);console.log("!foo remote tool inited")');
-            });
+            var fooNsIdx = 1;
+
             setInterval(function() {
                 foo.send('foo' + (fooidx++));
+                foo.invoke('test', 'arg1', 'arg2', function(res) {
+                    console.log('invoke ns(*).test("arg1", "arg2") and callback response', res);
+                });
             }, 2000);
+            setInterval(function() {
+                foo.ns('ns').send('namespaced foo' + (fooNsIdx++));
+                foo.ns('ns').invoke('xxxtest', 'arg1', 'arg2', function(res) {
+                    console.log('invoke ns(ns).xxxtest("arg1", "arg2") and callback response', res);
+                });
+            }, 2500);
+
             foo.define({
-                test: function() {
-                    console.log('foo recieve', arguments);
+                test: function(msg, cb) {
+                    console.log('ns(*).test call', msg);
+                    cb('res from foo.ns(*).test');
+                }
+            });
+            foo.ns('xxx').define({
+                xxxtest: function(msg, cb) {
+                    console.log('ns(xxx).xxxtest call', msg);
+                    cb('res from foo.ns(xxx).xxxtest');
                 }
             });
 
@@ -49,13 +65,24 @@
             //     console.log('bar recieve', arguments);
             // })
 
-            new DomEventTransport('rempl-customer', 'rempl-provider').onInit({}, function(api) {
-                console.log('!!! in-page connected');
-                setTimeout(_=>api.invoke('test', 'customer->provider'), 0);
-                api.subscribe(function() {
-                    console.log('!!! customer recieve:', arguments);
+            (function() {
+                var createRemplCustomer = basis.require('../src/customer/browser/index.js');
+                var fooCustomer = createRemplCustomer('foo');
+
+                console.log('[!OK] in-page connected');
+                setTimeout(_=>fooCustomer.invoke('test', 'customer->provider'), 0);
+                fooCustomer.subscribe(function() {
+                    console.log('[!OK] customer recieve:', arguments);
                 });
-            });
+            })();
+
+            // new DomEventTransport('rempl-in-page-customer', 'rempl-provider').onInit({ id: 'foo' }, function(api) {
+            //     console.log('[OK] in-page connected');
+            //     setTimeout(_=>api.send({type:'call',method:'test', args:['customer->provider']}), 0);
+            //     api.subscribe(function() {
+            //         console.log('[OK] customer recieve:', arguments);
+            //     });
+            // });
         })();
     </script>
 </body>
