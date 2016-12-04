@@ -1,43 +1,60 @@
 // var Value = require('../../utils/Value.js');
-var pluginSync = require('./sync-devtools.js');
+var utils = require('../../utils/index.js');
+var pluginSync = require('./sync-browser-extension.js');
+var inpageSync = require('./sync-in-page.js');
 var serverSync = require('./sync-server.js');
 var noop = function() {};
 
 module.exports = function createSync(observer) {
-    // var remoteInspectors = new Value(0);
+    // var remoteCustomers = new Value(0);
     // var devtools = new Value(false);
 
-    // init ws-server
-    serverSync(observer, function(remoteApi) {
+    // browser extension
+    // pluginSync(observer, function(api) {
+    //     // sync features list
+    //     // observer.features.link(api, api.setFeatures);
+
+    //     // subscribe to data from devtools & context free send method
+    //     api.subscribe(observer.processInput);
+    //     api.connected.link(function(connected) {
+    //         // devtools.set(connected);
+    //         observer.channels.browserExtension = connected ? api.send : noop;
+    //     });
+
+    //     console.log('browser extension ready');
+    // });
+
+    // in page
+    inpageSync(observer, function(api) {
         // sync features list
-        // observer.features.link(remoteApi, remoteApi.setFeatures);
-
-        // subscribe to data from remote devtools & context free send method
-        remoteApi.subscribe(observer.processInput);
-        remoteApi.connected.attach(function(connected) {
-            // remoteInspectors.set(connected);
-            observer.channels.wsserver = connected ? remoteApi.send : noop;
-        });
-
-        console.log('ws transport ready');
-    });
-
-    // init devtools
-    pluginSync(observer, function(pluginApi) {
-        // sync features list
-        // observer.features.link(pluginApi, pluginApi.setFeatures);
+        // observer.features.link(api, api.setFeatures);
 
         // subscribe to data from devtools & context free send method
-        pluginApi.subscribe(observer.processInput);
-        pluginApi.connected.attach(function(connected) {
+        api.subscribe(observer.processInput);
+        utils.link(api.connected, function(connected) {
             // devtools.set(connected);
-            observer.channels.devtools = connected ? pluginApi.send : noop;
+            observer.channels.inPage = connected ? api.send : noop;
         });
 
-        console.log('dom event transport ready');
+        console.log('in-page ready');
     });
 
-    // observer.remoteInspectors = remoteInspectors; // TODO: remove
+    // ws server
+    serverSync(observer, function(api) {
+        // sync features list
+        // observer.features.link(api, api.setFeatures);
+
+        // subscribe to data from remote devtools & context free send method
+        api.subscribe(observer.processInput);
+        utils.link(api.connected, function(connected) {
+            // remoteCustomers.set(connected);
+            observer.channels.wsserver = connected ? api.send : noop;
+        });
+
+        console.log('ws server connection ready');
+    });
+
+    // observer.remoteCustomers = remoteCustomers;   // TODO: remove
     // observer.devtools = devtools;                 // TODO: remove
 
     return observer;

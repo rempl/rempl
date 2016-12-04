@@ -1,4 +1,4 @@
-var Customer = require('../Customer.js');
+var Customer = require('../customer.js');
 var makeSync = require('./sync.js');
 
 module.exports = Customer.factory(function(id) {

@@ -23,7 +23,6 @@ var Namespace = function(name, observer) {
     this.name = name;
     this.observer = observer;
     this.methods = Object.create(null);
-    this.subscribers = [];
 };
 
 Namespace.prototype = {
@@ -33,9 +32,6 @@ Namespace.prototype = {
             ns: this.name,
             payload: payload
         }]);
-    },
-    subscribe: function(fn) {
-        this.subscibers.push(fn);
     },
 
     hasMethod: function(method) {
@@ -87,11 +83,18 @@ Observer.prototype = {
     processInput: function(packet, callback) {
         var ns = packet.ns || '*';
 
-        if (!this.ns(ns).hasMethod(packet.method)) {
-            return console.warn('[rempl][sync] Observer `' + this.name + '` has no remote command:', packet.method);
-        }
+        switch (packet.type) {
+            case 'call':
+                if (!this.ns(ns).hasMethod(packet.method)) {
+                    return console.warn('[rempl][sync] Observer `' + this.name + '` has no remote command:', packet.method);
+                }
 
-        invoke.call(this.ns(ns), packet.method, packet.args, callback);
+                invoke.call(this.ns(ns), packet.method, packet.args, callback);
+                break;
+
+            default:
+                utils.warn('[rempl][sync] Unknown packet type:', packet.type);
+        }
     }
 };
 

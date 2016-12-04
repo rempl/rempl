@@ -5,7 +5,7 @@ var utils = require('./index.js');
 var Token = require('./Token.js');
 var global = new Function('return this')();
 var document = global.document;
-var DEBUG = true;
+var DEBUG = false;
 // var getRemoteUI = require('./getRemoteUI.js');
 
 function emitEvent(channelId, data) {
@@ -33,11 +33,14 @@ function handshake(channel) {
     });
 }
 
-function subscribe(observer, fn) {
-    this.subscribers.push(fn);
+function subscribe(endpoint, fn) {
+    this.subscribers.push({
+        endpoint: endpoint,
+        fn: fn
+    });
 }
 
-function send(observer) {
+function send(endpoint) {
     if (!this.inited) {
         utils.warn('[rempl][dom-event-transport] send() call on init is prohibited');
         return;
@@ -53,7 +56,8 @@ function send(observer) {
     }
 
     emitEvent(this.outputChannelId, {
-        event: 'data',
+        type: 'data',
+        endpoint: endpoint,
         callback: callback,
         data: args
     });
@@ -62,7 +66,7 @@ function send(observer) {
 function wrapCallback(channel, callback) {
     return function() {
         emitEvent(channel.outputChannelId, {
-            event: 'callback',
+            type: 'callback',
             callback: callback,
             data: Array.prototype.slice.call(arguments)
         });
@@ -105,7 +109,7 @@ function DomEventTransport(name, connectTo) {
         // send features to devtools
         // features.attach(function(features){
         //     emitEvent(outputChannelId, {
-        //         event: 'features',
+        //         type: 'features',
         //         data: [features]
         //     });
         // });
@@ -121,10 +125,10 @@ function DomEventTransport(name, connectTo) {
         var data = e.detail;
 
         if (DEBUG) {
-            utils.log('[rempl][dom-event-transport] recieve from ' + this.connectTo, data.event, data);
+            utils.log('[rempl][dom-event-transport] recieve from ' + this.connectTo, data.type, data);
         }
 
-        switch (data.event) {
+        switch (data.type) {
             case 'connect':
                 this.connected.set(true);
                 break;
@@ -148,9 +152,10 @@ function DomEventTransport(name, connectTo) {
                     args = args.concat(wrapCallback(callback));
                 }
 
-                console.log(this.name, this.subscribers);
-                this.subscribers.forEach(function(item) {
-                    item.apply(null, args);
+                this.subscribers.forEach(function(subscriber) {
+                    if (subscriber.endpoint === data.endpoint) {
+                        subscriber.fn.apply(null, args);
+                    }
                 });
                 break;
 
@@ -163,7 +168,7 @@ function DomEventTransport(name, connectTo) {
                 break;
 
             default:
-                utils.warn('[rempl][dom-event-transport] Unknown message type `' + data.event + '` for `' + name + '`', data);
+                utils.warn('[rempl][dom-event-transport] Unknown message type `' + data.type + '` for `' + name + '`', data);
         }
     }.bind(this));
 
@@ -171,29 +176,13 @@ function DomEventTransport(name, connectTo) {
 }
 
 DomEventTransport.prototype = {
-    onInit: function(observer, callback) {
+    onInit: function(endpoint, callback) {
         if (this.inited) {
             callback({
                 // setFeatures: features.set.bind(features),
                 connected: this.connected,
-                subscribe: subscribe.bind(this, observer),
-                send: send.bind(this, observer),
-                invoke: function(method) {
-                    var args = Array.prototype.slice.call(arguments);
-                    var callback = function() {};
-                    var method = args.shift();
-
-                    if (args.length && typeof args[args.length - 1] === 'function') {
-                        callback = args.pop();
-                    }
-
-                    send.call(this, observer, {
-                        ns: '*',
-                        type: 'call',
-                        method: method,
-                        args: args
-                    }, callback);
-                }.bind(this)
+                subscribe: subscribe.bind(this, endpoint.id),
+                send: send.bind(this, endpoint.id)
             });
         } else {
             this.initCallbacks.push(arguments);
