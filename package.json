@@ -22,6 +22,7 @@
       "no-unused-vars": [2, {"vars": "all", "args": "after-used"}]
     }
   },
+  "main": "src/index.js",
   "scripts": {
     "codestyle": "jscs src && eslint src",
     "build:observer-browser": "browserify --standalone rempl src/observer/browser/index.js > dist/rempl-observer-browser.js",
