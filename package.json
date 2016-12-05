@@ -48,5 +48,13 @@
   "dependencies": {
     "chalk": "~1.1.3",    
     "socket.io-client": "^1.7.1"
-  }
+  },
+  "files": [
+    "dist",
+    "server",
+    "src",
+    "HISTORY.md",
+    "LICENSE",
+    "README.md"
+  ]
 }
