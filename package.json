@@ -29,14 +29,17 @@
     "build:event": "browserify --standalone DomEventTransport src/utils/DomEventTransport.js > dist/rempl-dom-event-transport.js",
     "build:observer-nodejs": "browserify --standalone rempl src/observer/nodejs/index.js | uglifyjs --compress --mangle -o dist/rempl-observer-nodejs.js",
     "build:observer": "browserify --standalone rempl src/observer/index.js | uglifyjs --compress --mangle -o dist/rempl-observer.js",
-    "build:customer": "browserify --standalone RemplCustomer src/customer/customer.js > src/host/browser-extension/chromium/src/customer.js"
+    "build:customer": "browserify --standalone RemplCustomer src/customer/customer.js > src/host/browser-extension/chromium/src/customer.js",
+    "build:ui": "node node_modules/basisjs-tools-build/bin/build -c server/client/basis.config",
+    "prepublish": "npm run build:ui"
   },
   "devDependencies": {
     "basisjs": "~1.10.0",
     "browserify": "^13.0.0",
     "eslint": "^3.11.1",
     "jscs": "~3.0.7",
-    "uglify-js": "^2.6.1"
+    "uglify-js": "^2.6.1",
+    "basisjs-tools-build": "^1.4.0"
   },
   "dependencies": {
     "chalk": "~1.1.3",    
