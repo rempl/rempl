@@ -3,7 +3,8 @@
         "./coverage",
         "./docs",
         "./dist",
-        "./node_modules"
+        "./node_modules",
+        "./src/host/browser-extension/chromium/src/customer.js"
     ],
 
     "disallowEmptyBlocks": true,

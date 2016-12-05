@@ -87,6 +87,7 @@ function initUI(script) {
 
     window[apiId] = function createAPI() {
         return customer;
+        console.log(devtoolSession, devtoolFeatures); // FIXME: added to avoid no-unused-vars warnings
         // return {
         //     send: function() {
         //         sendToPage.apply(null, ['data'].concat(slice(arguments)));

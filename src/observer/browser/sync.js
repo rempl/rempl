@@ -1,7 +1,7 @@
 // var Value = require('../../utils/Value.js');
 var utils = require('../../utils/index.js');
 var pluginSync = require('./sync-browser-extension.js');
-var inpageSync = require('./sync-in-page.js');
+// var inpageSync = require('./sync-in-page.js');
 var serverSync = require('./sync-server.js');
 var noop = function() {};
 

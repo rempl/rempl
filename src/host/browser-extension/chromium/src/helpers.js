@@ -1,5 +1,6 @@
 /* eslint-env browser */
 /* exported createIndicator, slice, genUID */
+/* eslint no-unused-vars: "off" */ // exported doesn't work for some reason :(
 
 function createIndicator() {
     var debugIndicator = document.createElement('div');
