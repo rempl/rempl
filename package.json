@@ -32,6 +32,7 @@
     "build:customer": "browserify --standalone RemplCustomer src/customer/customer.js > src/host/browser-extension/chromium/src/customer.js"
   },
   "devDependencies": {
+    "basisjs": "~1.10.0",
     "browserify": "^13.0.0",
     "eslint": "^3.11.1",
     "jscs": "~3.0.7",
