@@ -1,15 +1,19 @@
 {
   "name": "rempl",
-  "version": "1.0.0",
-  "description": "Remote platform",
+  "version": "1.0.0-alpha1",
+  "description": "The platform for simplifying moderate remote access to JavaScript runtime via custom UI",
   "main": "index.js",
   "author": "Roman Dvornov",
-  "repository": "lahmatiy/rempl",
+  "contributors": [
+    "Roman Dvornov <rdvornov@gmail.com>",
+    "Sergey Melyukov <s.melukov@gmail.com>"
+  ],
   "license": "MIT",
+  "repository": "rempl/rempl",
+  "homepage": "https://github.com/rempl/rempl",
   "bugs": {
-    "url": "https://github.com/lahmatiy/rempl/issues"
+    "url": "https://github.com/rempl/rempl/issues"
   },
-  "homepage": "https://github.com/lahmatiy/rempl",
   "eslintConfig": {
     "env": {
       "node": true,
@@ -17,9 +21,9 @@
       "es6": true
     },
     "rules": {
-      "no-duplicate-case": 2,
-      "no-undef": 2,
-      "no-unused-vars": [2, {"vars": "all", "args": "after-used"}]
+      "no-duplicate-case": "error",
+      "no-undef": "error",
+      "no-unused-vars": ["error", {"vars": "all", "args": "after-used"}]
     }
   },
   "main": "src/index.js",
