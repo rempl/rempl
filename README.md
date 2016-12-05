@@ -1,9 +1,9 @@
-The general idea behide `Rempl` in simplifying remote access to JavaScript runtime. It provides transport between environments and set of hosts for UIs.
+The general idea behide `Rempl` in simplifying moderate remote access to JavaScript runtime. It provides transport between environments and set of hosts for UIs.
 
 ##
 
 ```
-[ provider ] <--- rempl ---> [ customer (UI) ]
+[ runtime ] <--- [ provider (data) ] <--- rempl ---> [ customer (UI) ]
 ```
 
 ## API
@@ -14,7 +14,7 @@ The general idea behide `Rempl` in simplifying remote access to JavaScript runti
 var createRemplProvider = require('rempl');
 var myTool = createRemplProvider('myTool', function(settings, callback) {
     callback(null, 'script', 'alert("myTool UI inited")');
-}, 'ws://localhost:8888');
+}, 'ws://localhost:8177');
 
 setInterval(function() {
     myTool.send('ping');
@@ -35,6 +35,14 @@ myTool.define({
   - send/define/hasMethod/invoke
 
 ### Customer
+
+```js
+rempl.subscribe(function(data) {
+    console.log('Recieve data from provider:', data);
+
+    rempl.invoke('pong');
+});
+```
 
 - subscribe(callback)
 - define(methods)
