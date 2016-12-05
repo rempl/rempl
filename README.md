@@ -28,20 +28,20 @@ myTool.define({
 ```
 
 - send(data)
-- subscribe(callback)
 - define(methods)
+- hasMethod(method)
 - invoke(method, ...args, callback)
 - ns(namespace)
-  - send/subscribe/define/invoke
+  - send/define/hasMethod/invoke
 
 ### Customer
 
-- send(data)
 - subscribe(callback)
 - define(methods)
+- hasMethod(method)
 - invoke(method, ...args, callback)
 - ns(namespace)
-  - send/subscribe/define/invoke
+  - subscribe/define/hasMethod/invoke
 
 ---
 
