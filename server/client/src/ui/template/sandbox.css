@@ -1,0 +1,67 @@
+.layout
+{
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  position: fixed;
+  z-index: 100;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+}
+
+.toolbar
+{
+  padding: 5px;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 0 5px rgba(0, 0, 0, .25);
+  display: -webkit-flex;
+  display: flex;
+}
+.header
+{
+  -webkit-flex: 1;
+  flex: 1;
+  display: inline-block;
+  vertical-align: top;
+  margin-left: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.title
+{
+  display: block;
+  font-size: 14px;
+  transition: color 1s;
+}
+.title_online
+{
+  color: #090;
+}
+.location
+{
+  font-size: 10px;
+  color: #888;
+}
+
+.error
+{
+  margin: 8px;
+  padding: 8px;
+  border-radius: 3px;
+  background: white;
+  color: #D00;
+}
+
+.frame-wrapper
+{
+  -webkit-flex: 1;
+  flex: 1;
+  position: relative;
+  background: rgba(0, 0, 0, .1) no-repeat center center;
+}

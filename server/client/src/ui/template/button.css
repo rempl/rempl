@@ -1,0 +1,14 @@
+.button
+{
+  display: inline-block;
+  padding: 8px 16px;
+  background: #3BAFDA;
+  color: white;
+  border-radius: 3px;
+  margin-right: 5px;
+  cursor: pointer;
+}
+.button:hover
+{
+  background: #4FC1E9;
+}

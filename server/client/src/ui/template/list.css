@@ -1,0 +1,12 @@
+.list
+{
+  position: relative;
+  z-index: 1;
+}
+
+.empty
+{
+  color: #888;
+  padding: 10px;
+  text-align: center;
+}

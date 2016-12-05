@@ -1,0 +1,17 @@
+.observer
+{
+  display: inline-block;
+  color: #666;
+  font-size: 11px;
+  background: #E8E8E8;
+  padding: 4px 8px;
+  margin-right: 4px;
+  line-height: 1;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.observer:hover
+{
+  color: #333;
+  background: #F8F8F8;
+}

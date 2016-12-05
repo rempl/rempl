@@ -1,0 +1,24 @@
+<b:isolate/>
+<b:style src="./sandbox.css"/>
+<b:define name="online" type="bool"/>
+
+<div class="layout" b:visible="{hasClient}">
+  <div class="toolbar">
+    <b:include src="./button.tmpl" isolate>
+      <b:set-attr name="event-click" value="drop"/>
+      &slarr; Back
+    </b:include>
+    <div class="header">
+      <span class="title title_{online}" b:visible="{title}">{title}</span>
+      <span b:show="{isBrowser}" class="location">{location}</span>
+      <span b:show="{isNode}" class="pid">PID: {pid}</span>
+    </div>
+  </div>
+  <div class="frame-wrapper">
+    <b:include src="./spinner.tmpl" show="{loading}" isolate>
+      Fetching UI...
+    </b:include>
+    <div class="error" b:show="{error}">{error}</div>
+    <!--{frame}-->
+  </div>
+</div>
