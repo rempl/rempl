@@ -149,7 +149,7 @@ function DomEventTransport(name, connectTo) {
                 var callback = data.callback;
 
                 if (callback) {
-                    args = args.concat(wrapCallback(callback));
+                    args = args.concat(wrapCallback(this, callback));
                 }
 
                 this.subscribers.forEach(function(subscriber) {
@@ -159,11 +159,10 @@ function DomEventTransport(name, connectTo) {
                 });
                 break;
 
-            case 'getInspectorUI': // legacy
             case 'getRemoteUI':
-                getRemoteUI(
+                this.getRemoteUI(
                     Array.prototype.slice.call(data.data)[0] || false,
-                    data.callback ? wrapCallback(data.callback) : Function
+                    data.callback ? wrapCallback(this, data.callback) : Function
                 );
                 break;
 
@@ -178,6 +177,7 @@ function DomEventTransport(name, connectTo) {
 DomEventTransport.prototype = {
     onInit: function(endpoint, callback) {
         if (this.inited) {
+            this.getRemoteUI = endpoint.getRemoteUI; // FIXME: temporary
             callback({
                 // setFeatures: features.set.bind(features),
                 connected: this.connected,

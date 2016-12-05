@@ -1,0 +1,25 @@
+{
+  "name": "Rempl",
+  "version": "1.0.0",
+  "description": "Rempl host",
+  "devtools_page": "index.html",
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "manifest_version": 2,
+  "permissions":  [
+    "tabs",
+    "contextMenus", 
+    "http://*/*",
+    "https://*/*"
+  ],
+  "icons": {
+    "32": "img/icon32x32.png",
+    "128": "img/icon128x128.png"
+  },
+  "background": {
+    "scripts": ["src/background.js"]
+  },
+  "content_scripts": [{
+    "matches": ["http://*/*"],
+    "js": ["src/helpers.js", "src/page.js"]
+  }]
+}

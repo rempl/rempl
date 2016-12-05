@@ -1,0 +1,63 @@
+<!doctype html>
+<meta charset="utf-8"/>
+
+<style>
+    BODY,
+    HTML
+    {
+        padding: 0;
+        margin: 0;
+    }
+
+    iframe
+    {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+        z-index: 1;
+        background: white;
+    }
+
+    #state-banner
+    {
+        padding: 20px;
+        color: #444;
+        font-size: 14px;
+    }
+    .connection
+    {
+        margin-bottom: 16px;
+    }
+    .state.pending
+    {
+        color: orange;
+    }
+    .state.ok
+    {
+        color: #090;
+    }
+    .comment
+    {
+        color: #999;
+        font-size: 12px;
+        margin-top: 4px;
+        margin-left: 16px;
+    }
+</style>
+
+<div id="state-banner">
+    <div class="connection">
+        Connection to page – <span id="connection-to-page" class="state pending">pending...</span>
+    </div>
+    <div class="connection">
+        Connection to rempl provider – <span id="connection-to-rempl" class="state pending">pending...</span>
+        <div class="comment">NOTE: Page should contains rempl provider</di>
+    </div>
+</div>
+
+<script src="helpers.js"></script>
+<script src="customer.js"></script>
+<script src="plugin.js"></script>
