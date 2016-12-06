@@ -1,4 +1,4 @@
-// var Value = require('../../utils/Value.js');
+// var Token = require('../../utils/index.js').Token;
 var utils = require('../../utils/index.js');
 var pluginSync = require('./sync-browser-extension.js');
 // var inpageSync = require('./sync-in-page.js');
@@ -6,8 +6,8 @@ var serverSync = require('./sync-server.js');
 var noop = function() {};
 
 module.exports = function createSync(observer) {
-    // var remoteCustomers = new Value(0);
-    // var devtools = new Value(false);
+    // var remoteCustomers = new Token(0);
+    // var devtools = new Token(false);
 
     // browser extension
     pluginSync(observer, function(api) {

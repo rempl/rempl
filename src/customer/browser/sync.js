@@ -1,4 +1,3 @@
-// var Value = require('../../utils/Value.js');
 var DomEventTransport = require('../../utils/DomEventTransport.js');
 
 module.exports = function createSync(customer) {
