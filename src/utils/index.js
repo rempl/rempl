@@ -5,7 +5,7 @@ var document = global.document;
 
 function complete(dest, source) {
     for (var key in source) {
-        if (key in dest == false) {
+        if (key in dest === false) {
             dest[key] = source[key];
         }
     }

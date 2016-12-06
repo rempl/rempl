@@ -30,7 +30,5 @@ setInterval(function() {
 
 // ---- 
 
-var x = document.createElement('div');
-x.innerHTML = 'foo interface';
-document.body.appendChild(x);
-console.log('!foo remote tool inited');
+document.body.innerHTML = rempl.id + ' interface';
+console.log('remote tool `' + rempl.id + '` inited');
