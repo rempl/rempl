@@ -1,14 +1,13 @@
 var fs = require('fs');
 var path = require('path');
-var Token = require('../../utils/Token');
 var utils = require('../../utils');
 var socketIO = require('socket.io-client');
 var clients = Object.create(null);
 
-var CLIENT_ID_FILENAME = '.rempl_client_id';
+var CLIENT_ID_FILENAME = '.rempl_client_id'; // FIXME: dirty solution
+var DEBUG = false;
 
 function onConnect() {
-    console.log('[rempl][ws-transport] connected');
     clearInterval(this.sendInfoTimer);
 
     this.isOnline.set(true);
@@ -22,11 +21,18 @@ function onConnect() {
 
         this.sendInfoTimer = setInterval(this.sendInfo.bind(this), this.sendInfoTimerTTL);
     }.bind(this));
+
+    if (DEBUG) {
+        console.log('[rempl][ws-transport] connected');
+    }
 }
 
 function onGetUI(id, settings, callback) {
     if (!this.observersMap.hasOwnProperty(id)) {
-        console.error('[rempl][ws-transport] Observer `' + id + '` isn\'t registered on page');
+        if (DEBUG) {
+            console.error('[rempl][ws-transport] Observer `' + id + '` isn\'t registered on page');
+        }
+
         callback('[rempl][ws-transport] Observer `' + id + '` isn\'t registered on page');
         return;
     }
@@ -36,7 +42,10 @@ function onGetUI(id, settings, callback) {
 
 function onData(id) {
     if (!this.observersMap.hasOwnProperty(id)) {
-        console.error('[rempl][ws-transport] Observer `' + id + '` isn\'t registered on page');
+        if (DEBUG) {
+            console.error('[rempl][ws-transport] Observer `' + id + '` isn\'t registered on page');
+        }
+
         return;
     }
 
@@ -49,7 +58,10 @@ function onData(id) {
 }
 
 function onDisconnect() {
-    console.log('[rempl] disconnected');
+    if (DEBUG) {
+        console.log('[rempl] disconnected');
+    }
+
     this.isOnline.set(false);
     this.setFeatures([]);
 
@@ -65,7 +77,7 @@ function Client(uri) {
 
     // TODO make it through temp file
     if (fs.existsSync(path.resolve(CLIENT_ID_FILENAME))) {
-        this.clientId = fs.readFileSync(path.resolve(CLIENT_ID_FILENAME), { encoding: 'utf-8' });
+        this.clientId = fs.readFileSync(path.resolve(CLIENT_ID_FILENAME), 'utf-8');
     }
 
     this.clientInfo = {};
@@ -75,7 +87,7 @@ function Client(uri) {
     this.sendInfoTimer = null;
     this.sendInfoTimerTTL = 150;
 
-    this.isOnline = new Token(false);
+    this.isOnline = new utils.Token(false);
     this.features = [];
 
     this.transport = socketIO.connect(uri)
@@ -148,20 +160,26 @@ Client.prototype.setFeatures = function(list) {
     this.sendInfo();
 };
 
-Client.prototype.startIdentify = function(num, callback) {
-    console.error('[rempl] #startIdentify not implemented');
-    callback();
+Client.prototype.startIdentify = function() {
+    if (DEBUG) {
+        console.error('[rempl] #startIdentify not implemented');
+    }
 };
 
 Client.prototype.stopIdentify = function() {
-    console.error('[rempl] #stopIdentify not implemented');
+    if (DEBUG) {
+        console.error('[rempl] #stopIdentify not implemented');
+    }
 };
 
 Client.prototype.createApi = function(id, getRemoteUI) {
     var subscribers = [];
 
     if (this.observersMap.hasOwnProperty(id)) {
-        console.error('[rempl][ws-transport] Observer `' + id + '` already registered on page');
+        if (DEBUG) {
+            console.error('[rempl][ws-transport] Observer `' + id + '` already registered on page');
+        }
+
         return;
     }
 
