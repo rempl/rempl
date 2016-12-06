@@ -28,7 +28,7 @@
   },
   "main": "src/index.js",
   "scripts": {
-    "codestyle": "jscs src && eslint src",
+    "codestyle": "jscs src server && eslint src server",
     "build:observer-browser": "browserify --standalone rempl src/observer/browser/index.js > dist/rempl-observer-browser.js",
     "build:event": "browserify --standalone DomEventTransport src/utils/DomEventTransport.js > dist/rempl-dom-event-transport.js",
     "build:observer-nodejs": "browserify --standalone rempl src/observer/nodejs/index.js | uglifyjs --compress --mangle -o dist/rempl-observer-nodejs.js",

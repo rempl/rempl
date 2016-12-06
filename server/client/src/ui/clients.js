@@ -14,84 +14,85 @@ var selectedObserver = selectedId.as(Observer.getSlot);
 var selectedClient = selectedObserver.query('data.clientId').as(Client.getSlot);
 var selectedOnline = selectedClient.query('data.online');
 var selected = new ObjectMerge({
-  sources: {
-    client: selectedClient,
-    observer: selectedObserver
-  },
-  fields: {
-    id: 'observer:id',
-    '*': 'client',
-    clientId: 'observer',
-    name: 'observer',
-    uiType: 'observer',
-    uiContent: 'observer'
-  }
+    sources: {
+        client: selectedClient,
+        observer: selectedObserver
+    },
+    fields: {
+        id: 'observer:id',
+        '*': 'client',
+        clientId: 'observer',
+        name: 'observer',
+        uiType: 'observer',
+        uiContent: 'observer'
+    }
 });
 
 Value
-  .from(router.route('*id').param('id'))
-  .link(selectedId, selectedId.set);
+    .from(router.route('*id').param('id'))
+    .link(selectedId, selectedId.set);
 
-selectedId.link(location, function(value){
-  this.hash = value || '';
+selectedId.link(location, function(value) {
+    this.hash = value || '';
 });
 
 module.exports = new Node({
-  template: resource('./template/list.tmpl'),
-  binding: {
-    selectedOnline: selectedOnline
-  },
-
-  active: true,
-  dataSource: Client.all,
-  childClass: {
-    disabled: Value.query('data.observers.itemCount').as(basis.bool.invert),
-
-    template: resource('./template/client.tmpl'),
+    template: resource('./template/list.tmpl'),
     binding: {
-      title: {
-        events: 'update',
-        getter: function(node){
-          return node.data.title || '<no title>';
-        }
-      },
-      isBrowser: Value.query('data.type').as(function(type){
-        return type == 'browser';
-      }),
-      isNode: Value.query('data.type').as(function(type){
-        return type == 'node';
-      }),
-      location: 'data:',
-      pid: 'data:',
-      online: 'data:',
-      num: 'data:',
-      pickMode: pickMode
-    },
-    action: {
-      select: function(){
-        if (!this.isDisabled())
-          selectedId.set(this.data.observers.pick().data.id);
-      }
+        selectedOnline: selectedOnline
     },
 
-    dataSource: Value.query('data.observers'),
+    active: true,
+    dataSource: Client.all,
     childClass: {
-      template: resource('./template/observer.tmpl'),
-      binding: {
-        name: 'data:'
-      },
-      action: {
-        select: function(){
-          selectedId.set(this.data.id);
-        }
-      }
-    }
-  },
+        disabled: Value.query('data.observers.itemCount').as(basis.bool.invert),
 
-  pickMode: pickMode,
-  selectedId: selectedId,
-  selectedObserver: selected,
-  dropSelection: function(){
-    selectedId.set(null);
-  }
+        template: resource('./template/client.tmpl'),
+        binding: {
+            title: {
+                events: 'update',
+                getter: function(node) {
+                    return node.data.title || '<no title>';
+                }
+            },
+            isBrowser: Value.query('data.type').as(function(type) {
+                return type == 'browser';
+            }),
+            isNode: Value.query('data.type').as(function(type) {
+                return type == 'node';
+            }),
+            location: 'data:',
+            pid: 'data:',
+            online: 'data:',
+            num: 'data:',
+            pickMode: pickMode
+        },
+        action: {
+            select: function() {
+                if (!this.isDisabled()) {
+                    selectedId.set(this.data.observers.pick().data.id);
+                }
+            }
+        },
+
+        dataSource: Value.query('data.observers'),
+        childClass: {
+            template: resource('./template/observer.tmpl'),
+            binding: {
+                name: 'data:'
+            },
+            action: {
+                select: function() {
+                    selectedId.set(this.data.id);
+                }
+            }
+        }
+    },
+
+    pickMode: pickMode,
+    selectedId: selectedId,
+    selectedObserver: selected,
+    dropSelection: function() {
+        selectedId.set(null);
+    }
 });
