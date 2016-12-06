@@ -10,12 +10,12 @@
     <script>
         /* eslint-env browser */
         /* global basis */
-        var createRemplObserver = basis.require('../src/observer/index.js');
+        var createRemplProvider = basis.require('../src/provider/index.js');
         // var DomEventTransport = basis.require('../src/utils/DomEventTransport.js');
 
         (function() {
-            // var createRemplObserver = rempl;
-            var foo = createRemplObserver('foo', function(s, cb) {
+            // var createRemplProvider = rempl;
+            var foo = createRemplProvider('foo', function(s, cb) {
                 fetch('browser-ui-foo.js')
                     .then(res => {
                         if (res.ok) return res.text();

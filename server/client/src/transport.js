@@ -3,7 +3,7 @@
 
 var Value = require('basis.data').Value;
 var Client = require('./type.js').Client;
-var Observer = require('./type.js').Observer;
+var Provider = require('./type.js').Provider;
 var online = new Value({ value: false });
 var socket = io.connect(location.host, { transports: ['websocket', 'polling'] });
 
@@ -27,9 +27,9 @@ socket
 module.exports = {
     online: online,
     getClientUI: function(id, callback) {
-        var observer = Observer(id);
-        socket.emit('devtool:get client ui', observer.data.clientId, observer.data.name, function(err, type, content) {
-            observer.update({
+        var provider = Provider(id);
+        socket.emit('devtool:get client ui', provider.data.clientId, provider.data.name, function(err, type, content) {
+            provider.update({
                 uiType: type,
                 uiContent: content
             });

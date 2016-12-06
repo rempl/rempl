@@ -1,5 +1,5 @@
 module.exports = {
-    Observer: require('./type/observer.js'),
+    Provider: require('./type/provider.js'),
     Client: require('./type/client.js')
 };
 

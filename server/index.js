@@ -39,12 +39,12 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
                     client.update(data);
                     clients.notifyUpdates();
                 })
-                .on('devtool:client data', function(observerId) {
+                .on('devtool:client data', function(providerId) {
                     // var channel = socket.to(client.room);
                     // channel.emit.apply(channel, packet('devtool:session data', arguments));
                     var args = Array.prototype.slice.call(arguments, 1);
                     client.customers.forEach(function(customer) {
-                        if (customer.observerId === observerId) {
+                        if (customer.providerId === providerId) {
                             customer.emit.apply(customer, packet('devtool:session data', args));
                         }
                     });
@@ -71,8 +71,8 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
         socket.on('devtool:customer connect', function(connectCallback) {
             this.on('devtool:pick client', function(pickCallback) {
                 function startIdentify(client) {
-                    client.emitIfPossible('devtool:identify', client.num, function(observerId) {
-                        pickCallback(client.id, observerId);
+                    client.emitIfPossible('devtool:identify', client.num, function(providerId) {
+                        pickCallback(client.id, providerId);
                         stopIdentify();
                     });
                 }
@@ -97,14 +97,14 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
                 clients.notifyUpdates();
             });
 
-            this.on('devtool:get client ui', function(clientId, observerId, callback) {
+            this.on('devtool:get client ui', function(clientId, providerId, callback) {
                 var client = clients.get('id', clientId);
 
                 if (!client || !client.socket) {
                     return callback('[devtool:get client ui] Client (' + clientId + ') not found or disconnected');
                 }
 
-                client.emit('devtool:get ui', observerId, {
+                client.emit('devtool:get ui', providerId, {
                     dev: options.dev,
                     accept: ['script', 'url']
                 }, callback);
@@ -116,9 +116,9 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
         });
 
         //
-        // session observer
+        // session provider
         //
-        socket.on('devtool:join session', function(clientId, observerId, callback) {
+        socket.on('devtool:join session', function(clientId, providerId, callback) {
             var client = clients.get('id', clientId);
 
             if (!client || !client.socket) {
@@ -126,11 +126,11 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
             }
 
             client.addCustomer(this);
-            this.observerId = observerId;
+            this.providerId = providerId;
             this
                 .join(client.room)
                 .on('devtool:to session', function() {
-                    client.emit.apply(client, packet('devtool:to session', packet(observerId, arguments)));
+                    client.emit.apply(client, packet('devtool:to session', packet(providerId, arguments)));
                 })
                 .on('disconnect', function() {
                     client.removeCustomer(this);

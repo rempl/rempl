@@ -1,9 +1,9 @@
 var utils = require('../utils/index.js');
 var instances = Object.create(null);
 
-function send(observer, args) {
-    for (var channel in observer.channels) {
-        observer.channels[channel].apply(null, args);
+function send(provider, args) {
+    for (var channel in provider.channels) {
+        provider.channels[channel].apply(null, args);
     }
 }
 
@@ -19,15 +19,15 @@ function invoke(method, args, callback) {
     this.methods[method].apply(null, args);
 }
 
-var Namespace = function(name, observer) {
+var Namespace = function(name, provider) {
     this.name = name;
-    this.observer = observer;
+    this.provider = provider;
     this.methods = Object.create(null);
 };
 
 Namespace.prototype = {
     send: function(payload) {
-        send(this.observer, [{
+        send(this.provider, [{
             type: 'data',
             ns: this.name,
             payload: payload
@@ -48,7 +48,7 @@ Namespace.prototype = {
             callback = args.pop();
         }
 
-        send(this.observer, [{
+        send(this.provider, [{
             type: 'call',
             ns: this.name,
             method: method,
@@ -57,7 +57,7 @@ Namespace.prototype = {
     }
 };
 
-var Observer = function(id, getRemoteUI) {
+var Provider = function(id, getRemoteUI) {
     this.id = id;
     this.getRemoteUI = getRemoteUI;
     this.namespaces = Object.create(null);
@@ -72,7 +72,7 @@ var Observer = function(id, getRemoteUI) {
     }
 };
 
-Observer.prototype = {
+Provider.prototype = {
     ns: function getNamespace(name) {
         if (!this.namespaces[name]) {
             this.namespaces[name] = new Namespace(name, this);
@@ -86,7 +86,7 @@ Observer.prototype = {
         switch (packet.type) {
             case 'call':
                 if (!this.ns(ns).hasMethod(packet.method)) {
-                    return console.warn('[rempl][sync] Observer `' + this.name + '` has no remote command:', packet.method);
+                    return console.warn('[rempl][sync] Provider `' + this.name + '` has no remote command:', packet.method);
                 }
 
                 invoke.call(this.ns(ns), packet.method, packet.args, callback);
@@ -98,16 +98,16 @@ Observer.prototype = {
     }
 };
 
-Observer.factory = function createObserverFactory(Observer) {
-    return function getObserver(id, getRemoteUI, endpoint) {
-        var observer = instances[id];
+Provider.factory = function createProviderFactory(Provider) {
+    return function getProvider(id, getRemoteUI, endpoint) {
+        var provider = instances[id];
 
-        if (!observer) {
-            observer = instances[id] = new Observer(id, getRemoteUI, endpoint);
+        if (!provider) {
+            provider = instances[id] = new Provider(id, getRemoteUI, endpoint);
         }
 
-        return observer;
+        return provider;
     };
 };
 
-module.exports = Observer;
+module.exports = Provider;

@@ -15,16 +15,16 @@ var mainView = new Node({
     action: {
         pick: function() {
             clients.pickMode.set(true);
-            transport.pickClient(function(clientId, observerId) {
+            transport.pickClient(function(clientId, providerId) {
                 clients.pickMode.set(false);
-                clients.selectedId.set(clientId + '/' + observerId);
+                clients.selectedId.set(clientId + '/' + providerId);
             }.bind(this));
         }
     },
     satellite: {
         clients: clients,
         sandbox: {
-            delegate: clients.selectedObserver,
+            delegate: clients.selectedProvider,
             instance: require('./sandbox.js')
         }
     },

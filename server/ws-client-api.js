@@ -7,12 +7,12 @@ var documentStyleOverflow;
 var sessionStorage = global.sessionStorage || {};
 var clientId = sessionStorage[STORAGE_KEY];
 var sessionId = genUID();
-var observersEl = document.createElement('div');
+var providersEl = document.createElement('div');
 var overlayEl = createOverlay();
-var pickObserverCallback;
+var pickProviderCallback;
 var features = [];
-var observers = [];
-var observersMap = {};
+var providers = [];
+var providersMap = {};
 var clientInfo = getSelfInfo();
 var sendInfoTimer;
 
@@ -43,7 +43,7 @@ function getSelfInfo() {
         title: global.top.document.title,
         location: String(location),
         features: features.slice(),
-        observers: observers.slice()
+        providers: providers.slice()
     };
 }
 
@@ -52,9 +52,9 @@ function sendInfo() {
     if (clientInfo.title != newClientInfo.title ||
             clientInfo.location != newClientInfo.location ||
             String(clientInfo.features) != String(newClientInfo.features) ||
-            String(clientInfo.observers) != String(newClientInfo.observers)) {
+            String(clientInfo.providers) != String(newClientInfo.providers)) {
         clientInfo = newClientInfo;
-        socket.emit('devtool:client info', getSelfInfo());
+        socket.emit('devtool:client info', clientInfo);
     }
 }
 
@@ -64,7 +64,7 @@ function createOverlay() {
         '<div style="position:fixed;overflow:auto;top:0;left:0;bottom:0;right:0;z-index:100000000;background:rgba(255,255,255,.9);text-align:center;line-height:1.5;font-family:Tahoma,Verdana,Arial,sans-serif">' +
              '<div style="font-size:100px;font-size:33vh">#</div>' +
         '</div>';
-    tmp.firstChild.appendChild(observersEl);
+    tmp.firstChild.appendChild(providersEl);
     return tmp.firstChild;
 }
 
@@ -77,27 +77,27 @@ function createButton(name, callback) {
     temp.firstChild.firstChild.onclick = callback;
     return temp.firstChild;
 }
-function updateObserverList() {
-    if (observers.length && pickObserverCallback) {
-        observersEl.innerHTML = '<div style="margin-bottom: 10px">Pick an observer:</div>';
-        for (var i = 0; i < observers.length; i++) {
-            observersEl.appendChild(createButton(observers[i], pickObserverCallback.bind(null, observers[i])));
+function updateProviderList() {
+    if (providers.length && pickProviderCallback) {
+        providersEl.innerHTML = '<div style="margin-bottom: 10px">Pick an provider:</div>';
+        for (var i = 0; i < providers.length; i++) {
+            providersEl.appendChild(createButton(providers[i], pickProviderCallback.bind(null, providers[i])));
         }
     } else {
-        observersEl.innerHTML = '<div style="color:#AA0000">No rempl observers inited</div>';
+        providersEl.innerHTML = '<div style="color:#AA0000">No rempl providers inited</div>';
     }
 }
 
 function startIdentify(num, callback) {
     overlayEl.firstChild.innerHTML = num;
-    pickObserverCallback = callback;
-    updateObserverList();
+    pickProviderCallback = callback;
+    updateProviderList();
     documentStyleOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     document.body.appendChild(overlayEl);
 }
 function stopIdentify() {
-    pickObserverCallback = null;
+    pickProviderCallback = null;
 
     if (overlayEl.parentNode !== document.body) {
         return;
@@ -129,21 +129,21 @@ socket
         api.remoteCustomers.set(count);
     })
     .on('devtool:get ui', function(id, settings, callback) {
-        if (!observersMap.hasOwnProperty(id)) {
-            console.error('[rempl][ws-transport] Observer `' + id + '` isn\'t registered on page');
-            callback('[rempl][ws-transport] Observer `' + id + '` isn\'t registered on page');
+        if (!providersMap.hasOwnProperty(id)) {
+            console.error('[rempl][ws-transport] Provider `' + id + '` isn\'t registered on page');
+            callback('[rempl][ws-transport] Provider `' + id + '` isn\'t registered on page');
             return;
         }
 
-        observersMap[id].getRemoteUI.call(null, settings, callback);
+        providersMap[id].getRemoteUI.call(null, settings, callback);
     })
     .on('devtool:to session', function(id) {
-        if (!observersMap.hasOwnProperty(id)) {
-            console.error('[rempl][ws-transport] Observer `' + id + '` isn\'t registered on page');
+        if (!providersMap.hasOwnProperty(id)) {
+            console.error('[rempl][ws-transport] Provider `' + id + '` isn\'t registered on page');
             return;
         }
 
-        var subscribers = observersMap[id].subscribers;
+        var subscribers = providersMap[id].subscribers;
         var args = Array.prototype.slice.call(arguments, 1);
 
         for (var i = 0; i < subscribers.length; i++) {
@@ -168,24 +168,24 @@ api.getRemoteUrl = function() {
     return location.protocol + '//' + location.host + '/basisjs-tools/devtool/';
 };
 api.initRemoteDevtoolAPI = function() {
-    console.warn('initRemoteDevtoolAPI() method is deprecated, use initRemoteObserver() instead');
+    console.warn('initRemoteDevtoolAPI() method is deprecated, use initRemoteProvider() instead');
 };
 
-api.initRemoteObserver = function(id, getRemoteUI) {
+api.initRemoteProvider = function(id, getRemoteUI) {
     var subscribers = [];
 
-    if (observersMap.hasOwnProperty(id)) {
-        console.error('[rempl][ws-transport] Observer `' + id + '` already registered on page');
+    if (providersMap.hasOwnProperty(id)) {
+        console.error('[rempl][ws-transport] Provider `' + id + '` already registered on page');
         return;
     }
 
-    observers.push(id);
-    observersMap[id] = {
+    providers.push(id);
+    providersMap[id] = {
         getRemoteUI: getRemoteUI,
         subscribers: subscribers
     };
 
-    updateObserverList();
+    updateProviderList();
     sendInfo();
 
     return {

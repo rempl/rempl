@@ -7,12 +7,12 @@ var onInit = function() {
 
 // run via utils.waitForGlobal to ensure GLOBAL_NAME is available
 utils.waitForGlobal(GLOBAL_NAME, function(remplWsServer) {
-    if (typeof remplWsServer.initRemoteObserver === 'function') {
-        onInit = function(observer, callback) {
-            callback(remplWsServer.initRemoteObserver(observer.id, observer.getRemoteUI));
+    if (typeof remplWsServer.initRemoteProvider === 'function') {
+        onInit = function(provider, callback) {
+            callback(remplWsServer.initRemoteProvider(provider.id, provider.getRemoteUI));
         };
     } else {
-        utils.warn('[rempl][sync-server] initRemoteObserver method doesn\'t implemented in rempl server API');
+        utils.warn('[rempl][sync-server] initRemoteProvider method doesn\'t implemented in rempl server API');
         return;
     }
 

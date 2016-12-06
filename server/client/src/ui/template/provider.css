@@ -1,4 +1,4 @@
-.observer
+.provider
 {
   display: inline-block;
   color: #666;
@@ -10,7 +10,7 @@
   border-radius: 3px;
   cursor: pointer;
 }
-.observer:hover
+.provider:hover
 {
   color: #333;
   background: #F8F8F8;

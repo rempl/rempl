@@ -6,25 +6,25 @@ var Value = require('basis.data').Value;
 var ObjectMerge = require('basis.data.object').Merge;
 var router = require('basis.router');
 var Client = require('../type.js').Client;
-var Observer = require('../type.js').Observer;
+var Provider = require('../type.js').Provider;
 
 var selectedId = new Value();
 var pickMode = new Value({ value: false });
-var selectedObserver = selectedId.as(Observer.getSlot);
-var selectedClient = selectedObserver.query('data.clientId').as(Client.getSlot);
+var selectedProvider = selectedId.as(Provider.getSlot);
+var selectedClient = selectedProvider.query('data.clientId').as(Client.getSlot);
 var selectedOnline = selectedClient.query('data.online');
 var selected = new ObjectMerge({
     sources: {
         client: selectedClient,
-        observer: selectedObserver
+        provider: selectedProvider
     },
     fields: {
-        id: 'observer:id',
+        id: 'provider:id',
         '*': 'client',
-        clientId: 'observer',
-        name: 'observer',
-        uiType: 'observer',
-        uiContent: 'observer'
+        clientId: 'provider',
+        name: 'provider',
+        uiType: 'provider',
+        uiContent: 'provider'
     }
 });
 
@@ -45,7 +45,7 @@ module.exports = new Node({
     active: true,
     dataSource: Client.all,
     childClass: {
-        disabled: Value.query('data.observers.itemCount').as(basis.bool.invert),
+        disabled: Value.query('data.providers.itemCount').as(basis.bool.invert),
 
         template: resource('./template/client.tmpl'),
         binding: {
@@ -70,14 +70,14 @@ module.exports = new Node({
         action: {
             select: function() {
                 if (!this.isDisabled()) {
-                    selectedId.set(this.data.observers.pick().data.id);
+                    selectedId.set(this.data.providers.pick().data.id);
                 }
             }
         },
 
-        dataSource: Value.query('data.observers'),
+        dataSource: Value.query('data.providers'),
         childClass: {
-            template: resource('./template/observer.tmpl'),
+            template: resource('./template/provider.tmpl'),
             binding: {
                 name: 'data:'
             },
@@ -91,7 +91,7 @@ module.exports = new Node({
 
     pickMode: pickMode,
     selectedId: selectedId,
-    selectedObserver: selected,
+    selectedProvider: selected,
     dropSelection: function() {
         selectedId.set(null);
     }

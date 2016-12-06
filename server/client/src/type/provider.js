@@ -4,7 +4,7 @@ function stringOrNull(value) {
     return value == null ? null : String(value);
 }
 
-var Observer = entity.createType('Observer', {
+var Provider = entity.createType('Provider', {
     id: entity.StringId,
     clientId: entity.calc('id', function(id) {
         return id.split(/\//)[0];
@@ -16,4 +16,4 @@ var Observer = entity.createType('Observer', {
     uiContent: stringOrNull
 });
 
-module.exports = Observer;
+module.exports = Provider;

@@ -1,6 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var utils = require('../../utils');
+var Token = require('../../utils/Token.js');
 var socketIO = require('socket.io-client');
 var clients = Object.create(null);
 
@@ -28,28 +29,28 @@ function onConnect() {
 }
 
 function onGetUI(id, settings, callback) {
-    if (!this.observersMap.hasOwnProperty(id)) {
+    if (!this.providersMap.hasOwnProperty(id)) {
         if (DEBUG) {
-            console.error('[rempl][ws-transport] Observer `' + id + '` isn\'t registered on page');
+            console.error('[rempl][ws-transport] Provider `' + id + '` isn\'t registered on page');
         }
 
-        callback('[rempl][ws-transport] Observer `' + id + '` isn\'t registered on page');
+        callback('[rempl][ws-transport] Provider `' + id + '` isn\'t registered on page');
         return;
     }
 
-    this.observersMap[id].getRemoteUI.call(null, settings, callback);
+    this.providersMap[id].getRemoteUI.call(null, settings, callback);
 }
 
 function onData(id) {
-    if (!this.observersMap.hasOwnProperty(id)) {
+    if (!this.providersMap.hasOwnProperty(id)) {
         if (DEBUG) {
-            console.error('[rempl][ws-transport] Observer `' + id + '` isn\'t registered on page');
+            console.error('[rempl][ws-transport] Provider `' + id + '` isn\'t registered on page');
         }
 
         return;
     }
 
-    var subscribers = this.observersMap[id].subscribers;
+    var subscribers = this.providersMap[id].subscribers;
     var args = Array.prototype.slice.call(arguments, 1);
 
     for (var i = 0; i < subscribers.length; i++) {
@@ -81,13 +82,13 @@ function Client(uri) {
     }
 
     this.clientInfo = {};
-    this.observers = [];
-    this.observersMap = {};
+    this.providers = [];
+    this.providersMap = {};
 
     this.sendInfoTimer = null;
     this.sendInfoTimerTTL = 150;
 
-    this.isOnline = new utils.Token(false);
+    this.isOnline = new Token(false);
     this.features = [];
 
     this.transport = socketIO.connect(uri)
@@ -129,7 +130,7 @@ Client.prototype.getInfo = function() {
         pid: process.pid,
         type: 'node',
         features: this.features.slice(),
-        observers: this.observers.slice()
+        providers: this.providers.slice()
     };
 };
 
@@ -143,7 +144,7 @@ Client.prototype.sendInfo = function() {
         this.clientInfo.title != newClientInfo.title ||
         this.clientInfo.pid != newClientInfo.pid ||
         String(this.clientInfo.features) != String(newClientInfo.features) ||
-        String(this.clientInfo.observers) != String(newClientInfo.observers)
+        String(this.clientInfo.providers) != String(newClientInfo.providers)
     ) {
         this.clientInfo = newClientInfo;
         this.send('devtool:client info', this.clientInfo);
@@ -175,16 +176,16 @@ Client.prototype.stopIdentify = function() {
 Client.prototype.createApi = function(id, getRemoteUI) {
     var subscribers = [];
 
-    if (this.observersMap.hasOwnProperty(id)) {
+    if (this.providersMap.hasOwnProperty(id)) {
         if (DEBUG) {
-            console.error('[rempl][ws-transport] Observer `' + id + '` already registered on page');
+            console.error('[rempl][ws-transport] Provider `' + id + '` is already registered on page');
         }
 
         return;
     }
 
-    this.observers.push(id);
-    this.observersMap[id] = {
+    this.providers.push(id);
+    this.providersMap[id] = {
         getRemoteUI: getRemoteUI,
         subscribers: subscribers
     };

@@ -6,7 +6,7 @@ var CLIENT_FIELDS = {
     pid: 0,
     type: '',
     features: [],
-    observers: []
+    providers: []
 };
 
 function Client(list, id, socket, data) {
@@ -54,7 +54,7 @@ Client.prototype = {
             location: this.location,
             online: Boolean(this.socket),
             features: this.features || [],
-            observers: this.observers || [],
+            providers: this.providers || [],
             num: this.num
         };
     },
@@ -71,7 +71,7 @@ Client.prototype = {
         if (this.socket) {
             this.socket = null;
             this.features = [];
-            this.observers = [];
+            this.providers = [];
             this.offlineTime = Date.now();
             this.list.notifyUpdates();
             this.ttlTimer = setTimeout(function() {
