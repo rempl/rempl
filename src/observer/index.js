@@ -1,4 +1,3 @@
-module.exports = {
-    browser: require('./browser/index.js'),
-    nodejs: require('./nodejs/index.js')
-};
+var isNode = typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]';
+
+module.exports = isNode ? require('./nodejs/index.js') : require('./browser/index.js');

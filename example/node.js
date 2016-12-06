@@ -1,5 +1,5 @@
 var fs = require('fs');
-var createRemplObserver = require('../src/observer/nodejs');
+var createRemplObserver = require('../src/observer');
 
 var foo = createRemplObserver('foo', function(settings, callback) {
     callback(null, 'script', fs.readFileSync(__dirname + '/node-ui-foo.js', 'utf-8'));
