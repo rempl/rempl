@@ -12,14 +12,14 @@
             console.log('provider->customer inited');
             api.send('provider->customer');
             api.subscribe(function() {
-                console.log('!!! provider recieve:', arguments);
+                console.log('!!! provider receive:', arguments);
             });
         });
         new DomEventTransport('customer', 'provider').onInit({}, function(api) {
             console.log('customer->provider inited');
             api.send('customer->provider');
             api.subscribe(function() {
-                console.log('!!! customer recieve:', arguments);
+                console.log('!!! customer receive:', arguments);
             });
         });
     </script>

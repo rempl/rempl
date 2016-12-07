@@ -34,7 +34,7 @@ function updateIndicator() {
     if (DEBUG) {
         debugIndicator.style.background = [
             'gray',   // once disconnected
-            'orange', // pageConnected but no a page
+            'orange', // pageConnected but without a page
             'green'   // all connected
         ][pageConnected + remplConnected];
     }
@@ -165,7 +165,7 @@ function sendToPage(type) {
 
 page.onMessage.addListener(function(packet) {
     if (DEBUG) {
-        console.log('[rempl.plugin] Recieve:', packet);
+        console.log('[rempl.plugin] Receive:', packet);
     }
 
     var args = packet.data;
@@ -236,7 +236,7 @@ listeners = {
     },
     'data': function() {
         if (DEBUG) {
-            console.log('[rempl.plugin] recieve data', arguments);
+            console.log('[rempl.plugin] receive data', arguments);
         }
 
         notify('data', arguments);

@@ -12,12 +12,12 @@ setInterval(function() {
 
 foo.define({
     test: function(msg) {
-        console.log('foo recieve "test"', msg);
+        console.log('foo receive "test"', msg);
     },
     reset: function(cb) {
         fooidx = 1;
         foo.send('foo/' + fooidx);
-        console.log('foo recieve "reset"', arguments);
+        console.log('foo receive "reset"', arguments);
         cb('reset done');
     }
 });

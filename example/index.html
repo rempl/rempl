@@ -62,7 +62,7 @@
             //     bar.send('bar' + (baridx++));
             // }, 2500);
             // bar.subscribe(function(){
-            //     console.log('bar recieve', arguments);
+            //     console.log('bar receive', arguments);
             // })
 
             (function() {
@@ -72,7 +72,7 @@
                 console.log('[!OK] in-page connected');
                 setTimeout(_=>fooCustomer.invoke('test', 'customer->provider'), 0);
                 fooCustomer.subscribe(function() {
-                    console.log('[!OK] customer recieve:', arguments);
+                    console.log('[!OK] customer receive:', arguments);
                 });
             })();
 
@@ -80,7 +80,7 @@
             //     console.log('[OK] in-page connected');
             //     setTimeout(_=>api.send({type:'call',method:'test', args:['customer->provider']}), 0);
             //     api.subscribe(function() {
-            //         console.log('[OK] customer recieve:', arguments);
+            //         console.log('[OK] customer receive:', arguments);
             //     });
             // });
         })();
