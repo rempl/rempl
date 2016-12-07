@@ -1,6 +1,6 @@
 [![NPM version](https://img.shields.io/npm/v/rempl.svg)](https://www.npmjs.com/package/rempl)
 
-The general idea behide `Rempl` in simplifying moderate remote access to JavaScript runtime. It provides transport between environments and set of hosts for UIs.
+The general idea behind `Rempl` is to simplify moderated remote access to JavaScript runtime. `Rempl` provides a transport between environments and a set of UI hosts.
 
 ##
 
@@ -40,7 +40,7 @@ myTool.define({
 
 ```js
 rempl.subscribe(function(data) {
-    console.log('Recieve data from provider:', data);
+    console.log('Receive data from provider:', data);
 
     rempl.invoke('pong');
 });
@@ -55,6 +55,6 @@ rempl.subscribe(function(data) {
 
 ---
 
-- `session` - remote inspector ui connections
-- `connected` - flag to represent connection state to remote end point (dev-server, browser's developer tools)
-- `features` - available host feature list
+- `session` - remote inspector for ui connections
+- `connected` - flag to represent a state of a connection to the remote end point (dev-server or Developer Tools in a browser)
+- `features` - list of available feature hosts

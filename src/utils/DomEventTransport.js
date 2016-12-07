@@ -125,7 +125,7 @@ function DomEventTransport(name, connectTo) {
         var data = e.detail;
 
         if (DEBUG) {
-            utils.log('[rempl][dom-event-transport] recieve from ' + this.connectTo, data.type, data);
+            utils.log('[rempl][dom-event-transport] receive from ' + this.connectTo, data.type, data);
         }
 
         switch (data.type) {
