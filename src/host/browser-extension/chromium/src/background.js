@@ -114,7 +114,7 @@ chrome.extension.onConnect.addListener(function(port) {
         connectPage(port);
     }
 
-    if (port.name == 'rempl:plugin') {
+    if (port.name == 'rempl:host') {
         connectPlugin(port);
     }
 });

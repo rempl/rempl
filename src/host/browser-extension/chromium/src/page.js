@@ -6,6 +6,7 @@ var sessionId = genUID();
 var pluginConnected = false;
 var remplConnected = false;
 var features = [];
+var providers = [];
 var debugIndicator = DEBUG ? createIndicator() : null;
 var outputChannelId;
 var inputChannelId = 'rempl-browser-extension-customer:' + genUID();
@@ -64,7 +65,7 @@ plugin.onMessage.addListener(function(packet) {
     switch (packet.type) {
         case 'connect':
             if (!pluginConnected && remplConnected) {
-                sendToPlugin('provider:connect', [sessionId, features]);
+                sendToPlugin('page:connect', [sessionId, features, providers]);
                 sendToPage({
                     type: 'connect'
                 });
@@ -113,7 +114,7 @@ document.addEventListener('rempl-provider:connect', function(e) {
     }
 
     if (pluginConnected) {
-        sendToPlugin('provider:connect', [sessionId, packet.features || features]);
+        sendToPlugin('page:connect', [sessionId, packet.features || features, packet.providers || providers]);
         sendToPage({
             type: 'connect'
         });
@@ -127,11 +128,24 @@ document.addEventListener(inputChannelId, function(e) {
         console.log('[rempl][content script] page -> plugin', packet);
     }
 
-    if (packet.type === 'features') {
-        features = packet.data[0];
-        if (!pluginConnected) {
-            return;
-        }
+    switch (packet.type) {
+        case 'features':
+            features = packet.data;
+
+            if (!pluginConnected) {
+                return;
+            }
+
+            break;
+
+        case 'providers':
+            providers = packet.data;
+
+            if (!pluginConnected) {
+                return;
+            }
+
+            break;
     }
 
     plugin.postMessage(packet);

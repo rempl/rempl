@@ -29,7 +29,8 @@ function handshake(channel) {
     emitEvent(channel.name + ':connect', {
         input: channel.inputChannelId,
         output: channel.outputChannelId,
-        features: channel.features.value
+        features: channel.features.value,
+        providers: channel.providers
     });
 }
 
@@ -82,6 +83,8 @@ function DomEventTransport(name, connectTo) {
 
     this.connected = new Token(true); // TODO: set false by default
     this.features = new Token([]);
+    this.endpoints = new Token([]);
+    this.endpointGetUI = {};
 
     this.initCallbacks = [];
     this.callbacks = {};
@@ -110,9 +113,16 @@ function DomEventTransport(name, connectTo) {
         // features.attach(function(features){
         //     emitEvent(outputChannelId, {
         //         type: 'features',
-        //         data: [features]
+        //         data: features
         //     });
         // });
+
+        this.endpoints.attach(function(providers) {
+            emitEvent(this.outputChannelId, {
+                type: 'providers',
+                data: providers
+            });
+        }, this);
 
         // invoke onInit callbacks
         this.inited = true;
@@ -159,11 +169,20 @@ function DomEventTransport(name, connectTo) {
                 });
                 break;
 
-            case 'getRemoteUI':
-                this.getRemoteUI(
-                    Array.prototype.slice.call(data.data)[0] || false,
-                    data.callback ? wrapCallback(this, data.callback) : Function
-                );
+            case 'getRemoteUI': // FIXME: should get UI for concrete endpoint
+                if (!Object.prototype.hasOwnProperty.call(this.endpointGetUI, data.endpoint)) {
+                    utils.warn('[rempl][dom-event-transport] recieve unknown endpoint for getRemoteUI(): ' + data.endpoint);
+                    wrapCallback(this, data.callback)('Wrong endpoint – ' + data.endpoint);
+                } else {
+                    this.endpointGetUI[data.endpoint](
+                        data.data[0] || false,
+                        data.callback ? wrapCallback(this, data.callback) : Function
+                    );
+                }
+                break;
+
+            case 'providers':
+                // nothing to do for now
                 break;
 
             default:
@@ -177,7 +196,9 @@ function DomEventTransport(name, connectTo) {
 DomEventTransport.prototype = {
     onInit: function(endpoint, callback) {
         if (this.inited) {
-            this.getRemoteUI = endpoint.getRemoteUI; // FIXME: temporary
+            this.endpoints.set(this.endpoints.value.concat(endpoint.id));
+            this.endpointGetUI[endpoint.id] = endpoint.getRemoteUI;
+
             callback({
                 // setFeatures: features.set.bind(features),
                 connected: this.connected,

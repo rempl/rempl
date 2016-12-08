@@ -8,13 +8,15 @@ var pageConnected = false;
 var remplConnected = false;
 var devtoolSession = null;
 var devtoolFeatures = [];
+var selectedProvider = null;
+var providers = [];
 var callbacks = {};
 var listeners;
 var subscribers = createSubscribers();
 var dropSandboxTimer;
 var sandbox;
 var page = chrome.extension.connect({
-    name: 'rempl:plugin'
+    name: 'rempl:host'
 });
 
 function $(id) {
@@ -27,9 +29,18 @@ function updateConnectionStateIndicator(id, state) {
 }
 
 function updateIndicator() {
+    if (!selectedProvider) {
+        selectedProvider = providers[0] || null;
+        if (selectedProvider) {
+            requestUI();
+        }
+    }
+
     updateConnectionStateIndicator('connection-to-page', pageConnected);
     updateConnectionStateIndicator('connection-to-rempl', remplConnected);
-    $('state-banner').style.display = pageConnected && remplConnected ? 'none' : 'block';
+    updateConnectionStateIndicator('connection-to-provider', selectedProvider !== null);
+
+    $('state-banner').style.display = pageConnected && remplConnected && selectedProvider ? 'none' : 'block';
 
     if (DEBUG) {
         debugIndicator.style.background = [
@@ -73,6 +84,23 @@ function scriptWrapper(fn) {
     var remoteAPI = typeof host[getRemoteAPI] === 'function' ? host[getRemoteAPI]() : null;
 
     fn.call(this, remoteAPI);
+}
+
+function requestUI() {
+    // send interface UI request
+    // TODO: reduce reloads
+    initSandbox();
+    sendToPage('getRemoteUI', function(err, type, content) {
+        if (err) {
+            return sandboxError('Fetch UI error: ' + err);
+        }
+
+        if (type !== 'script') {
+            return sandboxError('Unsupported UI content: ' + type);
+        }
+
+        initUI(content);
+    });
 }
 
 function initUI(script) {
@@ -152,12 +180,12 @@ function sendToPage(type) {
     }
 
     if (DEBUG) {
-        console.log('[rempl.plugin] send data', callback, args);
+        console.log('[rempl][devtools plugin] send data', callback, args);
     }
 
     page.postMessage({
         type: type,
-        endpoint: 'foo', // FIXME
+        endpoint: selectedProvider,
         data: args,
         callback: callback
     });
@@ -165,7 +193,7 @@ function sendToPage(type) {
 
 page.onMessage.addListener(function(packet) {
     if (DEBUG) {
-        console.log('[rempl.plugin] Receive:', packet);
+        console.log('[rempl][devtools plugin] Recieve:', packet);
     }
 
     var args = packet.data;
@@ -182,7 +210,7 @@ page.onMessage.addListener(function(packet) {
     if (callback) {
         args = args.concat(function() {
             if (DEBUG) {
-                console.log('[plugin] send callback', callback, args);
+                console.log('[rempl][devtools plugin] send callback', callback, args);
             }
 
             page.postMessage({
@@ -203,40 +231,38 @@ listeners = {
         pageConnected = true;
         updateIndicator();
     },
-    'provider:connect': function(sessionId, features) {
+    'page:connect': function(sessionId, features, providers_) {
         notify('session', [devtoolSession = sessionId]);
         notify('features', [devtoolFeatures = features]);
         notify('connection', [remplConnected = true]);
+        providers = providers_;
         updateIndicator();
-
-        // send interface UI request
-        // TODO: reduce reloads
-        initSandbox();
-        sendToPage('getRemoteUI', function(err, type, content) {
-            if (err) {
-                return sandboxError('Fetch UI error: ' + err);
-            }
-
-            if (type !== 'script') {
-                return sandboxError('Unsupported UI content: ' + type);
-            }
-
-            initUI(content);
-        });
     },
     'disconnect': function() {
         pageConnected = false;
         notify('features', [devtoolFeatures = []]);
         notify('connection', [remplConnected = false]);
+        providers = [];
+        selectedProvider = null;
         updateIndicator();
         dropSandboxTimer = setTimeout(dropSandbox, 3000);
     },
     'features': function(features) {
         notify('features', [devtoolFeatures = features]);
     },
+    'providers': function(providers_) {
+        providers = providers_;
+
+        if (selectedProvider && providers.indexOf(selectedProvider) === -1) {
+            selectedProvider = null;
+            dropSandbox();
+        }
+
+        updateIndicator();
+    },
     'data': function() {
         if (DEBUG) {
-            console.log('[rempl.plugin] receive data', arguments);
+            console.log('[rempl][devtools plugin] recieve data', arguments);
         }
 
         notify('data', arguments);
