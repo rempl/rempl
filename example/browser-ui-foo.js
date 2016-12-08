@@ -1,3 +1,6 @@
+/* eslint-env browser */
+/* global rempl */
+
 rempl.subscribe(function(data) {
     console.log('from observer:', data);
 });
@@ -28,7 +31,9 @@ setInterval(function() {
     });
 }, 2000);
 
-// ---- 
+// ----
 
-document.body.innerHTML = rempl.id + ' interface';
+document.body
+    .appendChild(document.createElement('div'))
+    .innerHTML = rempl.id + ' interface';
 console.log('remote tool `' + rempl.id + '` inited');
