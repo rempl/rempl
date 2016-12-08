@@ -4,9 +4,8 @@ The general idea behind `Rempl` is to simplify moderated remote access to JavaSc
 
 ##
 
-```
-[ runtime ] <--- [ provider (data) ] <--- rempl ---> [ customer (UI) ]
-```
+
+![\[ subject \] <--- \[ provider (data) \] <--- rempl ---> \[ customer (UI) \]](https://cloud.githubusercontent.com/assets/270491/21027773/6a737c16-bda3-11e6-82c5-f0c0ef8ba00e.png)
 
 ## API
 
