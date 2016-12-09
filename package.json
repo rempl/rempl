@@ -51,6 +51,7 @@
     "dist",
     "server",
     "src",
+    "!src/host/browser-extension",
     "HISTORY.md",
     "LICENSE",
     "README.md"
