@@ -11,12 +11,12 @@ var myTool = createRemplPublisher('myTool', function(settings, callback) {
 
 var counter = 1;
 setInterval(function() {
-    myTool.send(counter++);
+    myTool.publish(counter++);
 }, 500);
 
 myTool.define({
     reset: function() {
         counter = 1;
-        myTool.send(counter);
+        myTool.publish(counter);
     }
 });

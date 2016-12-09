@@ -26,7 +26,7 @@ var Namespace = function(name, publisher) {
 };
 
 Namespace.prototype = {
-    send: function(payload) {
+    publish: function(payload) {
         send(this.publisher, [{
             type: 'data',
             ns: this.name,

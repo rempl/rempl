@@ -18,7 +18,7 @@ var myTool = createRemplPublisher('myTool', function(settings, callback) {
 }, 'ws://localhost:8177');
 
 setInterval(function() {
-    myTool.send('ping');
+    myTool.publish('ping');
 });
 
 myTool.define({
@@ -28,12 +28,12 @@ myTool.define({
 });
 ```
 
-- send(data)
+- publish(data)
 - define(methods)
 - hasMethod(method)
 - invoke(method, ...args, callback)
 - ns(namespace)
-  - send/define/hasMethod/invoke
+  - publish/define/hasMethod/invoke
 
 ### Subscriber
 
