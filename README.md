@@ -2,8 +2,35 @@
 
 The general idea behind `Rempl` is to simplify moderated remote access to JavaScript runtime. `Rempl` provides a transport between environments and a set of UI hosts.
 
-##
+## Install
 
+```
+npm install rempl
+```
+
+## Usage
+
+### Browser
+
+```html
+<script src="node_modules/rempl/dist/rempl.js"></script>
+<script>
+    var myTool = rempl.createPublisher('myTool', function() { /* ... */ });
+
+    // ...
+</script>
+```
+
+### Node.js
+
+```js
+var rempl = require('rempl');
+var myTool = rempl.createPublisher('myTool', function() { /* ... */ });
+
+// ...
+```
+
+##
 
 ![\[ subject \] <--- \[ publisher (data) \] <--- rempl ---> \[ subscriber (UI) \]](https://cloud.githubusercontent.com/assets/270491/21027773/6a737c16-bda3-11e6-82c5-f0c0ef8ba00e.png)
 
