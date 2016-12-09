@@ -5,15 +5,15 @@ The general idea behind `Rempl` is to simplify moderated remote access to JavaSc
 ##
 
 
-![\[ subject \] <--- \[ provider (data) \] <--- rempl ---> \[ customer (UI) \]](https://cloud.githubusercontent.com/assets/270491/21027773/6a737c16-bda3-11e6-82c5-f0c0ef8ba00e.png)
+![\[ subject \] <--- \[ publisher (data) \] <--- rempl ---> \[ customer (UI) \]](https://cloud.githubusercontent.com/assets/270491/21027773/6a737c16-bda3-11e6-82c5-f0c0ef8ba00e.png)
 
 ## API
 
-### Provider
+### Publisher
 
 ```js
-var createRemplProvider = require('rempl');
-var myTool = createRemplProvider('myTool', function(settings, callback) {
+var createRemplPublisher = require('rempl');
+var myTool = createRemplPublisher('myTool', function(settings, callback) {
     callback(null, 'script', 'alert("myTool UI inited")');
 }, 'ws://localhost:8177');
 
@@ -39,7 +39,7 @@ myTool.define({
 
 ```js
 rempl.subscribe(function(data) {
-    console.log('Receive data from provider:', data);
+    console.log('Receive data from publisher:', data);
 
     rempl.invoke('pong');
 });

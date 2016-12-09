@@ -6,7 +6,7 @@ var sessionId = genUID();
 var pluginConnected = false;
 var remplConnected = false;
 var features = [];
-var providers = [];
+var publishers = [];
 var debugIndicator = DEBUG ? createIndicator() : null;
 var outputChannelId;
 var inputChannelId = 'rempl-browser-extension-customer:' + genUID();
@@ -65,7 +65,7 @@ plugin.onMessage.addListener(function(packet) {
     switch (packet.type) {
         case 'connect':
             if (!pluginConnected && remplConnected) {
-                sendToPlugin('page:connect', [sessionId, features, providers]);
+                sendToPlugin('page:connect', [sessionId, features, publishers]);
                 sendToPage({
                     type: 'connect'
                 });
@@ -99,7 +99,7 @@ plugin.onMessage.addListener(function(packet) {
 // connect to basis.js devpanel
 //
 
-document.addEventListener('rempl-provider:connect', function(e) {
+document.addEventListener('rempl-publisher:connect', function(e) {
     if (outputChannelId) {
         return;
     }
@@ -114,7 +114,7 @@ document.addEventListener('rempl-provider:connect', function(e) {
     }
 
     if (pluginConnected) {
-        sendToPlugin('page:connect', [sessionId, packet.features || features, packet.providers || providers]);
+        sendToPlugin('page:connect', [sessionId, packet.features || features, packet.publishers || publishers]);
         sendToPage({
             type: 'connect'
         });
@@ -138,8 +138,8 @@ document.addEventListener(inputChannelId, function(e) {
 
             break;
 
-        case 'providers':
-            providers = packet.data;
+        case 'publishers':
+            publishers = packet.data;
 
             if (!pluginConnected) {
                 return;

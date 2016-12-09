@@ -7,12 +7,12 @@ var onInit = function() {
 
 // run via utils.waitForGlobal to ensure GLOBAL_NAME is available
 utils.waitForGlobal(GLOBAL_NAME, function(remplWsServer) {
-    if (typeof remplWsServer.initRemoteProvider === 'function') {
-        onInit = function(provider, callback) {
-            callback(remplWsServer.initRemoteProvider(provider.id, provider.getRemoteUI));
+    if (typeof remplWsServer.initRemotePublisher === 'function') {
+        onInit = function(publisher, callback) {
+            callback(remplWsServer.initRemotePublisher(publisher.id, publisher.getRemoteUI));
         };
     } else {
-        utils.warn('[rempl][sync-server] initRemoteProvider method doesn\'t implemented in rempl server API');
+        utils.warn('[rempl][sync-server] initRemotePublisher method doesn\'t implemented in rempl server API');
         return;
     }
 

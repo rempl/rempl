@@ -5,57 +5,57 @@ var pluginSync = require('./sync-browser-extension.js');
 var serverSync = require('./sync-server.js');
 var noop = function() {};
 
-module.exports = function createSync(provider) {
+module.exports = function createSync(publisher) {
     // var remoteCustomers = new Token(0);
     // var devtools = new Token(false);
 
     // browser extension
-    pluginSync(provider, function(api) {
+    pluginSync(publisher, function(api) {
         // sync features list
-        // provider.features.link(api, api.setFeatures);
+        // publisher.features.link(api, api.setFeatures);
 
         // subscribe to data from devtools & context free send method
-        api.subscribe(provider.processInput);
+        api.subscribe(publisher.processInput);
         utils.link(api.connected, function(connected) {
             // devtools.set(connected);
-            provider.channels.browserExtension = connected ? api.send : noop;
+            publisher.channels.browserExtension = connected ? api.send : noop;
         });
 
         console.log('browser extension ready');
     });
 
     // in page
-    // inpageSync(provider, function(api) {
+    // inpageSync(publisher, function(api) {
     //     // sync features list
-    //     // provider.features.link(api, api.setFeatures);
+    //     // publisher.features.link(api, api.setFeatures);
 
     //     // subscribe to data from devtools & context free send method
-    //     api.subscribe(provider.processInput);
+    //     api.subscribe(publisher.processInput);
     //     utils.link(api.connected, function(connected) {
     //         // devtools.set(connected);
-    //         provider.channels.inPage = connected ? api.send : noop;
+    //         publisher.channels.inPage = connected ? api.send : noop;
     //     });
 
     //     console.log('in-page ready');
     // });
 
     // ws server
-    serverSync(provider, function(api) {
+    serverSync(publisher, function(api) {
         // sync features list
-        // provider.features.link(api, api.setFeatures);
+        // publisher.features.link(api, api.setFeatures);
 
         // subscribe to data from remote devtools & context free send method
-        api.subscribe(provider.processInput);
+        api.subscribe(publisher.processInput);
         utils.link(api.connected, function(connected) {
             // remoteCustomers.set(connected);
-            provider.channels.wsserver = connected ? api.send : noop;
+            publisher.channels.wsserver = connected ? api.send : noop;
         });
 
         console.log('ws server connection ready');
     });
 
-    // provider.remoteCustomers = remoteCustomers;   // TODO: remove
-    // provider.devtools = devtools;                 // TODO: remove
+    // publisher.remoteCustomers = remoteCustomers;   // TODO: remove
+    // publisher.devtools = devtools;                 // TODO: remove
 
-    return provider;
+    return publisher;
 };

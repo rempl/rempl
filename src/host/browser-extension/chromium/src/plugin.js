@@ -8,8 +8,8 @@ var pageConnected = false;
 var remplConnected = false;
 var devtoolSession = null;
 var devtoolFeatures = [];
-var selectedProvider = null;
-var providers = [];
+var selectedPublisher = null;
+var publishers = [];
 var callbacks = {};
 var listeners;
 var subscribers = createSubscribers();
@@ -29,18 +29,18 @@ function updateConnectionStateIndicator(id, state) {
 }
 
 function updateIndicator() {
-    if (!selectedProvider) {
-        selectedProvider = providers[0] || null;
-        if (selectedProvider) {
+    if (!selectedPublisher) {
+        selectedPublisher = publishers[0] || null;
+        if (selectedPublisher) {
             requestUI();
         }
     }
 
     updateConnectionStateIndicator('connection-to-page', pageConnected);
     updateConnectionStateIndicator('connection-to-rempl', remplConnected);
-    updateConnectionStateIndicator('connection-to-provider', selectedProvider !== null);
+    updateConnectionStateIndicator('connection-to-publisher', selectedPublisher !== null);
 
-    $('state-banner').style.display = pageConnected && remplConnected && selectedProvider ? 'none' : 'block';
+    $('state-banner').style.display = pageConnected && remplConnected && selectedPublisher ? 'none' : 'block';
 
     if (DEBUG) {
         debugIndicator.style.background = [
@@ -185,7 +185,7 @@ function sendToPage(type) {
 
     page.postMessage({
         type: type,
-        endpoint: selectedProvider,
+        endpoint: selectedPublisher,
         data: args,
         callback: callback
     });
@@ -231,30 +231,30 @@ listeners = {
         pageConnected = true;
         updateIndicator();
     },
-    'page:connect': function(sessionId, features, providers_) {
+    'page:connect': function(sessionId, features, publishers_) {
         notify('session', [devtoolSession = sessionId]);
         notify('features', [devtoolFeatures = features]);
         notify('connection', [remplConnected = true]);
-        providers = providers_;
+        publishers = publishers_;
         updateIndicator();
     },
     'disconnect': function() {
         pageConnected = false;
         notify('features', [devtoolFeatures = []]);
         notify('connection', [remplConnected = false]);
-        providers = [];
-        selectedProvider = null;
+        publishers = [];
+        selectedPublisher = null;
         updateIndicator();
         dropSandboxTimer = setTimeout(dropSandbox, 3000);
     },
     'features': function(features) {
         notify('features', [devtoolFeatures = features]);
     },
-    'providers': function(providers_) {
-        providers = providers_;
+    'publishers': function(publishers_) {
+        publishers = publishers_;
 
-        if (selectedProvider && providers.indexOf(selectedProvider) === -1) {
-            selectedProvider = null;
+        if (selectedPublisher && publishers.indexOf(selectedPublisher) === -1) {
+            selectedPublisher = null;
             dropSandbox();
         }
 

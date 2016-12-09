@@ -8,16 +8,16 @@
     Rempl event transport test
     <script src="../dist/rempl-dom-event-transport.js"></script>
     <script>
-        new DomEventTransport('provider', 'customer').onInit({}, function(api) {
-            console.log('provider->customer inited');
-            api.send('provider->customer');
+        new DomEventTransport('publisher', 'customer').onInit({}, function(api) {
+            console.log('publisher->customer inited');
+            api.send('publisher->customer');
             api.subscribe(function() {
-                console.log('!!! provider receive:', arguments);
+                console.log('!!! publisher receive:', arguments);
             });
         });
-        new DomEventTransport('customer', 'provider').onInit({}, function(api) {
-            console.log('customer->provider inited');
-            api.send('customer->provider');
+        new DomEventTransport('customer', 'publisher').onInit({}, function(api) {
+            console.log('customer->publisher inited');
+            api.send('customer->publisher');
             api.subscribe(function() {
                 console.log('!!! customer receive:', arguments);
             });

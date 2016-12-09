@@ -1,9 +1,9 @@
 var utils = require('../utils/index.js');
 var instances = Object.create(null);
 
-function send(provider, args) {
-    for (var channel in provider.channels) {
-        provider.channels[channel].apply(null, args);
+function send(publisher, args) {
+    for (var channel in publisher.channels) {
+        publisher.channels[channel].apply(null, args);
     }
 }
 
@@ -19,15 +19,15 @@ function invoke(method, args, callback) {
     this.methods[method].apply(null, args);
 }
 
-var Namespace = function(name, provider) {
+var Namespace = function(name, publisher) {
     this.name = name;
-    this.provider = provider;
+    this.publisher = publisher;
     this.methods = Object.create(null);
 };
 
 Namespace.prototype = {
     send: function(payload) {
-        send(this.provider, [{
+        send(this.publisher, [{
             type: 'data',
             ns: this.name,
             payload: payload
@@ -48,7 +48,7 @@ Namespace.prototype = {
             callback = args.pop();
         }
 
-        send(this.provider, [{
+        send(this.publisher, [{
             type: 'call',
             ns: this.name,
             method: method,
@@ -57,7 +57,7 @@ Namespace.prototype = {
     }
 };
 
-var Provider = function(id, getRemoteUI) {
+var Publisher = function(id, getRemoteUI) {
     this.id = id;
     this.getRemoteUI = getRemoteUI;
     this.namespaces = Object.create(null);
@@ -72,7 +72,7 @@ var Provider = function(id, getRemoteUI) {
     }
 };
 
-Provider.prototype = {
+Publisher.prototype = {
     ns: function getNamespace(name) {
         if (!this.namespaces[name]) {
             this.namespaces[name] = new Namespace(name, this);
@@ -86,7 +86,7 @@ Provider.prototype = {
         switch (packet.type) {
             case 'call':
                 if (!this.ns(ns).hasMethod(packet.method)) {
-                    return console.warn('[rempl][sync] Provider `' + this.name + '` has no remote command:', packet.method);
+                    return console.warn('[rempl][sync] Publisher `' + this.name + '` has no remote command:', packet.method);
                 }
 
                 invoke.call(this.ns(ns), packet.method, packet.args, callback);
@@ -98,16 +98,16 @@ Provider.prototype = {
     }
 };
 
-Provider.factory = function createProviderFactory(Provider) {
-    return function getProvider(id, getRemoteUI, endpoint) {
-        var provider = instances[id];
+Publisher.factory = function createPublisherFactory(Publisher) {
+    return function getPublisher(id, getRemoteUI, endpoint) {
+        var publisher = instances[id];
 
-        if (!provider) {
-            provider = instances[id] = new Provider(id, getRemoteUI, endpoint);
+        if (!publisher) {
+            publisher = instances[id] = new Publisher(id, getRemoteUI, endpoint);
         }
 
-        return provider;
+        return publisher;
     };
 };
 
-module.exports = Provider;
+module.exports = Publisher;

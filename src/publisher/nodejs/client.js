@@ -29,28 +29,28 @@ function onConnect() {
 }
 
 function onGetUI(id, settings, callback) {
-    if (!this.providersMap.hasOwnProperty(id)) {
+    if (!this.publishersMap.hasOwnProperty(id)) {
         if (DEBUG) {
-            console.error('[rempl][ws-transport] Provider `' + id + '` isn\'t registered on page');
+            console.error('[rempl][ws-transport] Publisher `' + id + '` isn\'t registered on page');
         }
 
-        callback('[rempl][ws-transport] Provider `' + id + '` isn\'t registered on page');
+        callback('[rempl][ws-transport] Publisher `' + id + '` isn\'t registered on page');
         return;
     }
 
-    this.providersMap[id].getRemoteUI.call(null, settings, callback);
+    this.publishersMap[id].getRemoteUI.call(null, settings, callback);
 }
 
 function onData(id) {
-    if (!this.providersMap.hasOwnProperty(id)) {
+    if (!this.publishersMap.hasOwnProperty(id)) {
         if (DEBUG) {
-            console.error('[rempl][ws-transport] Provider `' + id + '` isn\'t registered on page');
+            console.error('[rempl][ws-transport] Publisher `' + id + '` isn\'t registered on page');
         }
 
         return;
     }
 
-    var subscribers = this.providersMap[id].subscribers;
+    var subscribers = this.publishersMap[id].subscribers;
     var args = Array.prototype.slice.call(arguments, 1);
 
     for (var i = 0; i < subscribers.length; i++) {
@@ -82,8 +82,8 @@ function Client(uri) {
     }
 
     this.clientInfo = {};
-    this.providers = [];
-    this.providersMap = {};
+    this.publishers = [];
+    this.publishersMap = {};
 
     this.sendInfoTimer = null;
     this.sendInfoTimerTTL = 150;
@@ -130,7 +130,7 @@ Client.prototype.getInfo = function() {
         pid: process.pid,
         type: 'node',
         features: this.features.slice(),
-        providers: this.providers.slice()
+        publishers: this.publishers.slice()
     };
 };
 
@@ -144,7 +144,7 @@ Client.prototype.sendInfo = function() {
         this.clientInfo.title != newClientInfo.title ||
         this.clientInfo.pid != newClientInfo.pid ||
         String(this.clientInfo.features) != String(newClientInfo.features) ||
-        String(this.clientInfo.providers) != String(newClientInfo.providers)
+        String(this.clientInfo.publishers) != String(newClientInfo.publishers)
     ) {
         this.clientInfo = newClientInfo;
         this.send('devtool:client info', this.clientInfo);
@@ -176,16 +176,16 @@ Client.prototype.stopIdentify = function() {
 Client.prototype.createApi = function(id, getRemoteUI) {
     var subscribers = [];
 
-    if (this.providersMap.hasOwnProperty(id)) {
+    if (this.publishersMap.hasOwnProperty(id)) {
         if (DEBUG) {
-            console.error('[rempl][ws-transport] Provider `' + id + '` is already registered on page');
+            console.error('[rempl][ws-transport] Publisher `' + id + '` is already registered on page');
         }
 
         return;
     }
 
-    this.providers.push(id);
-    this.providersMap[id] = {
+    this.publishers.push(id);
+    this.publishersMap[id] = {
         getRemoteUI: getRemoteUI,
         subscribers: subscribers
     };

@@ -1,4 +1,4 @@
-.provider
+.publisher
 {
   display: inline-block;
   color: #666;
@@ -10,7 +10,7 @@
   border-radius: 3px;
   cursor: pointer;
 }
-.provider:hover
+.publisher:hover
 {
   color: #333;
   background: #F8F8F8;

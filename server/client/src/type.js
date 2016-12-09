@@ -1,5 +1,5 @@
 module.exports = {
-    Provider: require('./type/provider.js'),
+    Publisher: require('./type/publisher.js'),
     Client: require('./type/client.js')
 };
 

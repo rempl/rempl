@@ -7,12 +7,12 @@ var documentStyleOverflow;
 var sessionStorage = global.sessionStorage || {};
 var clientId = sessionStorage[STORAGE_KEY];
 var sessionId = genUID();
-var providersEl = document.createElement('div');
+var publishersEl = document.createElement('div');
 var overlayEl = createOverlay();
-var pickProviderCallback;
+var pickPublisherCallback;
 var features = [];
-var providers = [];
-var providersMap = {};
+var publishers = [];
+var publishersMap = {};
 var clientInfo = getSelfInfo();
 var sendInfoTimer;
 
@@ -43,7 +43,7 @@ function getSelfInfo() {
         title: global.top.document.title,
         location: String(location),
         features: features.slice(),
-        providers: providers.slice()
+        publishers: publishers.slice()
     };
 }
 
@@ -52,7 +52,7 @@ function sendInfo() {
     if (clientInfo.title != newClientInfo.title ||
             clientInfo.location != newClientInfo.location ||
             String(clientInfo.features) != String(newClientInfo.features) ||
-            String(clientInfo.providers) != String(newClientInfo.providers)) {
+            String(clientInfo.publishers) != String(newClientInfo.publishers)) {
         clientInfo = newClientInfo;
         socket.emit('devtool:client info', clientInfo);
     }
@@ -64,7 +64,7 @@ function createOverlay() {
         '<div style="position:fixed;overflow:auto;top:0;left:0;bottom:0;right:0;z-index:100000000;background:rgba(255,255,255,.9);text-align:center;line-height:1.5;font-family:Tahoma,Verdana,Arial,sans-serif">' +
              '<div style="font-size:100px;font-size:33vh">#</div>' +
         '</div>';
-    tmp.firstChild.appendChild(providersEl);
+    tmp.firstChild.appendChild(publishersEl);
     return tmp.firstChild;
 }
 
@@ -77,27 +77,27 @@ function createButton(name, callback) {
     temp.firstChild.firstChild.onclick = callback;
     return temp.firstChild;
 }
-function updateProviderList() {
-    if (providers.length && pickProviderCallback) {
-        providersEl.innerHTML = '<div style="margin-bottom: 10px">Pick an provider:</div>';
-        for (var i = 0; i < providers.length; i++) {
-            providersEl.appendChild(createButton(providers[i], pickProviderCallback.bind(null, providers[i])));
+function updatePublisherList() {
+    if (publishers.length && pickPublisherCallback) {
+        publishersEl.innerHTML = '<div style="margin-bottom: 10px">Pick an publisher:</div>';
+        for (var i = 0; i < publishers.length; i++) {
+            publishersEl.appendChild(createButton(publishers[i], pickPublisherCallback.bind(null, publishers[i])));
         }
     } else {
-        providersEl.innerHTML = '<div style="color:#AA0000">No rempl providers inited</div>';
+        publishersEl.innerHTML = '<div style="color:#AA0000">No rempl publishers inited</div>';
     }
 }
 
 function startIdentify(num, callback) {
     overlayEl.firstChild.innerHTML = num;
-    pickProviderCallback = callback;
-    updateProviderList();
+    pickPublisherCallback = callback;
+    updatePublisherList();
     documentStyleOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     document.body.appendChild(overlayEl);
 }
 function stopIdentify() {
-    pickProviderCallback = null;
+    pickPublisherCallback = null;
 
     if (overlayEl.parentNode !== document.body) {
         return;
@@ -129,21 +129,21 @@ socket
         api.remoteCustomers.set(count);
     })
     .on('devtool:get ui', function(id, settings, callback) {
-        if (!providersMap.hasOwnProperty(id)) {
-            console.error('[rempl][ws-transport] Provider `' + id + '` isn\'t registered on page');
-            callback('[rempl][ws-transport] Provider `' + id + '` isn\'t registered on page');
+        if (!publishersMap.hasOwnProperty(id)) {
+            console.error('[rempl][ws-transport] Publisher `' + id + '` isn\'t registered on page');
+            callback('[rempl][ws-transport] Publisher `' + id + '` isn\'t registered on page');
             return;
         }
 
-        providersMap[id].getRemoteUI.call(null, settings, callback);
+        publishersMap[id].getRemoteUI.call(null, settings, callback);
     })
     .on('devtool:to session', function(id) {
-        if (!providersMap.hasOwnProperty(id)) {
-            console.error('[rempl][ws-transport] Provider `' + id + '` isn\'t registered on page');
+        if (!publishersMap.hasOwnProperty(id)) {
+            console.error('[rempl][ws-transport] Publisher `' + id + '` isn\'t registered on page');
             return;
         }
 
-        var subscribers = providersMap[id].subscribers;
+        var subscribers = publishersMap[id].subscribers;
         var args = Array.prototype.slice.call(arguments, 1);
 
         for (var i = 0; i < subscribers.length; i++) {
@@ -168,24 +168,24 @@ api.getRemoteUrl = function() {
     return location.protocol + '//' + location.host + '/basisjs-tools/devtool/';
 };
 api.initRemoteDevtoolAPI = function() {
-    console.warn('initRemoteDevtoolAPI() method is deprecated, use initRemoteProvider() instead');
+    console.warn('initRemoteDevtoolAPI() method is deprecated, use initRemotePublisher() instead');
 };
 
-api.initRemoteProvider = function(id, getRemoteUI) {
+api.initRemotePublisher = function(id, getRemoteUI) {
     var subscribers = [];
 
-    if (providersMap.hasOwnProperty(id)) {
-        console.error('[rempl][ws-transport] Provider `' + id + '` already registered on page');
+    if (publishersMap.hasOwnProperty(id)) {
+        console.error('[rempl][ws-transport] Publisher `' + id + '` already registered on page');
         return;
     }
 
-    providers.push(id);
-    providersMap[id] = {
+    publishers.push(id);
+    publishersMap[id] = {
         getRemoteUI: getRemoteUI,
         subscribers: subscribers
     };
 
-    updateProviderList();
+    updatePublisherList();
     sendInfo();
 
     return {

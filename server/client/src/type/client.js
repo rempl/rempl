@@ -13,7 +13,7 @@ var Client = entity.createType('Client', {
     location: String,
     pid: Number,
     num: Number,
-    providers: entity.createSetType('Provider'),
+    publishers: entity.createSetType('Publisher'),
     features: {
         defValue: [],
         type: Array
@@ -21,7 +21,7 @@ var Client = entity.createType('Client', {
 });
 
 Client.extendReader(function(data) {
-    data.providers = data.providers.map(function(observer) {
+    data.publishers = data.publishers.map(function(observer) {
         return data.id + '/' + observer;
     });
 });

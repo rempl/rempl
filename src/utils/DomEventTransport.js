@@ -30,7 +30,7 @@ function handshake(channel) {
         input: channel.inputChannelId,
         output: channel.outputChannelId,
         features: channel.features.value,
-        providers: channel.providers
+        publishers: channel.publishers
     });
 }
 
@@ -117,10 +117,10 @@ function DomEventTransport(name, connectTo) {
         //     });
         // });
 
-        this.endpoints.attach(function(providers) {
+        this.endpoints.attach(function(publishers) {
             emitEvent(this.outputChannelId, {
-                type: 'providers',
-                data: providers
+                type: 'publishers',
+                data: publishers
             });
         }, this);
 
@@ -181,7 +181,7 @@ function DomEventTransport(name, connectTo) {
                 }
                 break;
 
-            case 'providers':
+            case 'publishers':
                 // nothing to do for now
                 break;
 

@@ -54,16 +54,16 @@
   color: rgba(128,128,0,.5);
 }
 
-.providers
+.publishers
 {
   line-height: 1;
   padding-bottom: 4px;
 }
-.providers:empty::before
+.publishers:empty::before
 {
   display: inline-block;
   padding: 4px 0;
   font-size: 11px;
-  content: 'No providers';
+  content: 'No publishers';
   color: #886666;
 }
