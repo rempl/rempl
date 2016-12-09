@@ -3,10 +3,9 @@
 
 var Value = require('basis.data').Value;
 var Node = require('basis.ui').Node;
+var Subscriber = require('rempl:subscriber/index.js');
 var transport = require('../transport.js');
 var sandboxApi = {};
-
-var Subscriber = require('rempl:subscriber/Subscriber.js');
 
 function scriptWrapper(fn) {
     var host = parent;

@@ -1,11 +1,11 @@
 // var Token = require('../../utils/index.js').Token;
 var utils = require('../../utils/index.js');
-var pluginSync = require('./sync-browser-extension.js');
-// var inpageSync = require('./sync-in-page.js');
-var serverSync = require('./sync-server.js');
 var noop = function() {};
 
 module.exports = function createSync(publisher) {
+    var pluginSync = require('./sync-browser-extension.js');
+    // var inpageSync = require('./sync-in-page.js');
+    var serverSync = require('./sync-server.js');
     // var remoteSubscribers = new Token(0);
     // var devtools = new Token(false);
 

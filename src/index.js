@@ -1,2 +1,5 @@
 // TODO: make it useful
-module.exports = {};
+module.exports = {
+    createPublisher: require('./publisher/index.js'),
+    createSubscriber: require('./subscriber/index.js')
+};

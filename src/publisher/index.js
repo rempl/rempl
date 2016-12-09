@@ -1,4 +1,6 @@
-var isNode = typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]';
+var isNode = require('../utils/index.js').isNode;
 
-module.exports = isNode ? require('./nodejs/index.js') : require('./browser/index.js');
-module.exports.createPublisher = module.exports;
+module.exports = isNode
+    ? require('./nodejs/index.js')
+    : require('./browser/index.js');
+

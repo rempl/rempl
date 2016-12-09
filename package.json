@@ -29,11 +29,10 @@
   "main": "src/index.js",
   "scripts": {
     "codestyle": "jscs src server && eslint src server",
-    "build:event": "browserify --standalone DomEventTransport src/utils/DomEventTransport.js > dist/rempl-dom-event-transport.js",
-    "build:publisher": "browserify --standalone rempl src/publisher/index.js | uglifyjs --compress --mangle -o dist/rempl-publisher.js",
-    "build:subscriber": "browserify --standalone RemplSubscriber src/subscriber/subscriber.js > src/host/browser-extension/chromium/src/subscriber.js",
-    "build:ui": "node node_modules/basisjs-tools-build/bin/build -c server/client/basis.config",
-    "prepublish": "npm run build:ui"
+    "build": "npm run build:rempl && npm run build:server-assets",
+    "build:rempl": "browserify --standalone rempl src/index.js | uglifyjs --compress --mangle -o dist/rempl.js && cp dist/rempl.js src/host/browser-extension/chromium/src/",
+    "build:server-assets": "node node_modules/basisjs-tools-build/bin/build -c server/client/basis.config",
+    "prepublish": "npm run build"
   },
   "devDependencies": {
     "basisjs": "~1.10.0",

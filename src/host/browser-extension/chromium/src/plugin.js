@@ -1,5 +1,5 @@
 /* eslint-env browser */
-/* global chrome, slice, genUID, createIndicator, RemplSubscriber */
+/* global chrome, slice, genUID, createIndicator, rempl */
 
 var DEBUG = false;
 var inspectedWindow = chrome.devtools.inspectedWindow;
@@ -105,7 +105,7 @@ function requestUI() {
 
 function initUI(script) {
     var apiId = genUID();
-    var subscriber = new RemplSubscriber('foo');
+    var subscriber = rempl.createSubscriber(selectedPublisher);
 
     subscribers = createSubscribers();
     subscribers.data.push(subscriber.processInput);

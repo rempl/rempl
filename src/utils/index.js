@@ -2,6 +2,7 @@
 
 var global = new Function('return this')();
 var document = global.document;
+var isNode = typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]';
 
 function complete(dest, source) {
     for (var key in source) {
@@ -168,6 +169,7 @@ var consoleMethods = (function() {
 })();
 
 module.exports = {
+    isNode: isNode,
     complete: complete,
     slice: slice,
     genUID: genUID,

@@ -12,8 +12,8 @@ The general idea behind `Rempl` is to simplify moderated remote access to JavaSc
 ### Publisher
 
 ```js
-var createRemplPublisher = require('rempl');
-var myTool = createRemplPublisher('myTool', function(settings, callback) {
+var rempl = require('rempl');
+var myTool = rempl.createPublisher('myTool', function(settings, callback) {
     callback(null, 'script', 'alert("myTool UI inited")');
 }, 'ws://localhost:8177');
 
