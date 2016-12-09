@@ -30,7 +30,7 @@ List.prototype = {
         this.connections.forEach(fn, context);
     },
     notifyUpdates: function() {
-        // TODO: notify customers
+        // TODO: notify subscribers
         this.server.emit('devtool:clientList', this.getList());
     },
     broadcast: function() {

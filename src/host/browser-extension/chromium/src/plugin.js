@@ -1,5 +1,5 @@
 /* eslint-env browser */
-/* global chrome, slice, genUID, createIndicator, RemplCustomer */
+/* global chrome, slice, genUID, createIndicator, RemplSubscriber */
 
 var DEBUG = false;
 var inspectedWindow = chrome.devtools.inspectedWindow;
@@ -105,16 +105,16 @@ function requestUI() {
 
 function initUI(script) {
     var apiId = genUID();
-    var customer = new RemplCustomer('foo');
+    var subscriber = new RemplSubscriber('foo');
 
     subscribers = createSubscribers();
-    subscribers.data.push(customer.processInput);
-    customer.channels.plugin = function() {
+    subscribers.data.push(subscriber.processInput);
+    subscriber.channels.plugin = function() {
         sendToPage.apply(null, ['data'].concat(slice(arguments)));
     };
 
     window[apiId] = function createAPI() {
-        return customer;
+        return subscriber;
         console.log(devtoolSession, devtoolFeatures); // FIXME: added to avoid no-unused-vars warnings
         // return {
         //     send: function() {

@@ -31,7 +31,7 @@
     "codestyle": "jscs src server && eslint src server",
     "build:event": "browserify --standalone DomEventTransport src/utils/DomEventTransport.js > dist/rempl-dom-event-transport.js",
     "build:publisher": "browserify --standalone rempl src/publisher/index.js | uglifyjs --compress --mangle -o dist/rempl-publisher.js",
-    "build:customer": "browserify --standalone RemplCustomer src/customer/customer.js > src/host/browser-extension/chromium/src/customer.js",
+    "build:subscriber": "browserify --standalone RemplSubscriber src/subscriber/subscriber.js > src/host/browser-extension/chromium/src/subscriber.js",
     "build:ui": "node node_modules/basisjs-tools-build/bin/build -c server/client/basis.config",
     "prepublish": "npm run build:ui"
   },

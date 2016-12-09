@@ -1,9 +1,9 @@
 var utils = require('../utils/index.js');
 var instances = Object.create(null);
 
-function send(customer, args) {
-    for (var channel in customer.channels) {
-        customer.channels[channel].apply(null, args);
+function send(subscriber, args) {
+    for (var channel in subscriber.channels) {
+        subscriber.channels[channel].apply(null, args);
     }
 }
 
@@ -19,9 +19,9 @@ function invoke(method, args, callback) {
     this.methods[method].apply(null, args);
 }
 
-var Namespace = function(name, customer) {
+var Namespace = function(name, subscriber) {
     this.name = name;
-    this.customer = customer;
+    this.subscriber = subscriber;
     this.methods = Object.create(null);
     this.subscribers = [];
 };
@@ -45,7 +45,7 @@ Namespace.prototype = {
             callback = args.pop();
         }
 
-        send(this.customer, [{
+        send(this.subscriber, [{
             type: 'call',
             ns: this.name,
             method: method,
@@ -54,7 +54,7 @@ Namespace.prototype = {
     }
 };
 
-var Customer = function(id) {
+var Subscriber = function(id) {
     this.id = id;
     this.namespaces = Object.create(null);
     this.channels = Object.create(null);
@@ -68,7 +68,7 @@ var Customer = function(id) {
     }
 };
 
-Customer.prototype = {
+Subscriber.prototype = {
     ns: function getNamespace(name) {
         if (!this.namespaces[name]) {
             this.namespaces[name] = new Namespace(name, this);
@@ -82,7 +82,7 @@ Customer.prototype = {
         switch (packet.type) {
             case 'call':
                 if (!this.ns(ns).hasMethod(packet.method)) {
-                    return console.warn('[rempl][sync] Customer `' + this.id + '` has no remote command `' + packet.method + '` in namespace `' + ns + '`');
+                    return console.warn('[rempl][sync] Subscriber `' + this.id + '` has no remote command `' + packet.method + '` in namespace `' + ns + '`');
                 }
 
                 invoke.call(this.ns(ns), packet.method, packet.args, callback);
@@ -100,16 +100,16 @@ Customer.prototype = {
     }
 };
 
-Customer.factory = function createCustomerFactory(Customer) {
-    return function getCustomer(id, getRemoteUI, endpoint) {
-        var customer = instances[id];
+Subscriber.factory = function createSubscriberFactory(Subscriber) {
+    return function getSubscriber(id, getRemoteUI, endpoint) {
+        var subscriber = instances[id];
 
-        if (!customer) {
-            customer = instances[id] = new Customer(id, getRemoteUI, endpoint);
+        if (!subscriber) {
+            subscriber = instances[id] = new Subscriber(id, getRemoteUI, endpoint);
         }
 
-        return customer;
+        return subscriber;
     };
 };
 
-module.exports = Customer;
+module.exports = Subscriber;

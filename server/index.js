@@ -43,9 +43,9 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
                     // var channel = socket.to(client.room);
                     // channel.emit.apply(channel, packet('devtool:session data', arguments));
                     var args = Array.prototype.slice.call(arguments, 1);
-                    client.customers.forEach(function(customer) {
-                        if (customer.publisherId === publisherId) {
-                            customer.emit.apply(customer, packet('devtool:session data', args));
+                    client.subscribers.forEach(function(subscriber) {
+                        if (subscriber.publisherId === publisherId) {
+                            subscriber.emit.apply(subscriber, packet('devtool:session data', args));
                         }
                     });
                 })
@@ -56,7 +56,7 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
             // connected and inited
             connectCallback({
                 clientId: clientId,
-                customers: client.customers.length,
+                subscribers: client.subscribers.length,
                 num: client.num
             });
 
@@ -66,9 +66,9 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
         });
 
         //
-        // customer
+        // subscriber
         //
-        socket.on('devtool:customer connect', function(connectCallback) {
+        socket.on('devtool:subscriber connect', function(connectCallback) {
             this.on('devtool:pick client', function(pickCallback) {
                 function startIdentify(client) {
                     client.emitIfPossible('devtool:identify', client.num, function(publisherId) {
@@ -125,7 +125,7 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
                 return callback('[devtool:join session] Client (' + clientId + ') not found or disconnected');
             }
 
-            client.addCustomer(this);
+            client.addSubscriber(this);
             this.publisherId = publisherId;
             this
                 .join(client.room)
@@ -133,7 +133,7 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
                     client.emit.apply(client, packet('devtool:to session', packet(publisherId, arguments)));
                 })
                 .on('disconnect', function() {
-                    client.removeCustomer(this);
+                    client.removeSubscriber(this);
                 }.bind(this));
         });
     });

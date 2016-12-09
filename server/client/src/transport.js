@@ -14,7 +14,7 @@ function syncClientList(data) {
 // connection events
 socket
     .on('connect', function() {
-        socket.emit('devtool:customer connect', function(data) {
+        socket.emit('devtool:subscriber connect', function(data) {
             syncClientList(data.clients);
             online.set(true);
         });

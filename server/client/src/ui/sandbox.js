@@ -6,7 +6,7 @@ var Node = require('basis.ui').Node;
 var transport = require('../transport.js');
 var sandboxApi = {};
 
-var Customer = require('rempl:customer/customer.js');
+var Subscriber = require('rempl:subscriber/subscriber.js');
 
 function scriptWrapper(fn) {
     var host = parent;
@@ -23,7 +23,7 @@ function createSandboxAPI(client) {
         }
     }
 
-    var customer = new Customer(client.data.name);
+    var subscriber = new Subscriber(client.data.name);
     var apiId = this.apiId;
     var sessionId = Value.query(client, 'data.sessionId');
     var online = Value.query(client, 'data.online');
@@ -73,12 +73,12 @@ function createSandboxAPI(client) {
         notify('features', [features]);
     });
 
-    subscribers.data.push(customer.processInput);
-    customer.channels.sandbox = function() {
+    subscribers.data.push(subscriber.processInput);
+    subscriber.channels.sandbox = function() {
         socket.emit.apply(socket, ['devtool:to session'].concat(Array.prototype.slice.call(arguments)));
     };
 
-    return customer;
+    return subscriber;
 
     return {
         // send: function() {

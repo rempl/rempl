@@ -15,7 +15,7 @@ function Client(list, id, socket, data) {
     this.num = 0;
     this.room = 'session-' + id;
     this.socket = socket;
-    this.customers = [];
+    this.subscribers = [];
 
     for (var key in CLIENT_FIELDS) {
         this[key] = Object.prototype.hasOwnProperty.call(data, key)
@@ -82,15 +82,15 @@ Client.prototype = {
         }
     },
 
-    addCustomer: function(customer) {
-        this.customers.push(customer);
-        this.emitIfPossible('devtool:customer count changed', this.customers.length);
+    addCustomer: function(subscriber) {
+        this.subscribers.push(subscriber);
+        this.emitIfPossible('devtool:subscriber count changed', this.subscribers.length);
     },
-    removeCustomer: function(customer) {
-        var index = this.customers.indexOf(customer);
+    removeCustomer: function(subscriber) {
+        var index = this.subscribers.indexOf(subscriber);
         if (index !== -1) {
-            this.customers.splice(index, 1);
-            this.emitIfPossible('devtool:customer count changed', this.customers.length);
+            this.subscribers.splice(index, 1);
+            this.emitIfPossible('devtool:subscriber count changed', this.subscribers.length);
         }
     },
 

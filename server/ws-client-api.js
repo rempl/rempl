@@ -115,7 +115,7 @@ function startSyncClient() {
             clientId = sessionStorage[STORAGE_KEY] = data.clientId;
         }
 
-        api.remoteCustomers.set(data.customers || 0);
+        api.remoteSubscribers.set(data.subscribers || 0);
 
         sendInfoTimer = setInterval(sendInfo, 150);
     });
@@ -125,8 +125,8 @@ function startSyncClient() {
 socket
     .on('devtool:identify', startIdentify)
     .on('devtool:stop identify', stopIdentify)
-    .on('devtool:customer count changed', function(count) {
-        api.remoteCustomers.set(count);
+    .on('devtool:subscriber count changed', function(count) {
+        api.remoteSubscribers.set(count);
     })
     .on('devtool:get ui', function(id, settings, callback) {
         if (!publishersMap.hasOwnProperty(id)) {
@@ -152,7 +152,7 @@ socket
     })
     .on('connect', startSyncClient)
     .on('disconnect', function() {
-        api.remoteCustomers.set(0);
+        api.remoteSubscribers.set(0);
         clearInterval(sendInfoTimer);
         stopIdentify();
     });
@@ -162,8 +162,8 @@ if (socket.connected) {
 }
 
 // extend api
-api.remoteCustomers = new Token(0);
-api.remoteInspectors = api.remoteCustomers; // deprecated
+api.remoteSubscribers = new Token(0);
+api.remoteInspectors = api.remoteSubscribers; // deprecated
 api.getRemoteUrl = function() {
     return location.protocol + '//' + location.host + '/basisjs-tools/devtool/';
 };
@@ -189,7 +189,7 @@ api.initRemotePublisher = function(id, getRemoteUI) {
     sendInfo();
 
     return {
-        connected: api.remoteCustomers,
+        connected: api.remoteSubscribers,
         getRemoteUrl: function() {
             return clientId
                 ? api.getRemoteUrl() + '#' + clientId + '/' + id

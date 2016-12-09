@@ -6,7 +6,7 @@ var serverSync = require('./sync-server.js');
 var noop = function() {};
 
 module.exports = function createSync(publisher) {
-    // var remoteCustomers = new Token(0);
+    // var remoteSubscribers = new Token(0);
     // var devtools = new Token(false);
 
     // browser extension
@@ -47,14 +47,14 @@ module.exports = function createSync(publisher) {
         // subscribe to data from remote devtools & context free send method
         api.subscribe(publisher.processInput);
         utils.link(api.connected, function(connected) {
-            // remoteCustomers.set(connected);
+            // remoteSubscribers.set(connected);
             publisher.channels.wsserver = connected ? api.send : noop;
         });
 
         console.log('ws server connection ready');
     });
 
-    // publisher.remoteCustomers = remoteCustomers;   // TODO: remove
+    // publisher.remoteSubscribers = remoteSubscribers;   // TODO: remove
     // publisher.devtools = devtools;                 // TODO: remove
 
     return publisher;

@@ -5,7 +5,7 @@ The general idea behind `Rempl` is to simplify moderated remote access to JavaSc
 ##
 
 
-![\[ subject \] <--- \[ publisher (data) \] <--- rempl ---> \[ customer (UI) \]](https://cloud.githubusercontent.com/assets/270491/21027773/6a737c16-bda3-11e6-82c5-f0c0ef8ba00e.png)
+![\[ subject \] <--- \[ publisher (data) \] <--- rempl ---> \[ subscriber (UI) \]](https://cloud.githubusercontent.com/assets/270491/21027773/6a737c16-bda3-11e6-82c5-f0c0ef8ba00e.png)
 
 ## API
 
@@ -23,7 +23,7 @@ setInterval(function() {
 
 myTool.define({
     pong: function() {
-        console.log('Remote customer invoke `pong`');
+        console.log('Remote subscriber invoke `pong`');
     }
 });
 ```
@@ -35,7 +35,7 @@ myTool.define({
 - ns(namespace)
   - send/define/hasMethod/invoke
 
-### Customer
+### Subscriber
 
 ```js
 rempl.subscribe(function(data) {
