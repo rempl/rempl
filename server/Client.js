@@ -82,11 +82,11 @@ Client.prototype = {
         }
     },
 
-    addCustomer: function(subscriber) {
+    addSubscriber: function(subscriber) {
         this.subscribers.push(subscriber);
         this.emitIfPossible('devtool:subscriber count changed', this.subscribers.length);
     },
-    removeCustomer: function(subscriber) {
+    removeSubscriber: function(subscriber) {
         var index = this.subscribers.indexOf(subscriber);
         if (index !== -1) {
             this.subscribers.splice(index, 1);

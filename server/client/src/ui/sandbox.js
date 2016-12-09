@@ -6,7 +6,7 @@ var Node = require('basis.ui').Node;
 var transport = require('../transport.js');
 var sandboxApi = {};
 
-var Subscriber = require('rempl:subscriber/subscriber.js');
+var Subscriber = require('rempl:subscriber/Subscriber.js');
 
 function scriptWrapper(fn) {
     var host = parent;

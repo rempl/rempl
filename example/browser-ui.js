@@ -5,5 +5,5 @@ var output = document.body
     .appendChild(document.createElement('div'));
 
 rempl.subscribe(function(data) {
-    output.innerHTML = new Date(data).toTimeString() + 'hello Avito';
+    output.innerHTML = new Date(data).toTimeString();
 });
