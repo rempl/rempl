@@ -1,12 +1,13 @@
 {
   "name": "rempl",
-  "version": "1.0.0-alpha1",
-  "description": "The platform for simplifying moderate remote access to JavaScript runtime via custom UI",
+  "version": "1.0.0-alpha2",
+  "description": "Рlatform for moderated remote access to JavaScript runtime via custom UI",
   "main": "index.js",
   "author": "Roman Dvornov",
   "contributors": [
     "Roman Dvornov <rdvornov@gmail.com>",
-    "Sergey Melyukov <s.melukov@gmail.com>"
+    "Sergey Melyukov <s.melukov@gmail.com>",
+    "Anastasia Goryacheva <a.e.goryacheva@gmail.com>"
   ],
   "license": "MIT",
   "repository": "rempl/rempl",
