@@ -14,7 +14,16 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
     var onClientConnectMode = null;
     var lastNum = 0;
 
-    wsServer.addClientApi(path.join(__dirname, 'ws-client-api.js'));
+    wsServer.addClientApi(path.join(__dirname, 'ws-client-api.js'), function(content) {
+        if (options.remplEndpoint) {
+            return (
+                'var socket = io.connect("' + options.remplEndpoint + '", { transports: ["websocket", "polling"] })' +
+                content
+            );
+        } else {
+            return content;
+        }
+    });
 
     wsServer.on('connect', function(socket) {
         //
@@ -138,13 +147,18 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
         });
     });
 
-    if (options.dev || !fs.existsSync(path.join(__dirname, 'client/dist/index.html'))) {
-        console.warn('Init ' + chalk.yellow('dev version') + ' of ' + chalk.yellow('devtool'));
+    if (options.remplStandalone) {
+        console.log('Init ' + chalk.green('standalone version') + ' of ' + chalk.yellow('rempl'));
+    } else if (options.dev || !fs.existsSync(path.join(__dirname, 'client/dist/index.html'))) {
+        console.warn('Init ' + chalk.yellow('dev version') + ' of ' + chalk.yellow('rempl'));
         httpServer.addSymlink('/basisjs-tools/basis', path.dirname(require.resolve('basisjs')));
         httpServer.addSymlink('/basisjs-tools/rempl', path.resolve(__dirname, '../src/'));
         httpServer.addSymlink('/basisjs-tools/devtool', path.join(__dirname, 'client/src'));
     } else {
-        console.log('Init ' + chalk.green('build version') + ' of ' + chalk.yellow('devtool'), true);
-        httpServer.addSymlink('/basisjs-tools/devtool', path.join(__dirname, 'client/dist'));
+        if (options.verbose) {
+            console.log('Init ' + chalk.green('build version') + ' of ' + chalk.yellow('rempl'));
+        }
+
+        httpServer.addSymlink('/basisjs-tools/rempl', path.join(__dirname, 'client/dist'));
     }
 };
