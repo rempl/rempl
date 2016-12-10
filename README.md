@@ -30,9 +30,57 @@ var myTool = rempl.createPublisher('myTool', function() { /* ... */ });
 // ...
 ```
 
-##
+## Overview
 
 ![\[ subject \] <--- \[ publisher (data) \] <--- rempl ---> \[ subscriber (UI) \]](https://cloud.githubusercontent.com/assets/270491/21027773/6a737c16-bda3-11e6-82c5-f0c0ef8ba00e.png)
+
+- `Subject` – something to be inspected, i.e. app, page, environment etc
+- `Publisher` – monotors a `subject`, collect a data and publish it for `subscribers`
+- `Subscriber` – consumer of `publisher`'s data, provide an UI for recieved data
+- `Transport` – channels and protocols between `publisher` and `subscriber`; WebSocket (socket.io) or DOM Event-based communication may to be used between endpoints
+- `Host` – integration to integrates in some environment (app), allows to choose a publisher and creates a `sandbox` for its `subscriber`; usually it's a plugin for something like browsers, editors etc
+- `Sandbox` – creates a `subscriber`, request an UI and activate it when recieved
+
+Publisher and subscriber are two parts of single app (tool). Transports, hosts and sandboxes are parts of `rempl`.
+
+### Server
+
+For most cases you need a WebSocket transport. In this case a WS server required. Rempl provides 
+
+- [rempl-cli](https://github.com/rempl/rempl-cli) – command line app to launch a server
+- [menubar-server](https://github.com/rempl/menubar-server) – an Electron app that launchs an `rempl` server instance and provide easy control over it; allows forget about command line
+
+### Host
+
+`Rempl` server provides web interface to monitor list of publishers and to launch selected publisher's UI in sandbox. Just open server's origin (by default `http://localhost:8177`) in your browser.
+
+- Browsers
+  - [Google Chrome](https://chrome.google.com/webstore/detail/rempl/hcikjlholajopgbgfmmlbmifdfbkijdj) [[sources](https://github.com/rempl/rempl/src/host/browser-extension/chromium)]
+  - Firefox (planned)
+- Editors
+  - [Atom](https://atom.io/packages/rempl) [[sources](https://github.com/rempl/host-atom)]
+  - VS Code (planned)
+
+### Publisher environment
+
+Publisher doesn't depends hard on environment. It's mostly limited by transports allowed to process. Currently `rempl` publisher works well in:
+
+- Browser's regular page
+- Node.js process
+
+Planned (not tested yet):
+
+- WebWorker
+- ServiceWorker
+
+> Publisher can theoretically be created in non-JavaScript environment. In this case [publisher](https://github.com/rempl/rempl/blob/master/src/publisher/Publisher.js) interface should be implemented and socket.io client in language you use.
+
+### Distribution of UI
+
+For tools based on `rempl`, a publisher is source of UI. When new sandbox for subscriber is created it send a request to publisher to provide an UI. Publisher should provide UI in some way:
+
+- `script` – JavaScript bundle that includes everything need to build an UI (i.e. JavaScript, CSS, templates etc)
+- `url` (in progress) – url of page that contains publishers UI
 
 ## API
 
