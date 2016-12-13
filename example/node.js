@@ -1,11 +1,5 @@
-var fs = require('fs');
 var rempl = require('../src');
-
-var myTool = rempl.createPublisher('myTool', function(settings, callback) {
-    callback(null, 'script',
-        fs.readFileSync(__dirname + '/node-ui.js', 'utf-8')
-    );
-});
+var myTool = rempl.createPublisher('myTool', rempl.getUiFromFile(__dirname + '/node-ui.js'));
 
 // ----
 
