@@ -14,7 +14,7 @@ function onConnect() {
     this.isOnline.set(true);
     this.clientInfo = this.getInfo();
 
-    this.send('devtool:client connect', this.clientInfo, function(data) {
+    this.send('rempl:client connect', this.clientInfo, function(data) {
         if ('clientId' in data) {
             this.clientId = data.clientId;
             fs.writeFileSync(CLIENT_ID_FILENAME, this.clientId);
@@ -96,11 +96,11 @@ function Client(uri) {
         .on('disconnect', onDisconnect.bind(this))
         .on('features', this.setFeatures.bind(this))
 
-        .on('devtool:get ui', onGetUI.bind(this))
-        .on('devtool:to session', onData.bind(this))
+        .on('rempl:get ui', onGetUI.bind(this))
+        .on('rempl:to session', onData.bind(this))
 
-        .on('devtool:identify', this.startIdentify.bind(this))
-        .on('devtool:stop identify', this.stopIdentify.bind(this));
+        .on('rempl:identify', this.startIdentify.bind(this))
+        .on('rempl:stop identify', this.stopIdentify.bind(this));
 }
 
 Client.create = function(endpoint) {
@@ -147,7 +147,7 @@ Client.prototype.sendInfo = function() {
         String(this.clientInfo.publishers) != String(newClientInfo.publishers)
     ) {
         this.clientInfo = newClientInfo;
-        this.send('devtool:client info', this.clientInfo);
+        this.send('rempl:client info', this.clientInfo);
     }
 };
 
@@ -198,7 +198,7 @@ Client.prototype.createApi = function(id, getRemoteUI) {
             this.setFeatures(list);
         }.bind(this),
         send: function() {
-            this.transport.emit.apply(this.transport, ['devtool:client data', id].concat(
+            this.transport.emit.apply(this.transport, ['rempl:client data', id].concat(
                 Array.prototype.slice.call(arguments)
             ));
         }.bind(this),

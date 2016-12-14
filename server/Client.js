@@ -35,7 +35,6 @@ Client.prototype = {
     socket: null,
     offlineTime: null,
     ttlTimer: null,
-    devtoolCount: 0,
 
     update: function(data) {
         for (var key in data) {
@@ -84,13 +83,13 @@ Client.prototype = {
 
     addSubscriber: function(subscriber) {
         this.subscribers.push(subscriber);
-        this.emitIfPossible('devtool:subscriber count changed', this.subscribers.length);
+        this.emitIfPossible('rempl:subscriber count changed', this.subscribers.length);
     },
     removeSubscriber: function(subscriber) {
         var index = this.subscribers.indexOf(subscriber);
         if (index !== -1) {
             this.subscribers.splice(index, 1);
-            this.emitIfPossible('devtool:subscriber count changed', this.subscribers.length);
+            this.emitIfPossible('rempl:subscriber count changed', this.subscribers.length);
         }
     },
 

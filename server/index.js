@@ -29,7 +29,7 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
         //
         // client
         //
-        socket.on('devtool:client connect', function(data, connectCallback) {
+        socket.on('rempl:client connect', function(data, connectCallback) {
             data = data || {};
 
             var clientId = data.clientId || genUID();
@@ -44,17 +44,17 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
             }
 
             this
-                .on('devtool:client info', function(data) {
+                .on('rempl:client info', function(data) {
                     client.update(data);
                     clients.notifyUpdates();
                 })
-                .on('devtool:client data', function(publisherId) {
+                .on('rempl:client data', function(publisherId) {
                     // var channel = socket.to(client.room);
-                    // channel.emit.apply(channel, packet('devtool:session data', arguments));
+                    // channel.emit.apply(channel, packet('rempl:session data', arguments));
                     var args = Array.prototype.slice.call(arguments, 1);
                     client.subscribers.forEach(function(subscriber) {
                         if (subscriber.publisherId === publisherId) {
-                            subscriber.emit.apply(subscriber, packet('devtool:session data', args));
+                            subscriber.emit.apply(subscriber, packet('rempl:session data', args));
                         }
                     });
                 })
@@ -77,10 +77,10 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
         //
         // subscriber
         //
-        socket.on('devtool:subscriber connect', function(connectCallback) {
-            this.on('devtool:pick client', function(pickCallback) {
+        socket.on('rempl:subscriber connect', function(connectCallback) {
+            this.on('rempl:pick client', function(pickCallback) {
                 function startIdentify(client) {
-                    client.emitIfPossible('devtool:identify', client.num, function(publisherId) {
+                    client.emitIfPossible('rempl:identify', client.num, function(publisherId) {
                         pickCallback(client.id, publisherId);
                         stopIdentify();
                     });
@@ -88,9 +88,9 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
                 function stopIdentify() {
                     onClientConnectMode = null;
                     socket.removeListener('disconnect', stopIdentify);
-                    socket.removeListener('devtool:cancel client pick', stopIdentify);
+                    socket.removeListener('rempl:cancel client pick', stopIdentify);
                     clients.forEach(function(client) {
-                        client.emitIfPossible('devtool:stop identify');
+                        client.emitIfPossible('rempl:stop identify');
                     });
                 }
 
@@ -98,7 +98,7 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
                 lastNum = 1;
 
                 this.once('disconnect', stopIdentify);
-                this.once('devtool:cancel client pick', stopIdentify);
+                this.once('rempl:cancel client pick', stopIdentify);
                 clients.forEach(function(client) {
                     client.num = lastNum++;
                     startIdentify(client);
@@ -106,14 +106,14 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
                 clients.notifyUpdates();
             });
 
-            this.on('devtool:get client ui', function(clientId, publisherId, callback) {
+            this.on('rempl:get client ui', function(clientId, publisherId, callback) {
                 var client = clients.get('id', clientId);
 
                 if (!client || !client.socket) {
-                    return callback('[devtool:get client ui] Client (' + clientId + ') not found or disconnected');
+                    return callback('[rempl:get client ui] Client (' + clientId + ') not found or disconnected');
                 }
 
-                client.emit('devtool:get ui', publisherId, {
+                client.emit('rempl:get ui', publisherId, {
                     dev: options.dev,
                     accept: ['script', 'url']
                 }, callback);
@@ -127,19 +127,19 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
         //
         // session publisher
         //
-        socket.on('devtool:join session', function(clientId, publisherId, callback) {
+        socket.on('rempl:join session', function(clientId, publisherId, callback) {
             var client = clients.get('id', clientId);
 
             if (!client || !client.socket) {
-                return callback('[devtool:join session] Client (' + clientId + ') not found or disconnected');
+                return callback('[rempl:join session] Client (' + clientId + ') not found or disconnected');
             }
 
             client.addSubscriber(this);
             this.publisherId = publisherId;
             this
                 .join(client.room)
-                .on('devtool:to session', function() {
-                    client.emit.apply(client, packet('devtool:to session', packet(publisherId, arguments)));
+                .on('rempl:to session', function() {
+                    client.emit.apply(client, packet('rempl:to session', packet(publisherId, arguments)));
                 })
                 .on('disconnect', function() {
                     client.removeSubscriber(this);

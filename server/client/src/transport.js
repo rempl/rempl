@@ -14,12 +14,12 @@ function syncClientList(data) {
 // connection events
 socket
     .on('connect', function() {
-        socket.emit('devtool:subscriber connect', function(data) {
+        socket.emit('rempl:subscriber connect', function(data) {
             syncClientList(data.clients);
             online.set(true);
         });
     })
-    .on('devtool:clientList', syncClientList)
+    .on('rempl:clientList', syncClientList)
     .on('disconnect', function() {
         online.set(false);
     });
@@ -28,7 +28,7 @@ module.exports = {
     online: online,
     getClientUI: function(id, callback) {
         var publisher = Publisher(id);
-        socket.emit('devtool:get client ui', publisher.data.clientId, publisher.data.name, function(err, type, content) {
+        socket.emit('rempl:get client ui', publisher.data.clientId, publisher.data.name, function(err, type, content) {
             publisher.update({
                 uiType: type,
                 uiContent: content
@@ -37,9 +37,9 @@ module.exports = {
         });
     },
     pickClient: function(callback) {
-        socket.emit('devtool:pick client', callback);
+        socket.emit('rempl:pick client', callback);
     },
     cancelClientPick: function() {
-        socket.emit('devtool:cancel client pick');
+        socket.emit('rempl:cancel client pick');
     }
 };

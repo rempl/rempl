@@ -54,7 +54,7 @@ function sendInfo() {
             String(clientInfo.features) != String(newClientInfo.features) ||
             String(clientInfo.publishers) != String(newClientInfo.publishers)) {
         clientInfo = newClientInfo;
-        socket.emit('devtool:client info', clientInfo);
+        socket.emit('rempl:client info', clientInfo);
     }
 }
 
@@ -110,7 +110,7 @@ function stopIdentify() {
 function startSyncClient() {
     clearInterval(sendInfoTimer);
     clientInfo = getSelfInfo();
-    socket.emit('devtool:client connect', clientInfo, function(data) {
+    socket.emit('rempl:client connect', clientInfo, function(data) {
         if ('clientId' in data) {
             clientId = sessionStorage[STORAGE_KEY] = data.clientId;
         }
@@ -123,12 +123,12 @@ function startSyncClient() {
 
 // socket messages
 socket
-    .on('devtool:identify', startIdentify)
-    .on('devtool:stop identify', stopIdentify)
-    .on('devtool:subscriber count changed', function(count) {
+    .on('rempl:identify', startIdentify)
+    .on('rempl:stop identify', stopIdentify)
+    .on('rempl:subscriber count changed', function(count) {
         api.remoteSubscribers.set(count);
     })
-    .on('devtool:get ui', function(id, settings, callback) {
+    .on('rempl:get ui', function(id, settings, callback) {
         if (!publishersMap.hasOwnProperty(id)) {
             console.error('[rempl][ws-transport] Publisher `' + id + '` isn\'t registered on page');
             callback('[rempl][ws-transport] Publisher `' + id + '` isn\'t registered on page');
@@ -137,7 +137,7 @@ socket
 
         publishersMap[id].getRemoteUI.call(null, settings, callback);
     })
-    .on('devtool:to session', function(id) {
+    .on('rempl:to session', function(id) {
         if (!publishersMap.hasOwnProperty(id)) {
             console.error('[rempl][ws-transport] Publisher `' + id + '` isn\'t registered on page');
             return;
@@ -200,7 +200,7 @@ api.initRemotePublisher = function(id, getRemoteUI) {
             sendInfo();
         },
         send: function() {
-            socket.emit.apply(socket, ['devtool:client data', id].concat(
+            socket.emit.apply(socket, ['rempl:client data', id].concat(
                 Array.prototype.slice.call(arguments)
             ));
         },

@@ -37,13 +37,13 @@ function createSandboxAPI(client) {
 
     var socket = io('', { transports: ['websocket', 'polling'] })
         .on('connect', function joinSession() {
-            socket.emit('devtool:join session', client.data.clientId, client.data.name, function(err) {
+            socket.emit('rempl:join session', client.data.clientId, client.data.name, function(err) {
                 if (err) {
                     retryTimer = setTimeout(joinSession, 2000);
                 }
             });
         })
-        .on('devtool:session data', function() {
+        .on('rempl:session data', function() {
             notify('data', arguments);
         });
 
@@ -74,14 +74,14 @@ function createSandboxAPI(client) {
 
     subscribers.data.push(subscriber.processInput);
     subscriber.channels.sandbox = function() {
-        socket.emit.apply(socket, ['devtool:to session'].concat(Array.prototype.slice.call(arguments)));
+        socket.emit.apply(socket, ['rempl:to session'].concat(Array.prototype.slice.call(arguments)));
     };
 
     return subscriber;
 
     return {
         // send: function() {
-        //     socket.emit.apply(socket, ['devtool:to session'].concat(basis.array(arguments)));
+        //     socket.emit.apply(socket, ['rempl:to session'].concat(basis.array(arguments)));
         // },
         invoke: function(method) {
             var args = Array.prototype.slice.call(arguments);
@@ -92,7 +92,7 @@ function createSandboxAPI(client) {
                 callback = args.pop();
             }
 
-            socket.emit('devtool:to session', {
+            socket.emit('rempl:to session', {
                 ns: '*',
                 type: 'call',
                 method: method,
@@ -151,7 +151,7 @@ var Frame = Node.subclass({
     },
     initUI: function() {
         if (this.ready && this.element) {
-            // run remote devtool code in sandbox and get created socket for future teardown
+            // run publisher UI code in sandbox and get created socket for future teardown
             var contentWindow = this.element.contentWindow;
 
             // set api reference to window.name since location bugs for some browsers
@@ -163,7 +163,7 @@ var Frame = Node.subclass({
             contentWindow.eval(
                 ';(' + scriptWrapper + ').call(this,function(rempl) {' +
                     this.script +
-                '});console.log("Remote devtool client (' + (this.url || 'script') + ') inited");'
+                '});console.log("Remote publisher UI (' + (this.url || 'script') + ') inited");'
             );
         }
     },
