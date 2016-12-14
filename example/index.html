@@ -11,7 +11,7 @@
         /* eslint-env browser */
         /* global rempl */
 
-        var myTool = rempl.createPublisher('myTool', rempl.getUiFromFile('browser-ui.js'));
+        var myTool = rempl.createPublisher('myTool', rempl.scriptFromFile('browser-ui.js'));
 
         setInterval(function() {
             myTool.publish(Date.now());

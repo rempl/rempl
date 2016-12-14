@@ -1,5 +1,5 @@
 var rempl = require('../src');
-var myTool = rempl.createPublisher('myTool', rempl.getUiFromFile(__dirname + '/node-ui.js'));
+var myTool = rempl.createPublisher('myTool', rempl.scriptFromFile(__dirname + '/node-ui.js'));
 
 // ----
 

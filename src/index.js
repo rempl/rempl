@@ -2,5 +2,6 @@
 module.exports = {
     createPublisher: require('./publisher/index.js'),
     createSubscriber: require('./subscriber/index.js'),
-    getUiFromFile: require('./sdk/getUiFromFile.js')
+
+    scriptFromFile: require('./sdk/scriptFromFile.js')
 };
