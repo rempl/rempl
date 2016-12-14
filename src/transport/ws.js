@@ -150,15 +150,6 @@ WSTransport.prototype.getInfo = function() {
     }, this);
 
     return result;
-    return {
-        clientId: this.clientId,
-        sessionId: this.sessionId,
-        title: this.name,
-        pid: process.pid,
-        type: 'node',
-        features: this.features.slice(),
-        publishers: this.publishers.slice()
-    };
 };
 
 /**
