@@ -1,8 +1,8 @@
 /* eslint-env browser */
 /* global CustomEvent */
 
-var utils = require('./index.js');
-var Token = require('./Token.js');
+var utils = require('../utils/index.js');
+var Token = require('../utils/Token.js');
 var global = new Function('return this')();
 var document = global.document;
 var DEBUG = false;
@@ -74,7 +74,7 @@ function wrapCallback(channel, callback) {
     };
 }
 
-function DomEventTransport(name, connectTo) {
+function EventTransport(name, connectTo) {
     this.name = name;
     this.connectTo = connectTo;
 
@@ -193,7 +193,7 @@ function DomEventTransport(name, connectTo) {
     handshake(this);
 }
 
-DomEventTransport.prototype = {
+EventTransport.prototype = {
     onInit: function(endpoint, callback) {
         if (this.inited) {
             this.endpoints.set(this.endpoints.value.concat(endpoint.id));
@@ -211,4 +211,4 @@ DomEventTransport.prototype = {
     }
 };
 
-module.exports = DomEventTransport;
+module.exports = EventTransport;
