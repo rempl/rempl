@@ -14,6 +14,7 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
     var onClientConnectMode = null;
     var lastNum = 0;
 
+    wsServer.addClientApi(path.join(__dirname, '../dist/rempl.js'));
     wsServer.addClientApi(path.join(__dirname, 'ws-client-api.js'), function(content) {
         if (options.remplEndpoint) {
             return (
