@@ -1,16 +1,15 @@
 // var Token = require('../../utils/index.js').Token;
 var utils = require('../../utils/index.js');
-var noop = function() {};
 
 module.exports = function createSync(publisher) {
-    var pluginSync = require('./sync-browser-extension.js');
+    var syncBrowserExtension = require('./sync-browser-extension.js');
     // var inpageSync = require('./sync-in-page.js');
-    var serverSync = require('./sync-server.js');
+    var syncWs = require('./sync-ws.js');
     // var remoteSubscribers = new Token(0);
     // var devtools = new Token(false);
 
     // browser extension
-    pluginSync(publisher, function(api) {
+    syncBrowserExtension(publisher, function(api) {
         // sync features list
         // publisher.features.link(api, api.setFeatures);
 
@@ -18,10 +17,8 @@ module.exports = function createSync(publisher) {
         api.subscribe(publisher.processInput);
         utils.link(api.connected, function(connected) {
             // devtools.set(connected);
-            publisher.channels.browserExtension = connected ? api.send : noop;
+            publisher.channels.browserExtension = connected ? api.send : null;
         });
-
-        console.log('browser extension ready');
     });
 
     // in page
@@ -33,14 +30,14 @@ module.exports = function createSync(publisher) {
     //     api.subscribe(publisher.processInput);
     //     utils.link(api.connected, function(connected) {
     //         // devtools.set(connected);
-    //         publisher.channels.inPage = connected ? api.send : noop;
+    //         publisher.channels.inPage = connected ? api.send : null;
     //     });
 
     //     console.log('in-page ready');
     // });
 
     // ws server
-    serverSync(publisher, function(api) {
+    syncWs(publisher, function(api) {
         // sync features list
         // publisher.features.link(api, api.setFeatures);
 
@@ -48,10 +45,8 @@ module.exports = function createSync(publisher) {
         api.subscribe(publisher.processInput);
         utils.link(api.connected, function(connected) {
             // remoteSubscribers.set(connected);
-            publisher.channels.wsserver = connected ? api.send : noop;
+            publisher.channels.wsserver = connected ? api.send : null;
         });
-
-        console.log('ws server connection ready');
     });
 
     // publisher.remoteSubscribers = remoteSubscribers;   // TODO: remove

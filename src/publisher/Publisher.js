@@ -1,9 +1,11 @@
 var utils = require('../utils/index.js');
-var instances = Object.create(null);
+var publishers = Object.create(null);
 
 function send(publisher, args) {
     for (var channel in publisher.channels) {
-        publisher.channels[channel].apply(null, args);
+        if (typeof publisher.channels[channel] === 'function') {
+            publisher.channels[channel].apply(null, args);
+        }
     }
 }
 
@@ -70,6 +72,9 @@ var Publisher = function(id, getRemoteUI) {
             this[method] = defaultNS[method].bind(defaultNS);
         }
     }
+
+    publishers[id] = this;
+    Publisher.onPublishersChange(Object.keys(publishers));
 };
 
 Publisher.prototype = {
@@ -98,12 +103,16 @@ Publisher.prototype = {
     }
 };
 
+Publisher.onPublishersChange = function(/* publishers */) {
+    /* stub method */
+};
+
 Publisher.factory = function createPublisherFactory(Publisher) {
     return function getPublisher(id, getRemoteUI, endpoint) {
-        var publisher = instances[id];
+        var publisher = publishers[id];
 
         if (!publisher) {
-            publisher = instances[id] = new Publisher(id, getRemoteUI, endpoint);
+            publisher = new Publisher(id, getRemoteUI, endpoint);
         }
 
         return publisher;

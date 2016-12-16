@@ -23,6 +23,22 @@ function valuesChanged(a, b) {
     return false;
 }
 
+function normalizeUri(uri) {
+    uri = String(uri);
+
+    if (/^\d+$/.test(uri)) {
+        return 'ws://localhost:' + uri;
+    }
+
+    return uri.replace(/^([a-z]+:)\/\/|^/i, 'ws://');
+}
+
+function callMethod(obj, method) {
+    return function() {
+        return obj[method].apply(this, arguments);
+    };
+}
+
 function onConnect() {
     clearInterval(this.sendInfoTimer);
 
@@ -98,7 +114,11 @@ function WSTransport(uri) {
     this.isOnline = new Token(false);
     this.features = [];
 
-    this.transport = socketIO.connect(uri)
+    if (DEBUG) {
+        console.log('[rempl][ws-transport] connecting to ' + normalizeUri(uri));
+    }
+
+    this.transport = socketIO.connect(normalizeUri(uri))
         .on('connect', onConnect.bind(this))
         .on('disconnect', onDisconnect.bind(this))
         .on('features', this.setFeatures.bind(this))
@@ -106,8 +126,8 @@ function WSTransport(uri) {
         .on('rempl:get ui', onGetUI.bind(this))
         .on('rempl:to session', onData.bind(this))
 
-        .on('rempl:identify', this.startIdentify.bind(this))
-        .on('rempl:stop identify', this.stopIdentify.bind(this));
+        .on('rempl:identify', callMethod(this, 'startIdentify'))
+        .on('rempl:stop identify', callMethod(this, 'stopIdentify'));
 }
 
 WSTransport.create = function(endpoint) {
@@ -176,6 +196,7 @@ WSTransport.prototype.setFeatures = function(list) {
 
 WSTransport.prototype.startIdentify = function() {
     if (DEBUG) {
+        debugger;
         console.error('[rempl] #startIdentify not implemented');
     }
 };
@@ -188,8 +209,9 @@ WSTransport.prototype.stopIdentify = function() {
 
 WSTransport.prototype.createApi = function(id, getRemoteUI) {
     var subscribers = [];
+    var publisher = this;
 
-    if (this.publishersMap.hasOwnProperty(id)) {
+    if (publisher.publishersMap.hasOwnProperty(id)) {
         if (DEBUG) {
             console.error('[rempl][ws-transport] Publisher `' + id + '` is already registered on page');
         }
@@ -197,24 +219,24 @@ WSTransport.prototype.createApi = function(id, getRemoteUI) {
         return;
     }
 
-    this.publishers.push(id);
-    this.publishersMap[id] = {
+    publisher.publishers.push(id);
+    publisher.publishersMap[id] = {
         getRemoteUI: getRemoteUI,
         subscribers: subscribers
     };
 
-    this.sendInfo();
+    publisher.sendInfo();
 
     return {
-        connected: this.isOnline,
+        connected: publisher.isOnline,
         setFeatures: function(list) {
-            this.setFeatures(list);
-        }.bind(this),
+            publisher.setFeatures(list);
+        },
         send: function() {
-            this.transport.emit.apply(this.transport, ['rempl:client data', id].concat(
-                Array.prototype.slice.call(arguments)
-            ));
-        }.bind(this),
+            publisher.transport.emit.apply(publisher.transport,
+                ['rempl:client data', id].concat(Array.prototype.slice.call(arguments))
+            );
+        },
         subscribe: function(fn) {
             subscribers.push(fn);
         }

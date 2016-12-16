@@ -1,3 +1,5 @@
+// process.env.REMPL_SERVER = 'localhost:1234';
+
 var rempl = require('../src');
 var myTool = rempl.createPublisher('myTool', rempl.scriptFromFile(__dirname + '/node-ui.js'));
 
