@@ -1,2 +1,2 @@
 server/client/dist/*
-src/host/browser-extension/chromium/src/customer.js
+src/host/browser-extension/chromium/src/rempl.js

@@ -3,11 +3,10 @@
 
 var Value = require('basis.data').Value;
 var Node = require('basis.ui').Node;
-var Subscriber = require('rempl:subscriber/index.js');
 var transport = require('../transport.js');
 var sandboxApi = {};
 
-function scriptWrapper(fn) {
+function scriptWrapper(rempl, fn) {
     var host = parent;
     var getRemoteAPI = window.name || location.hash.substr(1);
 
@@ -169,7 +168,7 @@ var Frame = Node.subclass({
             // run UI script
             contentWindow.eval(
                 resource('rempldist:rempl.js').get(true) +
-                ';(' + scriptWrapper + ').call(this,function(rempl) {' +
+                ';(' + scriptWrapper + ').call(this,rempl,function(rempl) {' +
                     this.script +
                 '});console.log("Remote publisher UI (' + (this.url || 'script') + ') inited");' +
                 '//# sourceURL=1.js'

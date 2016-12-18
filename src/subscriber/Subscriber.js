@@ -1,5 +1,4 @@
 var utils = require('../utils/index.js');
-var instances = Object.create(null);
 
 function send(subscriber, args) {
     for (var channel in subscriber.channels) {
