@@ -1,5 +1,5 @@
 /* eslint-env browser */
-/* global chrome, slice, genUID, createIndicator, rempl */
+/* global chrome, slice, genUID, createIndicator */
 
 var DEBUG = false;
 var inspectedWindow = chrome.devtools.inspectedWindow;
@@ -18,6 +18,16 @@ var sandbox;
 var page = chrome.extension.connect({
     name: 'rempl:host'
 });
+var remplSource = (function() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'rempl.js', false);
+    xhr.setRequestHeader('If-Modified-Since', new Date(0).toGMTString());
+    xhr.send('');
+
+    return xhr.status >= 200 && xhr.status < 400
+        ? xhr.responseText
+        : '';
+})();
 
 function $(id) {
     return document.getElementById(id);
@@ -78,12 +88,13 @@ function createSubscribers() {
     };
 }
 
-function scriptWrapper(fn) {
+function scriptWrapper(rempl, fn) {
     var host = parent;
     var getRemoteAPI = window.name || location.hash.substr(1);
-    var remoteAPI = typeof host[getRemoteAPI] === 'function' ? host[getRemoteAPI]() : null;
 
-    fn.call(this, remoteAPI);
+    if (typeof host[getRemoteAPI] === 'function') {
+        host[getRemoteAPI](rempl, fn);
+    }
 }
 
 function requestUI() {
@@ -105,16 +116,24 @@ function requestUI() {
 
 function initUI(script) {
     var apiId = genUID();
-    var subscriber = rempl.createSubscriber(selectedPublisher);
 
-    subscribers = createSubscribers();
-    subscribers.data.push(subscriber.processInput);
-    subscriber.channels.plugin = function() {
-        sendToPage.apply(null, ['data'].concat(slice(arguments)));
-    };
+    // var subscriber = rempl.createSubscriber(selectedPublisher);
+    // subscribers.data.push(subscriber.processInput);
+    // subscriber.channels.plugin = function() {
+    //     sendToPage.apply(null, ['data'].concat(slice(arguments)));
+    // };
 
-    window[apiId] = function createAPI() {
-        return subscriber;
+    window[apiId] = function createAPI(rempl, cb) {
+        rempl.initSandbox(selectedPublisher, function(api) {
+            api.subscribe(function() {
+                sendToPage.apply(null, ['data'].concat(slice(arguments)));
+            });
+            subscribers.data.push(api.send);
+        });
+
+        return cb(rempl);
+
+        // return subscriber;
         console.log(devtoolSession, devtoolFeatures); // FIXME: added to avoid no-unused-vars warnings
         // return {
         //     send: function() {
@@ -152,8 +171,9 @@ function initUI(script) {
     setTimeout(function() {
         sandbox.contentWindow.location.hash = apiId;
         sandbox.contentWindow.eval(
-            'document.getElementById("sandbox-splashscreen").style.display="none";' +
-            '(' + scriptWrapper + ').call(this,function(rempl){' +
+            remplSource +
+            ';document.getElementById("sandbox-splashscreen").style.display="none";' +
+            '(' + scriptWrapper + ').call(this,rempl,function(rempl){' +
                 script +
             '});'
         );
