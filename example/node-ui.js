@@ -1,16 +1,18 @@
 /* eslint-env browser */
 /* global rempl */
 
-rempl.subscribe(function(counter) {
-    document.getElementById('counter').innerHTML = counter;
+rempl.getSubscriber(function(api) {
+    api.subscribe(function(counter) {
+        document.getElementById('counter').innerHTML = counter;
+    });
+
+    window.reset = function() {
+        api.invoke('reset');
+    };
+
+    document.body
+        .appendChild(document.createElement('div'))
+        .innerHTML =
+            '<b id="counter"></b> ' +
+            '<button onclick="reset()">reset</button>';
 });
-
-this.reset = function() {
-    rempl.invoke('reset');
-};
-
-document.body
-    .appendChild(document.createElement('div'))
-    .innerHTML =
-        '<b id="counter"></b> ' +
-        '<button onclick="reset()">reset</button>';

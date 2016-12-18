@@ -197,7 +197,9 @@ EventTransport.prototype = {
     onInit: function(endpoint, callback) {
         if (this.inited) {
             this.endpoints.set(this.endpoints.value.concat(endpoint.id));
-            this.endpointGetUI[endpoint.id] = endpoint.getRemoteUI;
+            if (typeof endpoint.getRemoteUI === 'function') {
+                this.endpointGetUI[endpoint.id] = endpoint.getRemoteUI;
+            }
 
             callback({
                 // setFeatures: features.set.bind(features),

@@ -1,3 +1,3 @@
-var DomEventTransport = require('../../transport/event.js');
+var EventTransport = require('../../transport/event.js');
 
-module.exports = new DomEventTransport('rempl-publisher', 'rempl-browser-extension-subscriber').onInit;
+module.exports = new EventTransport('rempl-publisher', 'rempl-browser-extension-subscriber').onInit;

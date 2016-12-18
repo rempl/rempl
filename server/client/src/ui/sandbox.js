@@ -10,19 +10,19 @@ var sandboxApi = {};
 function scriptWrapper(fn) {
     var host = parent;
     var getRemoteAPI = window.name || location.hash.substr(1);
-    var remoteAPI = typeof host[getRemoteAPI] === 'function' ? host[getRemoteAPI]() : null;
 
-    fn.call(this, remoteAPI);
+    if (typeof host[getRemoteAPI] === 'function') {
+        host[getRemoteAPI](rempl, fn);
+    }
 }
 
-function createSandboxAPI(client) {
+function createSandboxAPI(client, rempl, cb) {
     function notify(type, args) {
         for (var i = 0; i < subscribers[type].length; i++) {
             subscribers[type][i].apply(null, args);
         }
     }
 
-    var subscriber = new Subscriber(client.data.name);
     var apiId = this.apiId;
     var sessionId = Value.query(client, 'data.sessionId');
     var online = Value.query(client, 'data.online');
@@ -72,60 +72,67 @@ function createSandboxAPI(client) {
         notify('features', [features]);
     });
 
-    subscribers.data.push(subscriber.processInput);
-    subscriber.channels.sandbox = function() {
-        socket.emit.apply(socket, ['rempl:to session'].concat(Array.prototype.slice.call(arguments)));
-    };
+    rempl.initSandbox(client.data.name, function(api) {
+        api.subscribe(function() {
+            socket.emit.apply(socket, ['rempl:to session'].concat(Array.prototype.slice.call(arguments)));
+        });
+        subscribers.data.push(api.send);
+    });
+    // var subscriber = new Subscriber(client.data.name);
+    // subscribers.data.push(subscriber.processInput);
+    // subscriber.channels.sandbox = function() {
+    //     socket.emit.apply(socket, ['rempl:to session'].concat(Array.prototype.slice.call(arguments)));
+    // };
 
-    return subscriber;
+    return cb(rempl);
 
-    return {
-        // send: function() {
-        //     socket.emit.apply(socket, ['rempl:to session'].concat(basis.array(arguments)));
-        // },
-        invoke: function(method) {
-            var args = Array.prototype.slice.call(arguments);
-            var callback = function() {};
-            var method = args.shift();
+    // return {
+    //     // send: function() {
+    //     //     socket.emit.apply(socket, ['rempl:to session'].concat(basis.array(arguments)));
+    //     // },
+    //     invoke: function(method) {
+    //         var args = Array.prototype.slice.call(arguments);
+    //         var callback = function() {};
+    //         var method = args.shift();
 
-            if (args.length && typeof args[args.length - 1] === 'function') {
-                callback = args.pop();
-            }
+    //         if (args.length && typeof args[args.length - 1] === 'function') {
+    //             callback = args.pop();
+    //         }
 
-            socket.emit('rempl:to session', {
-                ns: '*',
-                type: 'call',
-                method: method,
-                args: args
-            }, callback);
-        },
-        subscribe: function(channel, fn) {
-            if (typeof channel === 'function') {
-                fn = channel;
-                channel = 'data';
-            }
+    //         socket.emit('rempl:to session', {
+    //             ns: '*',
+    //             type: 'call',
+    //             method: method,
+    //             args: args
+    //         }, callback);
+    //     },
+    //     subscribe: function(channel, fn) {
+    //         if (typeof channel === 'function') {
+    //             fn = channel;
+    //             channel = 'data';
+    //         }
 
-            if (!subscribers.hasOwnProperty(channel)) {
-                return console.warn('[remote inspector] Unknown channel name: ' + channel);
-            }
+    //         if (!subscribers.hasOwnProperty(channel)) {
+    //             return console.warn('[remote inspector] Unknown channel name: ' + channel);
+    //         }
 
-            subscribers[channel].push(fn);
+    //         subscribers[channel].push(fn);
 
-            switch (channel) {
-                case 'session':
-                    fn(client.data.sessionId);
-                    break;
-                case 'connection':
-                    fn(client.data.online);
-                    break;
-                case 'features':
-                    fn(client.data.features);
-                    break;
-            }
+    //         switch (channel) {
+    //             case 'session':
+    //                 fn(client.data.sessionId);
+    //                 break;
+    //             case 'connection':
+    //                 fn(client.data.online);
+    //                 break;
+    //             case 'features':
+    //                 fn(client.data.features);
+    //                 break;
+    //         }
 
-            return this;
-        }
-    };
+    //         return this;
+    //     }
+    // };
 };
 
 var Frame = Node.subclass({
@@ -161,9 +168,11 @@ var Frame = Node.subclass({
 
             // run UI script
             contentWindow.eval(
+                resource('rempldist:rempl.js').get(true) +
                 ';(' + scriptWrapper + ').call(this,function(rempl) {' +
                     this.script +
-                '});console.log("Remote publisher UI (' + (this.url || 'script') + ') inited");'
+                '});console.log("Remote publisher UI (' + (this.url || 'script') + ') inited");' +
+                '//# sourceURL=1.js'
             );
         }
     },

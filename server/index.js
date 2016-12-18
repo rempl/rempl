@@ -153,7 +153,7 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
     } else if (options.dev || !fs.existsSync(path.join(__dirname, 'client/dist/index.html'))) {
         console.warn('Init ' + chalk.yellow('dev version') + ' of ' + chalk.yellow('rempl'));
         httpServer.addSymlink('/basisjs-tools/basis', path.dirname(require.resolve('basisjs')));
-        httpServer.addSymlink('/basisjs-tools/rempl', path.resolve(__dirname, '../src/'));
+        httpServer.addSymlink('/basisjs-tools/rempl', path.resolve(__dirname, '..'));
         httpServer.addSymlink('/basisjs-tools/devtool', path.join(__dirname, 'client/src'));
     } else {
         if (options.verbose) {

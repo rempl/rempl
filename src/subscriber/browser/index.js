@@ -1,6 +1,11 @@
 var Subscriber = require('../Subscriber.js');
 var makeSync = require('./sync.js');
+var subscriber;
 
-module.exports = Subscriber.factory(function(id) {
-    return makeSync(new Subscriber(id));
-});
+module.exports = function(fn) {
+    if (!subscriber) {
+        subscriber = makeSync(new Subscriber());
+    }
+
+    fn(subscriber);
+};

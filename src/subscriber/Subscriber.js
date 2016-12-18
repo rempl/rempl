@@ -54,8 +54,8 @@ Namespace.prototype = {
     }
 };
 
-var Subscriber = function(id) {
-    this.id = id;
+var Subscriber = function() {
+    this.id = Subscriber.id; // FIXME: temp solution
     this.namespaces = Object.create(null);
     this.channels = Object.create(null);
     this.processInput = this.processInput.bind(this);
@@ -101,14 +101,8 @@ Subscriber.prototype = {
 };
 
 Subscriber.factory = function createSubscriberFactory(Subscriber) {
-    return function getSubscriber(id, getRemoteUI, endpoint) {
-        var subscriber = instances[id];
-
-        if (!subscriber) {
-            subscriber = instances[id] = new Subscriber(id, getRemoteUI, endpoint);
-        }
-
-        return subscriber;
+    return function createSubscriber(id) {
+        return new Subscriber(id);
     };
 };
 

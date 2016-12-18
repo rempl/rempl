@@ -90,7 +90,7 @@ For tools based on `rempl`, a publisher is source of UI. When new sandbox for su
 var rempl = require('rempl');
 var myTool = rempl.createPublisher('myTool', function(settings, callback) {
     callback(null, 'script', 'alert("myTool UI inited")');
-}, 'ws://localhost:8177');
+});
 
 setInterval(function() {
     myTool.publish('ping');
@@ -113,10 +113,12 @@ myTool.define({
 ### Subscriber
 
 ```js
-rempl.subscribe(function(data) {
-    console.log('Receive data from publisher:', data);
+rempl.getSubscriber(function(myTool) {
+    myTool.subscribe(function(data) {
+        console.log('Receive data from publisher:', data);
 
-    rempl.invoke('pong');
+        myTool.invoke('pong');
+    });
 });
 ```
 

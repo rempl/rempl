@@ -1,9 +1,14 @@
-// var DomEventTransport = require('../../transport/event.js');
+var utils = require('../../utils/index.js');
 
 module.exports = function createSync(subscriber) {
-    // new DomEventTransport('rempl-in-page-subscriber', 'rempl-publisher').onInit(subscriber, function() {
-    //     console.log('in-page subscriber connected');
-    // });
+    var syncSandbox = require('./sync-sandbox.js');
+
+    syncSandbox(subscriber, function(api) {
+        api.subscribe(subscriber.processInput);
+        utils.link(api.connected, function(connected) {
+            subscriber.channels.browserExtension = connected ? api.send : null;
+        });
+    });
 
     return subscriber;
 };
