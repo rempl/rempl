@@ -54,7 +54,6 @@ Namespace.prototype = {
 };
 
 var Subscriber = function() {
-    this.id = Subscriber.id; // FIXME: temp solution
     this.namespaces = Object.create(null);
     this.channels = Object.create(null);
     this.processInput = this.processInput.bind(this);

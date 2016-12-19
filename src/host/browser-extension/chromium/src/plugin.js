@@ -124,7 +124,7 @@ function initUI(script) {
     // };
 
     window[apiId] = function createAPI(rempl, cb) {
-        rempl.initSandbox(selectedPublisher, function(api) {
+        rempl.initSandbox(null, selectedPublisher, function(api) {
             api.subscribe(function() {
                 sendToPage.apply(null, ['data'].concat(slice(arguments)));
             });
