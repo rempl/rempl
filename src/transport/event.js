@@ -105,7 +105,7 @@ function onConnect(payload) {
     }, this);
 }
 
-function onPacket(payload) {
+function onData(payload) {
     if (DEBUG) {
         utils.log('[rempl][dom-event-transport] receive from ' + this.connectTo, payload.type, payload);
     }
@@ -193,7 +193,7 @@ function EventTransport(name, connectTo) {
                 onConnect.call(this, data.payload || {});
                 break;
             case this.inputChannelId:
-                onPacket.call(this, data.payload || {});
+                onData.call(this, data.payload || {});
                 break;
         }
     }.bind(this), false);
