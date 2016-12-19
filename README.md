@@ -17,7 +17,11 @@ npm install rempl
 <script>
     var myTool = rempl.createPublisher('myTool', function() { /* ... */ });
 
-    // ...
+    // or
+
+    rempl.getSubscriber(function(myTool) {
+        // build UI and subscribe for data from publisher
+    });
 </script>
 ```
 
@@ -32,7 +36,7 @@ var myTool = rempl.createPublisher('myTool', function() { /* ... */ });
 
 ## Overview
 
-![\[ subject \] <--- \[ publisher (data) \] <--- rempl ---> \[ subscriber (UI) \]](https://cloud.githubusercontent.com/assets/270491/21027773/6a737c16-bda3-11e6-82c5-f0c0ef8ba00e.png)
+![\[ subject \] <--- \[ publisher (data) \] <--- rempl ---> \[ subscriber (UI) \]](https://cloud.githubusercontent.com/assets/270491/21329597/8e5786c2-c64a-11e6-912f-12d8e8827c71.png)
 
 - `Subject` – something to be inspected, i.e. app, page, environment etc
 - `Publisher` – monotors a `subject`, collect a data and publish it for `subscribers`
@@ -73,7 +77,7 @@ Planned (not tested yet):
 - WebWorker
 - ServiceWorker
 
-> Publisher can theoretically be created in non-JavaScript environment. In this case [publisher](https://github.com/rempl/rempl/blob/master/src/publisher/Publisher.js) interface should be implemented and socket.io client in language you use.
+> Publisher can theoretically be created in non-JavaScript environment. In this case [publisher](https://github.com/rempl/rempl/blob/master/src/publisher/Publisher.js) interface and socket.io client should be implemented in language you use.
 
 ### Distribution of UI
 
