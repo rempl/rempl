@@ -2,7 +2,7 @@
   "name": "Rempl",
   "version": "1.0.0",
   "version_name": "1.0.0 beta",
-  "description": "Rempl host as Developer Tools plugin",
+  "description": "Rempl host for Chromium Developer Tools",
   "devtools_page": "index.html",
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "manifest_version": 2,
