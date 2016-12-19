@@ -1,5 +1,5 @@
 /* eslint-env browser */
-/* global chrome, slice, genUID, createIndicator */
+/* global chrome, slice, genUID, createIndicator, rempl */
 
 var DEBUG = false;
 var inspectedWindow = chrome.devtools.inspectedWindow;
@@ -65,10 +65,11 @@ function sandboxError(message) {
     sandbox.srcdoc = '<div style="padding:20px;color:#D00;">' + message + '</div>';
 }
 
-function initSandbox() {
+function initSandbox(fn) {
     clearTimeout(dropSandboxTimer);
     dropSandbox();
     sandbox = document.createElement('iframe');
+    sandbox.onload = fn;
     sandbox.srcdoc = '<div id="sandbox-splashscreen" style="padding:20px;color:#888;">Fetching UI...</div>';
     document.documentElement.appendChild(sandbox);
 }
@@ -88,96 +89,42 @@ function createSubscribers() {
     };
 }
 
-function scriptWrapper(rempl, fn) {
-    var host = parent;
-    var getRemoteAPI = window.name || location.hash.substr(1);
-
-    if (typeof host[getRemoteAPI] === 'function') {
-        host[getRemoteAPI](rempl, fn);
-    }
-}
-
 function requestUI() {
     // send interface UI request
     // TODO: reduce reloads
-    initSandbox();
-    sendToPage('getRemoteUI', function(err, type, content) {
-        if (err) {
-            return sandboxError('Fetch UI error: ' + err);
-        }
+    initSandbox(function() {
+        sendToPage('getRemoteUI', function(err, type, content) {
+            if (err) {
+                return sandboxError('Fetch UI error: ' + err);
+            }
 
-        if (type !== 'script') {
-            return sandboxError('Unsupported UI content: ' + type);
-        }
+            if (type !== 'script') {
+                return sandboxError('Unsupported UI type: ' + type);
+            }
 
-        initUI(content);
+            initUI(content);
+        });
     });
 }
 
 function initUI(script) {
-    var apiId = genUID();
+    // TODO: use session and features
+    if (DEBUG) {
+        console.log(devtoolSession, devtoolFeatures);
+    }
 
-    // var subscriber = rempl.createSubscriber(selectedPublisher);
-    // subscribers.data.push(subscriber.processInput);
-    // subscriber.channels.plugin = function() {
-    //     sendToPage.apply(null, ['data'].concat(slice(arguments)));
-    // };
-
-    window[apiId] = function createAPI(rempl, cb) {
-        rempl.initSandbox(null, selectedPublisher, function(api) {
-            api.subscribe(function() {
-                sendToPage.apply(null, ['data'].concat(slice(arguments)));
-            });
-            subscribers.data.push(api.send);
+    rempl.initSandbox(sandbox.contentWindow, selectedPublisher, function(api) {
+        api.subscribe(function() {
+            sendToPage.apply(null, ['data'].concat(slice(arguments)));
         });
+        subscribers.data.push(api.send);
+    });
 
-        return cb(rempl);
-
-        // return subscriber;
-        console.log(devtoolSession, devtoolFeatures); // FIXME: added to avoid no-unused-vars warnings
-        // return {
-        //     send: function() {
-        //         sendToPage.apply(null, ['data'].concat(slice(arguments)));
-        //     },
-        //     subscribe: function(channel, fn) {
-        //         if (typeof channel === 'function') {
-        //             fn = channel;
-        //             channel = 'data';
-        //         }
-
-        //         if (!subscribers.hasOwnProperty(channel)) {
-        //             return console.warn('[remote inspector] Unknown channel name: ' + channel);
-        //         }
-
-        //         subscribers[channel].push(fn);
-
-        //         switch (channel) {
-        //             case 'session':
-        //                 fn(devtoolSession);
-        //                 break;
-        //             case 'connection':
-        //                 fn(remplConnected);
-        //                 break;
-        //             case 'features':
-        //                 fn(devtoolFeatures);
-        //                 break;
-        //         }
-
-        //         return this;
-        //     }
-        // };
-    };
-
-    setTimeout(function() {
-        sandbox.contentWindow.location.hash = apiId;
-        sandbox.contentWindow.eval(
-            remplSource +
-            ';document.getElementById("sandbox-splashscreen").style.display="none";' +
-            '(' + scriptWrapper + ').call(this,rempl,function(rempl){' +
-                script +
-            '});'
-        );
-    }, 10);
+    sandbox.contentWindow.eval(
+        remplSource +
+        ';document.getElementById("sandbox-splashscreen").style.display="none";' +
+        script
+    );
 }
 
 function dropSandbox() {
