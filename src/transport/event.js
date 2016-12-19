@@ -5,23 +5,21 @@ var utils = require('../utils/index.js');
 var Token = require('../utils/Token.js');
 var global = new Function('return this')();
 var document = global.document;
+var postMessage = global.postMessage;
 var DEBUG = false;
 // var getRemoteUI = require('./getRemoteUI.js');
 
-function emitEvent(channelId, data) {
+function emitEvent(channelId, payload) {
     if (DEBUG) {
-        utils.log('[rempl][dom-event-transport] emit event', channelId, data);
+        utils.log('[rempl][dom-event-transport] emit event', channelId, payload);
     }
 
     // IE does not support CustomEvent constructor
-    if (typeof document.createEvent == 'function') {
-        var event = document.createEvent('CustomEvent');
-        event.initCustomEvent(channelId, false, false, data);
-        document.dispatchEvent(event);
-    } else {
-        document.dispatchEvent(new CustomEvent(channelId, {
-            detail: data
-        }));
+    if (typeof postMessage === 'function') {
+        postMessage({
+            channel: channelId,
+            payload: payload
+        }, '*');
     }
 }
 
@@ -74,6 +72,96 @@ function wrapCallback(channel, callback) {
     };
 }
 
+function onConnect(payload) {
+    if (this.outputChannelId) {
+        return;
+    }
+
+    this.outputChannelId = payload.input;
+
+    if (!payload.output) {
+        handshake(this);
+    }
+
+    // send features to devtools
+    // features.attach(function(features){
+    //     emitEvent(outputChannelId, {
+    //         type: 'features',
+    //         data: features
+    //     });
+    // });
+
+    this.endpoints.attach(function(publishers) {
+        emitEvent(this.outputChannelId, {
+            type: 'publishers',
+            data: publishers
+        });
+    }, this);
+
+    // invoke onInit callbacks
+    this.inited = true;
+    this.initCallbacks.splice(0).forEach(function(args) {
+        this.onInit.apply(this, args);
+    }, this);
+}
+
+function onPacket(payload) {
+    if (DEBUG) {
+        utils.log('[rempl][dom-event-transport] receive from ' + this.connectTo, payload.type, payload);
+    }
+
+    switch (payload.type) {
+        case 'connect':
+            this.connected.set(true);
+            break;
+
+        case 'disconnect':
+            this.connected.set(false);
+            break;
+
+        case 'callback':
+            if (this.callbacks.hasOwnProperty(payload.callback)) {
+                this.callbacks[payload.callback].apply(null, payload.data);
+                delete this.callbacks[payload.callback];
+            }
+            break;
+
+        case 'data':
+            var args = Array.prototype.slice.call(payload.data);
+            var callback = payload.callback;
+
+            if (callback) {
+                args = args.concat(wrapCallback(this, callback));
+            }
+
+            this.subscribers.forEach(function(subscriber) {
+                if (subscriber.endpoint === payload.endpoint) {
+                    subscriber.fn.apply(null, args);
+                }
+            });
+            break;
+
+        case 'getRemoteUI':
+            if (!Object.prototype.hasOwnProperty.call(this.endpointGetUI, payload.endpoint)) {
+                utils.warn('[rempl][dom-event-transport] recieve unknown endpoint for getRemoteUI(): ' + payload.endpoint);
+                wrapCallback(this, payload.callback)('Wrong endpoint – ' + payload.endpoint);
+            } else {
+                this.endpointGetUI[payload.endpoint](
+                    payload.data[0] || false,
+                    payload.callback ? wrapCallback(this, payload.callback) : Function
+                );
+            }
+            break;
+
+        case 'publishers':
+            // nothing to do for now
+            break;
+
+        default:
+            utils.warn('[rempl][dom-event-transport] Unknown message type `' + payload.type + '` for `' + name + '`', payload);
+    }
+}
+
 function EventTransport(name, connectTo) {
     this.name = name;
     this.connectTo = connectTo;
@@ -92,103 +180,23 @@ function EventTransport(name, connectTo) {
     this.inited = false;
     this.onInit = this.onInit.bind(this);
 
-    if (!document || !document.createEvent) {
-        utils.warn('[rempl][dom-event-transport] Event transport isn\'t supported');
+    if (typeof postMessage !== 'function') {
+        utils.warn('[rempl][dom-event-transport] Event (postMessage) transport isn\'t supported');
         return;
     }
 
-    document.addEventListener(this.connectTo + ':connect', function(e) {
-        if (this.outputChannelId) {
-            return;
+    global.addEventListener('message', function(e) {
+        var data = e.data || {};
+
+        switch (data.channel) {
+            case this.connectTo + ':connect':
+                onConnect.call(this, data.payload || {});
+                break;
+            case this.inputChannelId:
+                onPacket.call(this, data.payload || {});
+                break;
         }
-
-        var data = e.detail;
-        this.outputChannelId = data.input;
-
-        if (!data.output) {
-            handshake(this);
-        }
-
-        // send features to devtools
-        // features.attach(function(features){
-        //     emitEvent(outputChannelId, {
-        //         type: 'features',
-        //         data: features
-        //     });
-        // });
-
-        this.endpoints.attach(function(publishers) {
-            emitEvent(this.outputChannelId, {
-                type: 'publishers',
-                data: publishers
-            });
-        }, this);
-
-        // invoke onInit callbacks
-        this.inited = true;
-        this.initCallbacks.splice(0).forEach(function(args) {
-            this.onInit.apply(this, args);
-        }, this);
-    }.bind(this));
-
-    document.addEventListener(this.inputChannelId, function(e) {
-        var data = e.detail;
-
-        if (DEBUG) {
-            utils.log('[rempl][dom-event-transport] receive from ' + this.connectTo, data.type, data);
-        }
-
-        switch (data.type) {
-            case 'connect':
-                this.connected.set(true);
-                break;
-
-            case 'disconnect':
-                this.connected.set(false);
-                break;
-
-            case 'callback':
-                if (this.callbacks.hasOwnProperty(data.callback)) {
-                    this.callbacks[data.callback].apply(null, data.data);
-                    delete this.callbacks[data.callback];
-                }
-                break;
-
-            case 'data':
-                var args = Array.prototype.slice.call(data.data);
-                var callback = data.callback;
-
-                if (callback) {
-                    args = args.concat(wrapCallback(this, callback));
-                }
-
-                this.subscribers.forEach(function(subscriber) {
-                    if (subscriber.endpoint === data.endpoint) {
-                        subscriber.fn.apply(null, args);
-                    }
-                });
-                break;
-
-            case 'getRemoteUI': // FIXME: should get UI for concrete endpoint
-                if (!Object.prototype.hasOwnProperty.call(this.endpointGetUI, data.endpoint)) {
-                    utils.warn('[rempl][dom-event-transport] recieve unknown endpoint for getRemoteUI(): ' + data.endpoint);
-                    wrapCallback(this, data.callback)('Wrong endpoint – ' + data.endpoint);
-                } else {
-                    this.endpointGetUI[data.endpoint](
-                        data.data[0] || false,
-                        data.callback ? wrapCallback(this, data.callback) : Function
-                    );
-                }
-                break;
-
-            case 'publishers':
-                // nothing to do for now
-                break;
-
-            default:
-                utils.warn('[rempl][dom-event-transport] Unknown message type `' + data.type + '` for `' + name + '`', data);
-        }
-    }.bind(this));
+    }.bind(this), false);
 
     handshake(this);
 }

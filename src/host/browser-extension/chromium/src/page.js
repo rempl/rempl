@@ -28,14 +28,15 @@ function sendToPlugin(event, data) {
     });
 }
 
-function emitPageEvent(channelId, data) {
+function emitPageEvent(channelId, payload) {
     if (DEBUG) {
-        console.log('[rempl][content script] send to page', channelId, data);
+        console.log('[rempl][content script] send to page', channelId, payload);
     }
 
-    document.dispatchEvent(new CustomEvent(channelId, {
-        detail: data
-    }));
+    postMessage({
+        channel: channelId,
+        payload: payload
+    }, '*');
 }
 
 function sendToPage(data) {
@@ -99,38 +100,49 @@ plugin.onMessage.addListener(function(packet) {
 // connect to basis.js devpanel
 //
 
-document.addEventListener('rempl-publisher:connect', function(e) {
+addEventListener('message', function(e) {
+    var data = e.data || {};
+
+    switch (data.channel) {
+        case 'rempl-publisher:connect':
+            onConnect(data.payload || {});
+            break;
+
+        case inputChannelId:
+            onData(data.payload || {});
+            break;
+    }
+});
+
+function onConnect(payload) {
     if (outputChannelId) {
         return;
     }
 
-    var packet = e.detail;
-    outputChannelId = packet.input;
+    outputChannelId = payload.input;
     remplConnected = true;
     updateIndicator();
 
-    if (!packet.output) {
+    if (!payload.output) {
         handshake();
     }
 
     if (pluginConnected) {
-        sendToPlugin('page:connect', [sessionId, packet.features || features, packet.publishers || publishers]);
+        sendToPlugin('page:connect', [sessionId, payload.features || features, payload.publishers || publishers]);
         sendToPage({
             type: 'connect'
         });
     }
-});
+}
 
-document.addEventListener(inputChannelId, function(e) {
-    var packet = e.detail;
-
+function onData(payload) {
     if (DEBUG) {
-        console.log('[rempl][content script] page -> plugin', packet);
+        console.log('[rempl][content script] page -> plugin', payload);
     }
 
-    switch (packet.type) {
+    switch (payload.type) {
         case 'features':
-            features = packet.data;
+            features = payload.data;
 
             if (!pluginConnected) {
                 return;
@@ -139,7 +151,7 @@ document.addEventListener(inputChannelId, function(e) {
             break;
 
         case 'publishers':
-            publishers = packet.data;
+            publishers = payload.data;
 
             if (!pluginConnected) {
                 return;
@@ -148,7 +160,7 @@ document.addEventListener(inputChannelId, function(e) {
             break;
     }
 
-    plugin.postMessage(packet);
-});
+    plugin.postMessage(payload);
+}
 
 handshake();
