@@ -82,7 +82,7 @@ function onConnect(payload) {
     this.endpoints.attach(function(publishers) {
         this.send(this.outputChannelId, {
             type: 'publishers',
-            data: publishers
+            data: [publishers]
         });
     }, this);
 

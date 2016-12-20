@@ -151,7 +151,7 @@ function onData(payload) {
             break;
 
         case 'publishers':
-            publishers = payload.data;
+            publishers = payload.data[0];
 
             if (!pluginConnected) {
                 return;
