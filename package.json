@@ -31,7 +31,7 @@
   "scripts": {
     "codestyle": "jscs src server && eslint src server",
     "build": "npm run build:rempl && npm run build:server-assets",
-    "build:rempl": "browserify --standalone rempl src/index.js | uglifyjs --compress --mangle -o dist/rempl.js && cp dist/rempl.js src/host/browser-extension/chromium/src/",
+    "build:rempl": "browserify --standalone rempl src/index.js | uglifyjs --compress --mangle -o dist/rempl.js",
     "build:server-assets": "node node_modules/basisjs-tools-build/bin/build -c server/client/basis.config",
     "prepublish": "npm run build"
   },
@@ -51,7 +51,6 @@
     "dist",
     "server",
     "src",
-    "!src/host/browser-extension",
     "HISTORY.md",
     "LICENSE",
     "README.md"

@@ -4,8 +4,7 @@
         "./docs",
         "./dist",
         "./node_modules",
-        "./server/client/dist/*",
-        "./src/host/browser-extension/chromium/src/rempl.js"
+        "./server/client/dist/*"
     ],
 
     "disallowEmptyBlocks": true,

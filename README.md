@@ -59,10 +59,10 @@ For most cases you need a WebSocket transport. In this case a WS server required
 `Rempl` server provides web interface to monitor list of publishers and to launch selected publisher's UI in sandbox. Just open server's origin (by default `http://localhost:8177`) in your browser.
 
 - Browsers
-  - [Google Chrome](https://chrome.google.com/webstore/detail/rempl/hcikjlholajopgbgfmmlbmifdfbkijdj) [[sources](https://github.com/rempl/rempl/src/host/browser-extension/chromium)]
+  - [Google Chrome](https://chrome.google.com/webstore/detail/rempl/hcikjlholajopgbgfmmlbmifdfbkijdj) [[repo](https://github.com/rempl/host-chromium-extension)]
   - Firefox (planned)
 - Editors
-  - [Atom](https://atom.io/packages/rempl) [[sources](https://github.com/rempl/host-atom)]
+  - [Atom](https://atom.io/packages/rempl) [[repo](https://github.com/rempl/host-atom)]
   - VS Code (planned)
 
 ### Publisher environment
