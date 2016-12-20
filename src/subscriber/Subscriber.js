@@ -7,10 +7,6 @@ function send(subscriber, args) {
 }
 
 function invoke(method, args, callback) {
-    if (!this.hasMethod(method)) {
-        return utils.warn('[rempl] Unknown method:', method, this.methods);
-    }
-
     if (typeof callback === 'function') {
         args = args.concat(callback);
     }
@@ -27,6 +23,7 @@ var Namespace = function(name, subscriber) {
 
 Namespace.prototype = {
     subscribe: function(fn) {
+        this.invoke('init', fn);
         this.subscribers.push(fn);
     },
 

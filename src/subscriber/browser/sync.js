@@ -6,7 +6,21 @@ module.exports = function createSync(subscriber) {
     syncSandbox(subscriber, function(api) {
         api.subscribe(subscriber.processInput);
         utils.link(api.connected, function(connected) {
-            subscriber.channels.browserExtension = connected ? api.send : null;
+            subscriber.channels.sandbox = connected ? api.send : null;
+
+            // TODO: make it better
+            if (connected) {
+                for (var name in subscriber.namespaces) {
+                    var ns = subscriber.namespaces[name];
+                    if (ns.subscribers.length) {
+                        ns.invoke('init', function(data) {
+                            ns.subscribers.forEach(function(subscriber) {
+                                subscriber(data);
+                            });
+                        });
+                    }
+                }
+            }
         });
     });
 

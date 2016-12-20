@@ -10,10 +10,6 @@ function send(publisher, args) {
 }
 
 function invoke(method, args, callback) {
-    if (!this.hasMethod(method)) {
-        return utils.warn('[rempl] Unknown method:', method, this.methods);
-    }
-
     if (typeof callback === 'function') {
         args = args.concat(callback);
     }
@@ -25,10 +21,16 @@ var Namespace = function(name, publisher) {
     this.name = name;
     this.publisher = publisher;
     this.methods = Object.create(null);
+    this.methods.init = function(callback) {
+        callback(this._lastData);
+    }.bind(this);
 };
 
 Namespace.prototype = {
+    _lastData: null,
+
     publish: function(payload) {
+        this._lastData = payload;
         send(this.publisher, [{
             type: 'data',
             ns: this.name,
