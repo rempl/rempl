@@ -6,6 +6,8 @@ var Node = require('basis.ui').Node;
 var transport = require('../transport.js');
 var sandboxApi = {};
 var initSandbox = require('rempl:sandbox/index.js');
+var SANDBOX_HTML = asset('./template/sandbox-blank.html');
+var REMPL_SCRIPT = basis.path.resolve(asset('rempldist:rempl.js'));
 
 function createSandboxAPI(client, win) {
     function notify(type, args) {
@@ -79,7 +81,7 @@ var Frame = Node.subclass({
     binding: {
         api: 'apiId',
         src: function(node) {
-            return node.url || asset('./template/sandbox-blank.html');
+            return node.url || SANDBOX_HTML;
         }
     },
     action: {
@@ -99,7 +101,7 @@ var Frame = Node.subclass({
 
             // run UI script
             contentWindow.eval(
-                '(function(){var s=document.createElement("script");s.src="' + asset('rempldist:rempl.js') + '";document.documentElement.appendChild(s)})();' +
+                '(function(){var s=document.createElement("script");s.src="' + REMPL_SCRIPT + '";document.documentElement.appendChild(s)})();' +
                 this.script +
                 'console.log("Remote publisher UI (' + (this.url || 'script') + ') inited");' +
                 '//# sourceURL=publisher-ui-launcher.js'
