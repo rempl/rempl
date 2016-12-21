@@ -1,3 +1,9 @@
+## 1.0.0-alpha5 (December 21, 2016)
+
+- Fixed `404` for rempl script in server sandbox
+- Fixed publisher's UI init issue when script doesn't end with semicolon
+- Fixed issue with auto init on subscribe in case of multiple namespaces
+
 ## 1.0.0-alpha4 (December 21, 2016)
 
 - Added standalone mode to server (required for [`rempl-cli`](https://github.com/rempl/rempl-cli))
