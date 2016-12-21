@@ -14,10 +14,10 @@ module.exports = function createSync(subscriber) {
                     var ns = subscriber.namespaces[name];
                     if (ns.subscribers.length) {
                         ns.invoke('init', function(data) {
-                            ns.subscribers.forEach(function(subscriber) {
+                            this.subscribers.forEach(function(subscriber) {
                                 subscriber(data);
                             });
-                        });
+                        }.bind(ns));
                     }
                 }
             }
