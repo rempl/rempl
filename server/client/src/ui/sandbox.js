@@ -103,7 +103,7 @@ var Frame = Node.subclass({
             contentWindow.eval(
                 '(function(){var s=document.createElement("script");s.src="' + REMPL_SCRIPT + '";document.documentElement.appendChild(s)})();' +
                 this.script +
-                'console.log("Remote publisher UI (' + (this.url || 'script') + ') inited");' +
+                ';console.log("Remote publisher UI (' + (this.url || 'script') + ') inited");' +
                 '//# sourceURL=publisher-ui-launcher.js'
             );
 
