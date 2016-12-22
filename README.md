@@ -8,7 +8,7 @@ The general idea behind `Rempl` is to simplify moderated remote access to JavaSc
 npm install rempl
 ```
 
-## Usage
+## How to use
 
 ### Browser
 
@@ -17,11 +17,7 @@ npm install rempl
 <script>
     var myTool = rempl.createPublisher('myTool', function() { /* ... */ });
 
-    // or
-
-    rempl.getSubscriber(function(myTool) {
-        // build UI and subscribe for data from publisher
-    });
+    // ...
 </script>
 ```
 
@@ -85,6 +81,11 @@ For tools based on `rempl`, a publisher is source of UI. When new sandbox for su
 
 - `script` – JavaScript bundle that includes everything need to build an UI (i.e. JavaScript, CSS, templates etc)
 - `url` (in progress) – url of page that contains publishers UI
+
+## Examples
+
+- [shower-remote-control](https://github.com/lahmatiy/shower-remote-control) - [Shower](https://github.com/shower/shower) plugin for remote controlling of presentation
+- [webpack-runtime-analyzer](https://github.com/smelukov/webpack-runtime-analyzer) - [Webpack](https://github.com/webpack/webpack) plugin for analyzing internal processes, state and structure of bundles.
 
 ## API
 
