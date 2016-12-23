@@ -87,7 +87,7 @@ Planned (not tested yet):
 For tools based on `rempl`, a publisher is source of UI. When new sandbox for subscriber is created it send a request to publisher to provide an UI. Publisher should provide UI in some way:
 
 - `script` – JavaScript bundle that includes everything need to build an UI (i.e. JavaScript, CSS, templates etc)
-- `url` (in progress) – url of page that contains publishers UI
+- `url` – url of page that contains publishers UI
 
 ## API
 
