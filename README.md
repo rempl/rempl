@@ -2,6 +2,13 @@
 
 The general idea behind `Rempl` is to simplify moderated remote access to JavaScript runtime. `Rempl` provides a transport between environments and a set of UI hosts.
 
+## Examples
+
+Built on `Rempl`:
+
+- [shower-remote-control](https://github.com/lahmatiy/shower-remote-control) – [Shower](https://github.com/shower/shower) plugin for remote controlling of presentation
+- [webpack-runtime-analyzer](https://github.com/smelukov/webpack-runtime-analyzer) – [Webpack](https://github.com/webpack/webpack) plugin for analyzing internal processes, state and structure of bundles
+
 ## Install
 
 ```
@@ -81,11 +88,6 @@ For tools based on `rempl`, a publisher is source of UI. When new sandbox for su
 
 - `script` – JavaScript bundle that includes everything need to build an UI (i.e. JavaScript, CSS, templates etc)
 - `url` (in progress) – url of page that contains publishers UI
-
-## Examples
-
-- [shower-remote-control](https://github.com/lahmatiy/shower-remote-control) - [Shower](https://github.com/shower/shower) plugin for remote controlling of presentation
-- [webpack-runtime-analyzer](https://github.com/smelukov/webpack-runtime-analyzer) - [Webpack](https://github.com/webpack/webpack) plugin for analyzing internal processes, state and structure of bundles.
 
 ## API
 
