@@ -100,12 +100,14 @@ var Frame = Node.subclass({
             var contentWindow = this.element.contentWindow;
 
             // run UI script
-            contentWindow.eval(
-                '(function(){var s=document.createElement("script");s.src="' + REMPL_SCRIPT + '";document.documentElement.appendChild(s)})();' +
-                this.script +
-                ';console.log("Remote publisher UI (' + (this.url || 'script') + ') inited");' +
-                '//# sourceURL=publisher-ui-launcher.js'
-            );
+            if (this.script) {
+                contentWindow.eval(
+                    '(function(){var s=document.createElement("script");s.src="' + REMPL_SCRIPT + '";document.documentElement.appendChild(s)})();' +
+                    this.script +
+                    ';console.log("Remote publisher UI (script) successful eval\'ed");' +
+                    '//# sourceURL=publisher-ui-init.js'
+                );
+            }
 
             createSandboxAPI.call(this, this.client, contentWindow);
         }

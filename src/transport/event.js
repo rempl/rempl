@@ -179,7 +179,7 @@ function EventTransport(name, connectTo, options) {
         return;
     }
 
-    this.env.addEventListener('message', function(e) {
+    addEventListener('message', function(e) {
         var data = e.data || {};
 
         switch (data.channel) {
