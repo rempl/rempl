@@ -41,18 +41,18 @@ var myTool = rempl.createPublisher('myTool', function() { /* ... */ });
 
 ![\[ subject \] <--- \[ publisher (data) \] <--- rempl ---> \[ subscriber (UI) \]](https://cloud.githubusercontent.com/assets/270491/21329597/8e5786c2-c64a-11e6-912f-12d8e8827c71.png)
 
-- `Subject` – something to be inspected, i.e. app, page, environment etc
-- `Publisher` – monotors a `subject`, collect a data and publish it for `subscribers`
-- `Subscriber` – consumer of `publisher`'s data, provide an UI for recieved data
+- `Subject` – something to be inspected, i.e. app, page, environment etc.
+- `Publisher` – monitors a `subject`, collects data and publishes it for `subscribers`
+- `Subscriber` – consumer of `publisher`'s data, provides an UI for received data
 - `Transport` – channels and protocols between `publisher` and `subscriber`; WebSocket (socket.io) or DOM Event-based communication may to be used between endpoints
-- `Host` – integration to integrates in some environment (app), allows to choose a publisher and creates a `sandbox` for its `subscriber`; usually it's a plugin for something like browsers, editors etc
-- `Sandbox` – creates a `subscriber`, request an UI and activate it when recieved
+- `Host` – integrates in some environment (app), allows to choose a publisher and creates a `sandbox` for its `subscriber`; usually it's a plugin for something like browser, editor etc.
+- `Sandbox` – creates a `subscriber`, request an UI and activate it when received
 
 Publisher and subscriber are two parts of single app (tool). Transports, hosts and sandboxes are parts of `rempl`.
 
 ### Server
 
-For most cases you need a WebSocket transport. In this case a WS server required. Rempl provides 
+For most cases you need a WebSocket transport. In this case a WS server is required. Rempl provides
 
 - [rempl-cli](https://github.com/rempl/rempl-cli) – command line app to launch a server
 - [menubar-server](https://github.com/rempl/menubar-server) – an Electron app that launchs an `rempl` server instance and provide easy control over it; allows forget about command line
@@ -84,9 +84,9 @@ Planned (not tested yet):
 
 ### Distribution of UI
 
-For tools based on `rempl`, a publisher is source of UI. When new sandbox for subscriber is created it send a request to publisher to provide an UI. Publisher should provide UI in some way:
+For tools based on `rempl`, a publisher is a source of UI. When new sandbox for subscriber is created, it sends a request to publisher to provide an UI. Publisher should provide UI in some way:
 
-- `script` – JavaScript bundle that includes everything need to build an UI (i.e. JavaScript, CSS, templates etc)
+- `script` – JavaScript bundle that includes everything is needed to build an UI (i.e. JavaScript, CSS, templates etc.)
 - `url` – url of page that contains publishers UI
 
 ## API
