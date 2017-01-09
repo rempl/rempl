@@ -1,3 +1,8 @@
+## 1.0.0-alpha6 (January 9, 2016)
+
+- Added `url` UI type support
+- Set proper server web interface viewport size on mobile devices
+
 ## 1.0.0-alpha5 (December 21, 2016)
 
 - Fixed `404` for rempl script in server sandbox
