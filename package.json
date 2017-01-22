@@ -22,9 +22,9 @@
       "es6": true
     },
     "rules": {
-      "no-duplicate-case": "error",
-      "no-undef": "error",
-      "no-unused-vars": ["error", {"vars": "all", "args": "after-used"}]
+      "no-duplicate-case": 2,
+      "no-undef": 2,
+      "no-unused-vars": [2, {"vars": "all", "args": "after-used"}]
     }
   },
   "main": "src/index.js",
