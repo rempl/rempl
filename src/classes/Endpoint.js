@@ -30,7 +30,7 @@ Endpoint.prototype = {
         var ns = packet.ns || '*';
 
         if (packet.type === 'call') {
-            if (!this.ns(ns).hasMethod(packet.method)) {
+            if (!this.ns(ns).isMethodProvided(packet.method)) {
                 return utils.warn('[rempl][sync] ' + this.getName() + ' has no remote command:', packet.method);
             }
 

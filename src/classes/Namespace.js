@@ -7,8 +7,8 @@ var Namespace = function(name, owner) {
 };
 
 Namespace.prototype = {
-    hasMethod: function(method) {
-        return method in this.methods;
+    isMethodProvided: function(methodName) {
+        return hasOwnProperty.call(this.methods, methodName);
     },
     provide: function(methodName, fn) {
         if (typeof methodName === 'string') {
