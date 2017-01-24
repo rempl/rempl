@@ -29,7 +29,7 @@ Subscriber.prototype.processInput = function(packet, callback) {
             subscriber(packet.payload);
         });
     } else {
-        Endpoint.call(this, packet, callback);
+        Endpoint.prototype.processInput.call(this, packet, callback);
     }
 };
 
