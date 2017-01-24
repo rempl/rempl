@@ -1,3 +1,5 @@
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+
 var Namespace = function(name, owner) {
     this.name = name;
     this.owner = owner;
@@ -8,18 +10,27 @@ Namespace.prototype = {
     hasMethod: function(method) {
         return method in this.methods;
     },
-    provide: function(name, fn) {
-        if (typeof name === 'string') {
+    provide: function(methodName, fn) {
+        if (typeof methodName === 'string') {
             if (typeof fn === 'function') {
-                this.methods[name] = fn;
+                this.methods[methodName] = fn;
             }
         } else {
-            var methods = name;
-            for (name in methods) {
-                if (hasOwnProperty.call(methods, name) &&
-                    typeof methods[name] === 'function') {
-                    this.methods[name] = methods[name];
+            var methods = methodName;
+            for (methodName in methods) {
+                if (hasOwnProperty.call(methods, methodName) &&
+                    typeof methods[methodName] === 'function') {
+                    this.methods[methodName] = methods[methodName];
                 }
+            }
+        }
+    },
+    revoke: function(methodName) {
+        if (Array.isArray(methodName)) {
+            methodName.forEach(this.revoke, this);
+        } else {
+            if (hasOwnProperty.call(this.methods, methodName)) {
+                delete this.methods[methodName];
             }
         }
     },
