@@ -1,3 +1,4 @@
+var hasOwnProperty = Object.prototype.hasOwnProperty;
 var utils = require('../utils/index.js');
 var publishers = Object.create(null);
 
@@ -41,8 +42,20 @@ Namespace.prototype = {
     hasMethod: function(method) {
         return method in this.methods;
     },
-    define: function(methods) {
-        utils.complete(this.methods, methods);
+    provide: function(name, fn) {
+        if (typeof name === 'string') {
+            if (typeof fn === 'function') {
+                this.methods[name] = fn;
+            }
+        } else {
+            var methods = name;
+            for (name in methods) {
+                if (hasOwnProperty.call(methods, name) &&
+                    typeof methods[name] === 'function') {
+                    this.methods[name] = methods[name];
+                }
+            }
+        }
     },
     invoke: function(method/*, ...args, callback*/) {
         var args = Array.prototype.slice.call(arguments, 1);

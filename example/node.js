@@ -10,9 +10,7 @@ setInterval(function() {
     myTool.publish(counter++);
 }, 500);
 
-myTool.define({
-    reset: function() {
-        counter = 1;
-        myTool.publish(counter);
-    }
+myTool.provide('reset', function() {
+    counter = 1;
+    myTool.publish(counter);
 });
