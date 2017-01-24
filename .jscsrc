@@ -3,8 +3,7 @@
         "./coverage",
         "./docs",
         "./dist",
-        "./node_modules",
-        "./server/client/dist/*"
+        "./node_modules"
     ],
 
     "disallowEmptyBlocks": true,
