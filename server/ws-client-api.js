@@ -10,5 +10,3 @@ api.getRemoteUrl = function() {
 api.initRemoteDevtoolAPI = function() {
     console.warn('initRemoteDevtoolAPI() method is deprecated, use initRemotePublisher() instead');
 };
-
-api.initRemotePublisher = rempl.createPublisher;
