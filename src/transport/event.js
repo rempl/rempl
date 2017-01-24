@@ -1,8 +1,8 @@
 /* eslint-env browser */
 /* global CustomEvent */
 
+var Token = require('../classes/Token.js');
 var utils = require('../utils/index.js');
-var Token = require('../utils/Token.js');
 var global = new Function('return this')();
 var DEBUG = false;
 

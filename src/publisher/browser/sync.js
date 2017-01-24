@@ -1,4 +1,4 @@
-// var Token = require('../../utils/index.js').Token;
+// var Token = require('../../classes/Token.js');
 var utils = require('../../utils/index.js');
 
 module.exports = function createSync(publisher) {

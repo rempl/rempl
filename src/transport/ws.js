@@ -1,5 +1,5 @@
+var Token = require('../classes/Token.js');
 var utils = require('../utils');
-var Token = require('../utils/Token.js');
 var socketIO = require('socket.io-client');
 var clients = Object.create(null);
 var DEBUG = false;

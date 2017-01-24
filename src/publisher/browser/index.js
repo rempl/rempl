@@ -1,4 +1,4 @@
-var Publisher = require('../Publisher.js');
+var Publisher = require('../../classes/Publisher.js');
 var makeSync = require('./sync.js');
 
 Publisher.onPublishersChange = require('./identify.js').updatePublisherList;
