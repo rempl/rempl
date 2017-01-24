@@ -13,7 +13,7 @@ module.exports = function createSync(subscriber) {
                 for (var name in subscriber.namespaces) {
                     var ns = subscriber.namespaces[name];
                     if (ns.subscribers.length) {
-                        ns.invoke('init', function(data) {
+                        ns.callRemote('init', function(data) {
                             this.subscribers.forEach(function(subscriber) {
                                 subscriber(data);
                             });

@@ -7,7 +7,7 @@ rempl.getSubscriber(function(api) {
     });
 
     window.reset = function() {
-        api.invoke('reset');
+        api.callRemote('reset');
     };
 
     document.body

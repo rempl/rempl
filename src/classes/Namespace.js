@@ -34,7 +34,7 @@ Namespace.prototype = {
             }
         }
     },
-    invoke: function(method/*, ...args, callback*/) {
+    callRemote: function(method/*, ...args, callback*/) {
         var args = Array.prototype.slice.call(arguments, 1);
         var callback = null;
 

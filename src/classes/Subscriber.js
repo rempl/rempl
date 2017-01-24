@@ -10,7 +10,7 @@ var SubscriberNamespace = function(name, owner) {
 SubscriberNamespace.prototype = Object.create(Namespace.prototype);
 SubscriberNamespace.prototype._lastData = null;
 SubscriberNamespace.prototype.subscribe = function(fn) {
-    this.invoke('init', fn);
+    this.callRemote('init', fn);
     this.subscribers.push(fn);
 };
 
