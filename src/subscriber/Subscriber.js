@@ -1,110 +1,35 @@
-var hasOwnProperty = Object.prototype.hasOwnProperty;
-var utils = require('../utils/index.js');
+var Namespace = require('../classes/Namespace.js');
+var Endpoint = require('../classes/Endpoint.js');
 
-function send(subscriber, args) {
-    for (var channel in subscriber.channels) {
-        subscriber.channels[channel].apply(null, args);
-    }
-}
+var SubscriberNamespace = function(name, owner) {
+    Namespace.call(this, name, owner);
 
-function invoke(method, args, callback) {
-    if (typeof callback === 'function') {
-        args = args.concat(callback);
-    }
-
-    this.methods[method].apply(null, args);
-}
-
-var Namespace = function(name, subscriber) {
-    this.name = name;
-    this.subscriber = subscriber;
-    this.methods = Object.create(null);
     this.subscribers = [];
 };
 
-Namespace.prototype = {
-    subscribe: function(fn) {
-        this.invoke('init', fn);
-        this.subscribers.push(fn);
-    },
-
-    hasMethod: function(method) {
-        return method in this.methods;
-    },
-    provide: function(name, fn) {
-        if (typeof name === 'string') {
-            if (typeof fn === 'function') {
-                this.methods[name] = fn;
-            }
-        } else {
-            var methods = name;
-            for (name in methods) {
-                if (hasOwnProperty.call(methods, name) &&
-                    typeof methods[name] === 'function') {
-                    this.methods[name] = methods[name];
-                }
-            }
-        }
-    },
-    invoke: function(method/*, ...args, callback*/) {
-        var args = Array.prototype.slice.call(arguments, 1);
-        var callback = null;
-
-        if (args.length && typeof args[args.length - 1] === 'function') {
-            callback = args.pop();
-        }
-
-        send(this.subscriber, [{
-            type: 'call',
-            ns: this.name,
-            method: method,
-            args: args
-        }, callback]);
-    }
+SubscriberNamespace.prototype = Object.create(Namespace.prototype);
+SubscriberNamespace.prototype._lastData = null;
+SubscriberNamespace.prototype.subscribe = function(fn) {
+    this.invoke('init', fn);
+    this.subscribers.push(fn);
 };
 
 var Subscriber = function() {
-    this.namespaces = Object.create(null);
-    this.channels = Object.create(null);
-    this.processInput = this.processInput.bind(this);
-
-    var defaultNS = this.ns('*');
-    for (var method in defaultNS) {
-        if (typeof defaultNS[method] === 'function') {
-            this[method] = defaultNS[method].bind(defaultNS);
-        }
-    }
+    Endpoint.call(this);
 };
 
-Subscriber.prototype = {
-    ns: function getNamespace(name) {
-        if (!this.namespaces[name]) {
-            this.namespaces[name] = new Namespace(name, this);
-        }
-
-        return this.namespaces[name];
-    },
-    processInput: function(packet, callback) {
-        var ns = packet.ns || '*';
-
-        switch (packet.type) {
-            case 'call':
-                if (!this.ns(ns).hasMethod(packet.method)) {
-                    return console.warn('[rempl][sync] Subscriber `' + this.id + '` has no remote command `' + packet.method + '` in namespace `' + ns + '`');
-                }
-
-                invoke.call(this.ns(ns), packet.method, packet.args, callback);
-                break;
-
-            case 'data':
-                this.ns(ns).subscribers.forEach(function(subscriber) {
-                    subscriber(packet.payload);
-                });
-                break;
-
-            default:
-                utils.warn('[rempl][sync] Unknown packet type:', packet.type);
-        }
+Subscriber.prototype = Object.create(Endpoint.prototype);
+Subscriber.prototype.namespaceClass = SubscriberNamespace;
+Subscriber.prototype.getName = function() {
+    return 'Subscriber';
+};
+Subscriber.prototype.processInput = function(packet, callback) {
+    if (packet.type === 'data') {
+        this.ns(packet.ns || '*').subscribers.forEach(function(subscriber) {
+            subscriber(packet.payload);
+        });
+    } else {
+        Endpoint.call(this, packet, callback);
     }
 };
 
