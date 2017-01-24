@@ -5,7 +5,6 @@ var CLIENT_FIELDS = {
     location: '[unknown]',
     pid: 0,
     type: '',
-    features: [],
     publishers: []
 };
 
@@ -52,7 +51,6 @@ Client.prototype = {
             pid: this.pid,
             location: this.location,
             online: Boolean(this.socket),
-            features: this.features || [],
             publishers: this.publishers || [],
             num: this.num
         };
@@ -69,7 +67,6 @@ Client.prototype = {
     setOffline: function() {
         if (this.socket) {
             this.socket = null;
-            this.features = [];
             this.publishers = [];
             this.offlineTime = Date.now();
             this.list.notifyUpdates();

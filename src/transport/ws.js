@@ -42,7 +42,7 @@ function callMethod(obj, method) {
 function onConnect() {
     clearInterval(this.sendInfoTimer);
 
-    this.isOnline.set(true);
+    this.connected.set(true);
     this.clientInfo = this.getInfo();
 
     this.send('rempl:client connect', this.clientInfo, function(data) {
@@ -93,8 +93,7 @@ function onDisconnect() {
         console.log('[rempl] disconnected');
     }
 
-    this.isOnline.set(false);
-    this.setFeatures([]);
+    this.connected.set(false);
 
     clearInterval(this.sendInfoTimer);
     this.stopIdentify();
@@ -111,8 +110,7 @@ function WSTransport(uri) {
     this.sendInfoTimer = null;
     this.sendInfoTimerTTL = 150;
 
-    this.isOnline = new Token(false);
-    this.features = [];
+    this.connected = new Token(false);
 
     if (DEBUG) {
         console.log('[rempl][ws-transport] connecting to ' + normalizeUri(uri));
@@ -121,7 +119,6 @@ function WSTransport(uri) {
     this.transport = socketIO.connect(normalizeUri(uri))
         .on('connect', onConnect.bind(this))
         .on('disconnect', onDisconnect.bind(this))
-        .on('features', this.setFeatures.bind(this))
 
         .on('rempl:get ui', onGetUI.bind(this))
         .on('rempl:to session', onData.bind(this))
@@ -143,7 +140,6 @@ WSTransport.prototype.clientInfoFields = [
     'clientId',
     'sessionId',
     'type',
-    'features',
     'publishers'
 ];
 
@@ -184,16 +180,6 @@ WSTransport.prototype.sendInfo = function() {
     }
 };
 
-/**
- * Set features for this client
- *
- * @param {Array<string>} list
- */
-WSTransport.prototype.setFeatures = function(list) {
-    this.features = Array.prototype.slice.call(list || []);
-    this.sendInfo();
-};
-
 WSTransport.prototype.startIdentify = function() {
     if (DEBUG) {
         debugger;
@@ -228,10 +214,7 @@ WSTransport.prototype.createApi = function(id, getRemoteUI) {
     publisher.sendInfo();
 
     return {
-        connected: publisher.isOnline,
-        setFeatures: function(list) {
-            publisher.setFeatures(list);
-        },
+        connected: publisher.connected,
         send: function() {
             publisher.transport.emit.apply(publisher.transport,
                 ['rempl:client data', id].concat(Array.prototype.slice.call(arguments))

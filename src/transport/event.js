@@ -41,7 +41,6 @@ function handshake(channel) {
         name: channel.remoteName,  // FIXME: temporary solution to pass subscriber name from sandbox
         input: channel.inputChannelId,
         output: channel.outputChannelId,
-        features: channel.features.value,
         publishers: channel.publishers
     });
 }
@@ -70,14 +69,6 @@ function onConnect(payload) {
     if (payload.name && !this.remoteName) { // FIXME: temporary solution to pass subscriber name from sandbox
         this.remoteName = payload.name;
     }
-
-    // send features to devtools
-    // features.on(function(features){
-    //     emitEvent(outputChannelId, {
-    //         type: 'features',
-    //         data: features
-    //     });
-    // });
 
     this.endpoints.on(function(publishers) {
         this.send(this.outputChannelId, {
@@ -163,7 +154,6 @@ function EventTransport(name, connectTo, options) {
     this.outputChannelId = null;
 
     this.connected = new Token(true); // TODO: set false by default
-    this.features = new Token([]);
     this.endpoints = new Token([]);
     this.endpointGetUI = {};
 
@@ -209,7 +199,6 @@ EventTransport.prototype = {
             }
 
             callback({
-                // setFeatures: features.set.bind(features),
                 connected: this.connected,
                 subscribe: subscribe.bind(this, endpoint.id),
                 send: send.bind(this, endpoint.id)

@@ -7,10 +7,6 @@ module.exports = function createSync(publisher) {
 
     // browser extension
     syncBrowserExtension(publisher, function(api) {
-        // sync features list
-        // publisher.features.link(api, api.setFeatures);
-
-        // subscribe to data from devtools & context free send method
         api.subscribe(publisher.processInput);
         api.connected.link(function(connected) {
             // devtools.set(connected);
@@ -20,25 +16,15 @@ module.exports = function createSync(publisher) {
 
     // in page
     // inpageSync(publisher, function(api) {
-    //     // sync features list
-    //     // publisher.features.link(api, api.setFeatures);
-
-    //     // subscribe to data from devtools & context free send method
     //     api.subscribe(publisher.processInput);
     //     api.connected.link(function(connected) {
     //         // devtools.set(connected);
     //         publisher.channels.inPage = connected ? api.send : null;
     //     });
-
-    //     console.log('in-page ready');
     // });
 
     // ws server
     syncWs(publisher, function(api) {
-        // sync features list
-        // publisher.features.link(api, api.setFeatures);
-
-        // subscribe to data from remote devtools & context free send method
         api.subscribe(publisher.processInput);
         api.connected.link(function(connected) {
             // remoteSubscribers.set(connected);
