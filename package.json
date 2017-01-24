@@ -32,7 +32,7 @@
     "codestyle": "jscs src server && eslint src server",
     "build": "npm run build:rempl && npm run build:server-assets",
     "build:rempl": "browserify --standalone rempl src/index.js | uglifyjs --compress --mangle -o dist/rempl.js",
-    "build:server-assets": "node node_modules/basisjs-tools-build/bin/build -c server/client/basis.config",
+    "build:server-assets": "node node_modules/basisjs-tools-build/bin/build -c server/client/build.config",
     "prepublish": "npm run build"
   },
   "devDependencies": {

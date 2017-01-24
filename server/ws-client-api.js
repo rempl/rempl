@@ -1,5 +1,5 @@
 /* eslint-env browser */
-/* global Token, api, rempl */
+/* global Token, api */
 
 // extend api
 api.remoteSubscribers = new Token(0);
