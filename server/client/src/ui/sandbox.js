@@ -7,7 +7,16 @@ var transport = require('../transport.js');
 var sandboxApi = {};
 var initSandbox = require('rempl:sandbox/index.js');
 var SANDBOX_HTML = asset('./template/sandbox-blank.html');
-var REMPL_SCRIPT = basis.path.resolve(asset('rempldist:rempl.js'));
+var remplScript = (function() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', basis.path.resolve(asset('rempldist:rempl.js')), false);
+    xhr.setRequestHeader('If-Modified-Since', new Date(0).toGMTString());
+    xhr.send('');
+
+    return xhr.status >= 200 && xhr.status < 400
+        ? xhr.responseText
+        : '';
+})();
 
 function createSandboxAPI(client, win) {
     function notify(type, args) {
@@ -96,16 +105,14 @@ var Frame = Node.subclass({
     },
     initUI: function() {
         if (this.ready && this.element) {
-            // run publisher UI code in sandbox and get created socket for future teardown
             var contentWindow = this.element.contentWindow;
 
-            // run UI script
+            // run publisher UI script
             if (this.script) {
+                contentWindow.eval(remplScript);
                 contentWindow.eval(
-                    '(function(){var s=document.createElement("script");s.src="' + REMPL_SCRIPT + '";document.documentElement.appendChild(s)})();' +
                     this.script +
-                    ';console.log("Remote publisher UI (script) successful eval\'ed");' +
-                    '//# sourceURL=publisher-ui-init.js'
+                    '\n//# sourceURL=publisher-ui.js'
                 );
             }
 
