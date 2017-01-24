@@ -103,7 +103,7 @@ setInterval(function() {
     myTool.publish('ping');
 });
 
-myTool.define({
+myTool.provide({
     pong: function() {
         console.log('Remote subscriber invoke `pong`');
     }
@@ -111,11 +111,12 @@ myTool.define({
 ```
 
 - publish(data)
-- define(methods)
-- hasMethod(method)
-- invoke(method, ...args, callback)
+- provide(methodName, fn) or provide(methods)
+- revoke(methodName) or provide(methodNamesArray)
+- isMethodProvided(method)
+- callRemote(method, ...args, callback)
 - ns(namespace)
-  - publish/define/hasMethod/invoke
+  - publish/provide/isMethodProvided/callRemote
 
 ### Subscriber
 
@@ -124,17 +125,22 @@ rempl.getSubscriber(function(myTool) {
     myTool.subscribe(function(data) {
         console.log('Receive data from publisher:', data);
 
-        myTool.invoke('pong');
+        myTool.callRemote('pong');
     });
 });
 ```
 
 - subscribe(callback)
-- define(methods)
-- hasMethod(method)
-- invoke(method, ...args, callback)
+- provide(methodName, fn) or provide(methods)
+- revoke(methodName) or provide(methodNamesArray)
+- isMethodProvided(method)
+- callRemote(method, ...args, callback)
 - ns(namespace)
-  - subscribe/define/hasMethod/invoke
+  - subscribe/provide/isMethodProvided/callRemote
+
+### RPC
+
+
 
 ---
 
