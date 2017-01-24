@@ -1,11 +1,9 @@
-var utils = require('../../utils/index.js');
-
 module.exports = function createSync(subscriber) {
     var syncSandbox = require('./sync-sandbox.js');
 
     syncSandbox(subscriber, function(api) {
         api.subscribe(subscriber.processInput);
-        utils.link(api.connected, function(connected) {
+        api.connected.link(function(connected) {
             subscriber.channels.sandbox = connected ? api.send : null;
 
             // TODO: make it better

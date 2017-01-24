@@ -9,7 +9,7 @@ Token.prototype = {
     handler: null,
 
     /**
-     * Set new value for token. Call apply method if value has been changed.
+     * Set new value and call apply method if value has been changed.
      * @param {*} value
      */
     set: function(value) {
@@ -20,15 +20,23 @@ Token.prototype = {
     },
 
     /**
-     * Add callback on token value changes.
+     * Returns current token value.
+     * @returns {*}
+     */
+    get: function() {
+        return this.value;
+    },
+
+    /**
+     * Adds a callback on token value changes.
      * @param {function(value)} fn
      * @param {object=} context
      */
-    attach: function(fn, context) {
+    on: function(fn, context) {
         var cursor = this;
         while (cursor = cursor.handler) {
             if (cursor.fn === fn && cursor.context === context) {
-                console.warn('duplicate fn & context pair');
+                console.warn('Token#on: duplicate fn & context pair');
             }
         }
 
@@ -40,19 +48,28 @@ Token.prototype = {
     },
 
     /**
-     * Remove callback. Must be passed the same arguments as for {basis.Token#attach} method.
+     * Adds a callback on token value changes and invokes callback with current value.
      * @param {function(value)} fn
      * @param {object=} context
      */
-    detach: function(fn, context) {
+    link: function(fn, context) {
+        this.on(fn, context);
+        fn.call(context, this.value);
+    },
+
+    /**
+     * Removes a callback. Must be passed the same arguments as for Token#on() method.
+     * @param {function(value)} fn
+     * @param {object=} context
+     */
+    off: function(fn, context) {
         var cursor = this;
         var prev;
 
         while (prev = cursor, cursor = cursor.handler) {
             if (cursor.fn === fn && cursor.context === context) {
                 // make it non-callable
-                cursor.fn = function() {
-                };
+                cursor.fn = function() {};
 
                 // remove from list
                 prev.handler = cursor.handler;
@@ -61,11 +78,11 @@ Token.prototype = {
             }
         }
 
-        console.warn('fn & context pair not found, nothing was removed');
+        console.warn('Token#off: fn & context pair not found, nothing was removed');
     },
 
     /**
-     * Call every attached callbacks with current token value.
+     * Call all callbacks with current token value.
      */
     apply: function() {
         var cursor = this;

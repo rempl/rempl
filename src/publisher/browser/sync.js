@@ -1,6 +1,3 @@
-// var Token = require('../../classes/Token.js');
-var utils = require('../../utils/index.js');
-
 module.exports = function createSync(publisher) {
     var syncBrowserExtension = require('./sync-browser-extension.js');
     // var inpageSync = require('./sync-in-page.js');
@@ -15,7 +12,7 @@ module.exports = function createSync(publisher) {
 
         // subscribe to data from devtools & context free send method
         api.subscribe(publisher.processInput);
-        utils.link(api.connected, function(connected) {
+        api.connected.link(function(connected) {
             // devtools.set(connected);
             publisher.channels.browserExtension = connected ? api.send : null;
         });
@@ -28,7 +25,7 @@ module.exports = function createSync(publisher) {
 
     //     // subscribe to data from devtools & context free send method
     //     api.subscribe(publisher.processInput);
-    //     utils.link(api.connected, function(connected) {
+    //     api.connected.link(function(connected) {
     //         // devtools.set(connected);
     //         publisher.channels.inPage = connected ? api.send : null;
     //     });
@@ -43,7 +40,7 @@ module.exports = function createSync(publisher) {
 
         // subscribe to data from remote devtools & context free send method
         api.subscribe(publisher.processInput);
-        utils.link(api.connected, function(connected) {
+        api.connected.link(function(connected) {
             // remoteSubscribers.set(connected);
             publisher.channels.wsserver = connected ? api.send : null;
         });

@@ -37,11 +37,6 @@ function genUID(len) {
     return result.substr(0, len);
 }
 
-function link(token, fn, context) {
-    token.attach(fn, context);
-    fn.call(context, token.value);
-}
-
 var ready = (function() {
     var eventFired = !document || document.readyState == 'complete';
     var readyHandlers = [];
@@ -173,7 +168,6 @@ module.exports = {
     complete: complete,
     slice: slice,
     genUID: genUID,
-    link: link,
     ready: ready,
     waitForGlobal: waitForGlobal,
     log: consoleMethods.log,

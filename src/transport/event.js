@@ -72,14 +72,14 @@ function onConnect(payload) {
     }
 
     // send features to devtools
-    // features.attach(function(features){
+    // features.on(function(features){
     //     emitEvent(outputChannelId, {
     //         type: 'features',
     //         data: features
     //     });
     // });
 
-    this.endpoints.attach(function(publishers) {
+    this.endpoints.on(function(publishers) {
         this.send(this.outputChannelId, {
             type: 'publishers',
             data: [publishers]
