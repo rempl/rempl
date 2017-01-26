@@ -140,7 +140,54 @@ rempl.getSubscriber(function(myTool) {
 
 ### RPC
 
+Publishers and Subcribers can provide methods for remote side invocation and invoke methods of other side. API of both sides is symetric. Every namespace have the same RPC API as Publisher or Subscriber have.
 
+> NOTE: Examples are given for a Publisher, but the same API is available for any Subscriber since API is symetric.
+
+#### provide()
+
+Method to provide a method(s) for remote side. It has two semantic: to provide a single method or batch of methods.
+
+```js
+publisher.provide('foo', function() {
+    console.log('Method `foo` was invoked by subscriber');
+});
+publisher.ns('something').provide({
+    method1: function() { /* do something */ },
+    method2: function() { /* do something */ }
+});
+```
+
+#### revoke()
+
+Method to revoke a method(s) that was provided before. It allows to revoke a single method or several methods at once.
+
+```js
+publisher.remove('foo');
+publisher.ns('something').revoke(['method1', 'method2']);
+```
+
+#### isMethodProvided()
+
+Returns `true` when method is provided for remote side by `provide()` method.
+
+```js
+publisher.isMethodProvided('test'); // false
+publisher.provide('test', function() {});
+publisher.isMethodProvided('test'); // true
+publisher.revoke('test');
+publisher.isMethodProvided('test'); // false
+```
+
+#### callRemote()
+
+Invoke remote side method with given arguments. All arguments should be a transferable through JSON data types, i.e. `number`, `string`, `boolean`, `Array`, plain object or null. The last argument can be a function that remote side can use to send data back.
+
+```js
+publisher.callRemote('methodName', 1, 2, function(res) {
+    console.log('response from subscriber');
+});
+```
 
 ---
 
