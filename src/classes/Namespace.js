@@ -52,10 +52,11 @@ Namespace.prototype = {
 };
 
 Namespace.invoke = function invoke(namespace, method, args, callback) {
-    if (typeof callback === 'function') {
-        args = args.concat(callback);
-    }
+    // add a callback to args even if no callback, to avoid extra checking
+    // that callback is passed by remote side
+    args = args.concat(callback === 'function' ? callback : function() {});
 
+    // invoke the provided remote method
     namespace.methods[method].apply(null, args);
 };
 
