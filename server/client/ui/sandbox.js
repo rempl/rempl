@@ -18,7 +18,7 @@ var remplScript = (function() {
         : '';
 })();
 
-function createSandboxAPI(client, win) {
+function createSandboxAPI(endpoint, win) {
     function notify(type, args) {
         for (var i = 0; i < subscribers[type].length; i++) {
             subscribers[type][i].apply(null, args);
@@ -26,9 +26,9 @@ function createSandboxAPI(client, win) {
     }
 
     var apiId = this.apiId;
-    var sessionId = Value.query(client, 'data.sessionId');
-    var online = Value.query(client, 'data.online');
-    var features = Value.query(client, 'data.features');
+    var sessionId = Value.query(endpoint, 'data.sessionId');
+    var online = Value.query(endpoint, 'data.online');
+    var features = Value.query(endpoint, 'data.features');
     var retryTimer;
     var subscribers = {
         data: [],
@@ -39,7 +39,7 @@ function createSandboxAPI(client, win) {
 
     var socket = io('', { transports: ['websocket', 'polling'] })
         .on('connect', function joinSession() {
-            socket.emit('rempl:connect to publisher', client.data.clientId, client.data.name, function(err) {
+            socket.emit('rempl:connect to publisher', endpoint.data.endpointId, endpoint.data.name, function(err) {
                 if (err) {
                     retryTimer = setTimeout(joinSession, 2000);
                 }
@@ -74,7 +74,7 @@ function createSandboxAPI(client, win) {
         notify('features', [features]);
     });
 
-    initSandbox(win, client.data.name, function(api) {
+    initSandbox(win, endpoint.data.name, function(api) {
         api.subscribe(function() {
             socket.emit.apply(socket, ['rempl:to publisher'].concat(Array.prototype.slice.call(arguments)));
         });
@@ -116,7 +116,7 @@ var Frame = Node.subclass({
                 );
             }
 
-            createSandboxAPI.call(this, this.client, contentWindow);
+            createSandboxAPI.call(this, this.endpoint, contentWindow);
         }
     },
 
@@ -146,7 +146,7 @@ module.exports = new Node({
 
     template: resource('./template/sandbox.tmpl'),
     binding: {
-        hasClient: Value.query('data.id').as(Boolean),
+        hasEndpoint: Value.query('data.id').as(Boolean),
         loading: 'loading',
         error: 'error',
         online: 'data:',
@@ -186,14 +186,14 @@ module.exports = new Node({
         if (this.data.id) {
             this.loading.set(true);
             this.error.set();
-            transport.getClientUI(this.data.id, function(err, type, content) {
+            transport.getPublisherUI(this.data.id, function(err, type, content) {
                 this.loading.set(false);
 
                 if (err) {
                     this.error.set(err);
                 } else if (this.data.uiContent != null) {
                     this.setSatellite('frame', new Frame({
-                        client: this,
+                        endpoint: this,
                         url: type === 'url' ? content : null,
                         script: type === 'script' ? content : ''
                     }));

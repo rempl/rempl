@@ -2,13 +2,13 @@
 /* global io, basis */
 
 var Value = require('basis.data').Value;
-var Client = require('./type.js').Client;
+var Endpoint = require('./type.js').Endpoint;
 var Publisher = require('./type.js').Publisher;
 var online = new Value({ value: false });
 var socket = io.connect(location.host, { transports: ['websocket', 'polling'] });
 
 function syncEndpointList(data) {
-    Client.all.setAndDestroyRemoved(basis.array(data).map(Client.reader));
+    Endpoint.all.setAndDestroyRemoved(basis.array(data).map(Endpoint.reader));
 }
 
 // connection events
@@ -26,9 +26,9 @@ socket
 
 module.exports = {
     online: online,
-    getClientUI: function(id, callback) {
+    getPublisherUI: function(id, callback) {
         var publisher = Publisher(id);
-        socket.emit('rempl:get publisher ui', publisher.data.clientId, publisher.data.name, function(err, type, content) {
+        socket.emit('rempl:get publisher ui', publisher.data.endpointId, publisher.data.name, function(err, type, content) {
             publisher.update({
                 uiType: type,
                 uiContent: content
@@ -36,10 +36,10 @@ module.exports = {
             callback(err, type, content);
         });
     },
-    pickClient: function(callback) {
+    pickPublisher: function(callback) {
         socket.emit('rempl:pick publisher', callback);
     },
-    cancelClientPick: function() {
+    cancelPublisherPick: function() {
         socket.emit('rempl:cancel publisher pick');
     }
 };

@@ -1,6 +1,6 @@
 module.exports = {
     Publisher: require('./type/publisher.js'),
-    Client: require('./type/client.js')
+    Endpoint: require('./type/endpoint.js')
 };
 
 require('basis.entity').validate();

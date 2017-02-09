@@ -4,7 +4,7 @@ function stringOrNull(value) {
     return value == null ? null : String(value);
 }
 
-var Client = entity.createType('Client', {
+var Endpoint = entity.createType('Endpoint', {
     id: entity.StringId,
     sessionId: stringOrNull,
     type: String,
@@ -20,10 +20,10 @@ var Client = entity.createType('Client', {
     }
 });
 
-Client.extendReader(function(data) {
+Endpoint.extendReader(function(data) {
     data.publishers = data.publishers.map(function(observer) {
         return data.id + '/' + observer;
     });
 });
 
-module.exports = Client;
+module.exports = Endpoint;

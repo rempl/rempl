@@ -3,42 +3,42 @@
 
 var Node = require('basis.ui').Node;
 var transport = require('../transport.js');
-var clients = require('./clients.js');
+var endpoints = require('./endpoints.js');
 
 var mainView = new Node({
     template: resource('./template/layout.tmpl'),
     binding: {
         online: transport.online,
-        clients: 'satellite:',
+        endpoints: 'satellite:',
         sandbox: 'satellite:'
     },
     action: {
         pick: function() {
-            clients.pickMode.set(true);
-            transport.pickClient(function(clientId, publisherId) {
-                clients.pickMode.set(false);
-                clients.selectedId.set(clientId + '/' + publisherId);
+            endpoints.pickMode.set(true);
+            transport.pickPublisher(function(endpointId, publisherId) {
+                endpoints.pickMode.set(false);
+                endpoints.selectedId.set(endpointId + '/' + publisherId);
             }.bind(this));
         }
     },
     satellite: {
-        clients: clients,
+        endpoints: endpoints,
         sandbox: {
-            delegate: clients.selectedPublisher,
+            delegate: endpoints.selectedPublisher,
             instance: require('./sandbox.js')
         }
     },
     dropSelection: function() {
-        clients.selectedId.set(null);
+        endpoints.selectedId.set(null);
     }
 });
 
-clients.selectedId.link(null, function() {
-    if (clients.pickMode.value) {
-        transport.cancelClientPick();
+endpoints.selectedId.link(null, function() {
+    if (endpoints.pickMode.value) {
+        transport.cancelPublisherPick();
     }
 });
-transport.online.link(clients.pickMode, function(online) {
+transport.online.link(endpoints.pickMode, function(online) {
     if (!online) {
         this.set(false);
     }

@@ -5,26 +5,26 @@ var Node = require('basis.ui').Node;
 var Value = require('basis.data').Value;
 var ObjectMerge = require('basis.data.object').Merge;
 var router = require('basis.router');
-var Client = require('../type.js').Client;
+var Endpoint = require('../type.js').Endpoint;
 var Publisher = require('../type.js').Publisher;
 
 var selectedId = new Value();
 var pickMode = new Value({ value: false });
 var selectedPublisher = selectedId.as(Publisher.getSlot);
-var selectedClient = selectedPublisher.query('data.clientId').as(Client.getSlot);
-var selectedOnline = selectedClient.query('data.online');
+var selectedEndpoint = selectedPublisher.query('data.endpointId').as(Endpoint.getSlot);
+var selectedOnline = selectedEndpoint.query('data.online');
 var selected = new ObjectMerge({
     sources: {
-        client: selectedClient,
+        endpoint: selectedEndpoint,
         publisher: selectedPublisher
     },
     fields: {
         id: 'publisher:id',
-        '*': 'client',
-        clientId: 'publisher',
+        endpointId: 'publisher',
         name: 'publisher',
         uiType: 'publisher',
-        uiContent: 'publisher'
+        uiContent: 'publisher',
+        '*': 'endpoint'
     }
 });
 
@@ -43,11 +43,11 @@ module.exports = new Node({
     },
 
     active: true,
-    dataSource: Client.all,
+    dataSource: Endpoint.all,
     childClass: {
         disabled: Value.query('data.publishers.itemCount').as(basis.bool.invert),
 
-        template: resource('./template/client.tmpl'),
+        template: resource('./template/endpoint.tmpl'),
         binding: {
             title: {
                 events: 'update',

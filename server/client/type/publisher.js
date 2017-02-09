@@ -6,7 +6,7 @@ function stringOrNull(value) {
 
 var Publisher = entity.createType('Publisher', {
     id: entity.StringId,
-    clientId: entity.calc('id', function(id) {
+    endpointId: entity.calc('id', function(id) {
         return id.split(/\//)[0];
     }),
     name: entity.calc('id', function(id) {
