@@ -9,16 +9,22 @@ var mainView = new Node({
     template: resource('./template/layout.tmpl'),
     binding: {
         online: transport.online,
+        pickMode: endpoints.pickMode,
         endpoints: 'satellite:',
         sandbox: 'satellite:'
     },
     action: {
-        pick: function() {
-            endpoints.pickMode.set(true);
-            transport.pickPublisher(function(endpointId, publisherId) {
+        togglePublisherPick: function() {
+            if (!endpoints.pickMode.value) {
+                endpoints.pickMode.set(true);
+                transport.pickPublisher(function(endpointId, publisherId) {
+                    endpoints.pickMode.set(false);
+                    endpoints.selectedId.set(endpointId + '/' + publisherId);
+                }.bind(this));
+            } else {
                 endpoints.pickMode.set(false);
-                endpoints.selectedId.set(endpointId + '/' + publisherId);
-            }.bind(this));
+                transport.cancelPublisherPick();
+            }
         }
     },
     satellite: {

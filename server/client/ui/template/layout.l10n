@@ -1,0 +1,8 @@
+{
+    "en-US": {
+        "togglePickMode": {
+            "false": "Pick publisher",
+            "true": "Cancel pick mode"
+        }
+    }
+}
