@@ -31,7 +31,7 @@ List.prototype = {
     },
     notifyUpdates: function() {
         // TODO: notify subscribers
-        this.server.emit('rempl:clientList', this.getList());
+        this.server.emit('rempl:endpointList', this.getList());
     },
     broadcast: function() {
         var args = arguments;

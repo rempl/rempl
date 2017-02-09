@@ -1,5 +1,5 @@
-var TTL = 15 * 60 * 1000; // 15 min offline -> remove from client list
-var CLIENT_FIELDS = {
+var TTL = 15 * 60 * 1000; // 15 min offline -> remove from endpoint list
+var INFO_FIELDS = {
     sessionId: null,
     title: '[no title]',
     location: '[unknown]',
@@ -8,7 +8,7 @@ var CLIENT_FIELDS = {
     publishers: []
 };
 
-function Client(list, id, socket, data) {
+function Endpoint(list, id, socket, data) {
     this.list = list;
     this.id = id;
     this.num = 0;
@@ -16,16 +16,16 @@ function Client(list, id, socket, data) {
     this.socket = socket;
     this.subscribers = [];
 
-    for (var key in CLIENT_FIELDS) {
+    for (var key in INFO_FIELDS) {
         this[key] = Object.prototype.hasOwnProperty.call(data, key)
             ? data[key]
-            : CLIENT_FIELDS[key];
+            : INFO_FIELDS[key];
     }
 
     this.list.add(this);
 }
 
-Client.prototype = {
+Endpoint.prototype = {
     list: null,
     id: null,
     sessionId: null,
@@ -37,7 +37,7 @@ Client.prototype = {
 
     update: function(data) {
         for (var key in data) {
-            if (Object.prototype.hasOwnProperty.call(CLIENT_FIELDS, key)) {
+            if (Object.prototype.hasOwnProperty.call(INFO_FIELDS, key)) {
                 this[key] = data[key];
             }
         }
@@ -97,7 +97,7 @@ Client.prototype = {
     },
     emit: function() {
         if (!this.socket) {
-            return console.warn('[rempl] Client ' + this.id + ' is offline');
+            return console.warn('[rempl] Endpoint ' + this.id + ' is offline');
         }
 
         // console.log('socket', 'send to ' + this.id + ' ' + JSON.stringify(arguments), true);
@@ -105,4 +105,4 @@ Client.prototype = {
     }
 };
 
-module.exports = Client;
+module.exports = Endpoint;

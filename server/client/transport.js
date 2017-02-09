@@ -7,7 +7,7 @@ var Publisher = require('./type.js').Publisher;
 var online = new Value({ value: false });
 var socket = io.connect(location.host, { transports: ['websocket', 'polling'] });
 
-function syncClientList(data) {
+function syncEndpointList(data) {
     Client.all.setAndDestroyRemoved(basis.array(data).map(Client.reader));
 }
 
@@ -15,11 +15,11 @@ function syncClientList(data) {
 socket
     .on('connect', function() {
         socket.emit('rempl:subscriber connect', function(data) {
-            syncClientList(data.clients);
+            syncEndpointList(data.endpoints);
             online.set(true);
         });
     })
-    .on('rempl:clientList', syncClientList)
+    .on('rempl:endpointList', syncEndpointList)
     .on('disconnect', function() {
         online.set(false);
     });
@@ -28,7 +28,7 @@ module.exports = {
     online: online,
     getClientUI: function(id, callback) {
         var publisher = Publisher(id);
-        socket.emit('rempl:get client ui', publisher.data.clientId, publisher.data.name, function(err, type, content) {
+        socket.emit('rempl:get publisher ui', publisher.data.clientId, publisher.data.name, function(err, type, content) {
             publisher.update({
                 uiType: type,
                 uiContent: content
@@ -37,9 +37,9 @@ module.exports = {
         });
     },
     pickClient: function(callback) {
-        socket.emit('rempl:pick client', callback);
+        socket.emit('rempl:pick publisher', callback);
     },
     cancelClientPick: function() {
-        socket.emit('rempl:cancel client pick');
+        socket.emit('rempl:cancel publisher pick');
     }
 };

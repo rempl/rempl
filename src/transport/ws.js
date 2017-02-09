@@ -1,7 +1,7 @@
 var Token = require('../classes/Token.js');
 var utils = require('../utils');
 var socketIO = require('socket.io-client');
-var clients = Object.create(null);
+var endpoints = Object.create(null);
 var DEBUG = false;
 
 function valuesChanged(a, b) {
@@ -43,11 +43,11 @@ function onConnect() {
     clearInterval(this.sendInfoTimer);
 
     this.connected.set(true);
-    this.clientInfo = this.getInfo();
+    this.info = this.getInfo();
 
-    this.send('rempl:client connect', this.clientInfo, function(data) {
-        if ('clientId' in data) {
-            this.setClientId(data.clientId);
+    this.send('rempl:endpoint connect', this.info, function(data) {
+        if ('id' in data) {
+            this.setClientId(data.id);
         }
 
         this.sendInfoTimer = setInterval(this.sendInfo.bind(this), this.sendInfoTimerTTL);
@@ -101,9 +101,9 @@ function onDisconnect() {
 
 function WSTransport(uri) {
     this.sessionId = utils.genUID();
-    this.clientId = null;
+    this.id = null;
 
-    this.clientInfo = {};
+    this.info = {};
     this.publishers = [];
     this.publishersMap = {};
 
@@ -121,30 +121,30 @@ function WSTransport(uri) {
         .on('disconnect', onDisconnect.bind(this))
 
         .on('rempl:get ui', onGetUI.bind(this))
-        .on('rempl:to session', onData.bind(this))
+        .on('rempl:to publisher', onData.bind(this))
 
         .on('rempl:identify', callMethod(this, 'startIdentify'))
         .on('rempl:stop identify', callMethod(this, 'stopIdentify'));
 }
 
 WSTransport.create = function(endpoint) {
-    if (endpoint in clients) {
-        return clients[endpoint];
+    if (endpoint in endpoints) {
+        return endpoints[endpoint];
     }
 
-    return clients[endpoint] = new WSTransport(endpoint);
+    return endpoints[endpoint] = new WSTransport(endpoint);
 };
 
 WSTransport.prototype.type = 'unknown';
-WSTransport.prototype.clientInfoFields = [
-    'clientId',
+WSTransport.prototype.infoFields = [
+    'id',
     'sessionId',
     'type',
     'publishers'
 ];
 
-WSTransport.prototype.setClientId = function(clientId) {
-    this.clientId = clientId;
+WSTransport.prototype.setClientId = function(id) {
+    this.id = id;
 };
 
 /**
@@ -161,7 +161,7 @@ WSTransport.prototype.send = function() {
 WSTransport.prototype.getInfo = function() {
     var result = {};
 
-    this.clientInfoFields.forEach(function(name) {
+    this.infoFields.forEach(function(name) {
         result[name] = Array.isArray(this[name]) ? this[name].slice() : this[name];
     }, this);
 
@@ -174,15 +174,14 @@ WSTransport.prototype.getInfo = function() {
 WSTransport.prototype.sendInfo = function() {
     var newInfo = this.getInfo();
 
-    if (valuesChanged(this.clientInfo, newInfo)) {
-        this.clientInfo = newInfo;
-        this.send('rempl:client info', this.clientInfo);
+    if (valuesChanged(this.info, newInfo)) {
+        this.info = newInfo;
+        this.send('rempl:endpoint info', this.info);
     }
 };
 
 WSTransport.prototype.startIdentify = function() {
     if (DEBUG) {
-        debugger;
         console.error('[rempl] #startIdentify not implemented');
     }
 };
@@ -195,9 +194,9 @@ WSTransport.prototype.stopIdentify = function() {
 
 WSTransport.prototype.createApi = function(id, getRemoteUI) {
     var subscribers = [];
-    var publisher = this;
+    var endpoint = this;
 
-    if (publisher.publishersMap.hasOwnProperty(id)) {
+    if (endpoint.publishersMap.hasOwnProperty(id)) {
         if (DEBUG) {
             console.error('[rempl][ws-transport] Publisher `' + id + '` is already registered on page');
         }
@@ -205,19 +204,19 @@ WSTransport.prototype.createApi = function(id, getRemoteUI) {
         return;
     }
 
-    publisher.publishers.push(id);
-    publisher.publishersMap[id] = {
+    endpoint.publishers.push(id);
+    endpoint.publishersMap[id] = {
         getRemoteUI: getRemoteUI,
         subscribers: subscribers
     };
 
-    publisher.sendInfo();
+    endpoint.sendInfo();
 
     return {
-        connected: publisher.connected,
+        connected: endpoint.connected,
         send: function() {
-            publisher.transport.emit.apply(publisher.transport,
-                ['rempl:client data', id].concat(Array.prototype.slice.call(arguments))
+            endpoint.transport.emit.apply(endpoint.transport,
+                ['rempl:from publisher', id].concat(Array.prototype.slice.call(arguments))
             );
         },
         subscribe: function(fn) {

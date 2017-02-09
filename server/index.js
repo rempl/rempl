@@ -2,16 +2,16 @@ var fs = require('fs');
 var path = require('path');
 var chalk = require('chalk');
 var genUID = require('../src/utils').genUID;
-var ConnectionList = require('./ConnectionList');
-var Client = require('./Client');
+var EndpointList = require('./EndpointList');
+var Endpoint = require('./Endpoint');
 
 function packet(type, args) {
     return [type].concat(Array.prototype.slice.call(args));
 }
 
 module.exports = function initDevtool(wsServer, httpServer, options) {
-    var clients = new ConnectionList(wsServer);
-    var onClientConnectMode = null;
+    var endpoints = new EndpointList(wsServer);
+    var onEndpointConnectMode = null;
     var lastNum = 0;
 
     wsServer.addClientApi(path.join(__dirname, 'ws-client-api.js'), function(content) {
@@ -27,50 +27,50 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
 
     wsServer.on('connect', function(socket) {
         //
-        // client
+        // endpoint
         //
-        socket.on('rempl:client connect', function(data, connectCallback) {
+        socket.on('rempl:endpoint connect', function(data, connectCallback) {
             data = data || {};
 
-            var clientId = data.clientId || genUID();
-            var client = clients.get('id', clientId);
+            var id = data.id || genUID();
+            var endpoint = endpoints.get('id', id);
 
-            if (!client) {
-                client = new Client(clients, clientId, this, data);
-                client.num = lastNum++;
+            if (!endpoint) {
+                endpoint = new Endpoint(endpoints, id, this, data);
+                endpoint.num = lastNum++;
             } else {
-                client.update(data);
-                client.setOnline(this);
+                endpoint.update(data);
+                endpoint.setOnline(this);
             }
 
             this
-                .on('rempl:client info', function(data) {
-                    client.update(data);
-                    clients.notifyUpdates();
+                .on('rempl:endpoint info', function(data) {
+                    endpoint.update(data);
+                    endpoints.notifyUpdates();
                 })
-                .on('rempl:client data', function(publisherId) {
-                    // var channel = socket.to(client.room);
-                    // channel.emit.apply(channel, packet('rempl:session data', arguments));
+                .on('rempl:from publisher', function(publisherId) {
+                    // var channel = socket.to(endpoint.room);
+                    // channel.emit.apply(channel, packet('rempl:to subscriber', arguments));
                     var args = Array.prototype.slice.call(arguments, 1);
-                    client.subscribers.forEach(function(subscriber) {
+                    endpoint.subscribers.forEach(function(subscriber) {
                         if (subscriber.publisherId === publisherId) {
-                            subscriber.emit.apply(subscriber, packet('rempl:session data', args));
+                            subscriber.emit.apply(subscriber, packet('rempl:to subscriber', args));
                         }
                     });
                 })
                 .on('disconnect', function() {
-                    client.setOffline();
+                    endpoint.setOffline();
                 });
 
             // connected and inited
             connectCallback({
-                clientId: clientId,
-                subscribers: client.subscribers.length,
-                num: client.num
+                id: id,
+                subscribers: endpoint.subscribers.length,
+                num: endpoint.num
             });
 
-            if (typeof onClientConnectMode == 'function') {
-                onClientConnectMode(client);
+            if (typeof onEndpointConnectMode == 'function') {
+                onEndpointConnectMode(endpoint);
             }
         });
 
@@ -78,71 +78,71 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
         // subscriber
         //
         socket.on('rempl:subscriber connect', function(connectCallback) {
-            this.on('rempl:pick client', function(pickCallback) {
-                function startIdentify(client) {
-                    client.emitIfPossible('rempl:identify', client.num, function(publisherId) {
-                        pickCallback(client.id, publisherId);
+            this.on('rempl:pick publisher', function(pickCallback) {
+                function startIdentify(endpoint) {
+                    endpoint.emitIfPossible('rempl:identify', endpoint.num, function(publisherId) {
+                        pickCallback(endpoint.id, publisherId);
                         stopIdentify();
                     });
                 }
                 function stopIdentify() {
-                    onClientConnectMode = null;
+                    onEndpointConnectMode = null;
                     socket.removeListener('disconnect', stopIdentify);
-                    socket.removeListener('rempl:cancel client pick', stopIdentify);
-                    clients.forEach(function(client) {
-                        client.emitIfPossible('rempl:stop identify');
+                    socket.removeListener('rempl:cancel publisher pick', stopIdentify);
+                    endpoints.forEach(function(endpoint) {
+                        endpoint.emitIfPossible('rempl:stop identify');
                     });
                 }
 
-                onClientConnectMode = startIdentify;
+                onEndpointConnectMode = startIdentify;
                 lastNum = 1;
 
                 this.once('disconnect', stopIdentify);
-                this.once('rempl:cancel client pick', stopIdentify);
-                clients.forEach(function(client) {
-                    client.num = lastNum++;
-                    startIdentify(client);
+                this.once('rempl:cancel publisher pick', stopIdentify);
+                endpoints.forEach(function(endpoint) {
+                    endpoint.num = lastNum++;
+                    startIdentify(endpoint);
                 });
-                clients.notifyUpdates();
+                endpoints.notifyUpdates();
             });
 
-            this.on('rempl:get client ui', function(clientId, publisherId, callback) {
-                var client = clients.get('id', clientId);
+            this.on('rempl:get publisher ui', function(id, publisherId, callback) {
+                var endpoint = endpoints.get('id', id);
 
-                if (!client || !client.socket) {
-                    return callback('[rempl:get client ui] Client (' + clientId + ') not found or disconnected');
+                if (!endpoint || !endpoint.socket) {
+                    return callback('[rempl:get publisher ui] Endpoint (' + id + ') not found or disconnected');
                 }
 
-                client.emit('rempl:get ui', publisherId, {
+                endpoint.emit('rempl:get ui', publisherId, {
                     dev: options.dev,
                     accept: ['script', 'url']
                 }, callback);
             });
 
             connectCallback({
-                clients: clients.getList()
+                endpoints: endpoints.getList()
             });
         });
 
         //
         // session publisher
         //
-        socket.on('rempl:join session', function(clientId, publisherId, callback) {
-            var client = clients.get('id', clientId);
+        socket.on('rempl:connect to publisher', function(id, publisherId, callback) {
+            var endpoint = endpoints.get('id', id);
 
-            if (!client || !client.socket) {
-                return callback('[rempl:join session] Client (' + clientId + ') not found or disconnected');
+            if (!endpoint || !endpoint.socket) {
+                return callback('[rempl:connect to publisher] Endpoint (' + id + ') not found or disconnected');
             }
 
-            client.addSubscriber(this);
+            endpoint.addSubscriber(this);
             this.publisherId = publisherId;
             this
-                .join(client.room)
-                .on('rempl:to session', function() {
-                    client.emit.apply(client, packet('rempl:to session', packet(publisherId, arguments)));
+                .join(endpoint.room)
+                .on('rempl:to publisher', function() {
+                    endpoint.emit.apply(endpoint, packet('rempl:to publisher', packet(publisherId, arguments)));
                 })
                 .on('disconnect', function() {
-                    client.removeSubscriber(this);
+                    endpoint.removeSubscriber(this);
                 }.bind(this));
         });
     });

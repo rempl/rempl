@@ -3,7 +3,7 @@
 var WsTransport = require('../../transport/ws.js');
 var global = new Function('return this')();
 var sessionStorage = global.sessionStorage || {};
-var STORAGE_KEY = 'rempl:clientId';
+var STORAGE_KEY = 'rempl:id';
 
 function BrowserWsTransport() {
     this.title = global.top.document.title;
@@ -11,19 +11,19 @@ function BrowserWsTransport() {
 
     WsTransport.apply(this, arguments);
 
-    this.clientId = sessionStorage[STORAGE_KEY];
+    this.id = sessionStorage[STORAGE_KEY];
 }
 
 BrowserWsTransport.create = WsTransport.create;
 BrowserWsTransport.prototype = Object.create(WsTransport.prototype);
 
-BrowserWsTransport.prototype.setClientId = function(clientId) {
-    WsTransport.prototype.setClientId.call(this, clientId);
-    sessionStorage[STORAGE_KEY] = this.clientId;
+BrowserWsTransport.prototype.setClientId = function(id) {
+    WsTransport.prototype.setClientId.call(this, id);
+    sessionStorage[STORAGE_KEY] = this.id;
 };
 
 BrowserWsTransport.prototype.type = 'browser';
-BrowserWsTransport.prototype.clientInfoFields = WsTransport.prototype.clientInfoFields.concat(
+BrowserWsTransport.prototype.infoFields = WsTransport.prototype.infoFields.concat(
     'title',
     'location'
 );

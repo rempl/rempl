@@ -39,13 +39,13 @@ function createSandboxAPI(client, win) {
 
     var socket = io('', { transports: ['websocket', 'polling'] })
         .on('connect', function joinSession() {
-            socket.emit('rempl:join session', client.data.clientId, client.data.name, function(err) {
+            socket.emit('rempl:connect to publisher', client.data.clientId, client.data.name, function(err) {
                 if (err) {
                     retryTimer = setTimeout(joinSession, 2000);
                 }
             });
         })
-        .on('rempl:session data', function() {
+        .on('rempl:to subscriber', function() {
             notify('data', arguments);
         });
 
@@ -76,7 +76,7 @@ function createSandboxAPI(client, win) {
 
     initSandbox(win, client.data.name, function(api) {
         api.subscribe(function() {
-            socket.emit.apply(socket, ['rempl:to session'].concat(Array.prototype.slice.call(arguments)));
+            socket.emit.apply(socket, ['rempl:to publisher'].concat(Array.prototype.slice.call(arguments)));
         });
         subscribers.data.push(api.send);
     });
