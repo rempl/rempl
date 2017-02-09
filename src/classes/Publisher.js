@@ -5,9 +5,9 @@ var publishers = Object.create(null);
 var PublisherNamespace = function(name, owner) {
     Namespace.call(this, name, owner);
 
-    this.methods.init = function(callback) {
+    this.provide('init', function(callback) {
         callback(this._lastData);
-    }.bind(this);
+    }.bind(this));
 };
 
 PublisherNamespace.prototype = Object.create(Namespace.prototype);
