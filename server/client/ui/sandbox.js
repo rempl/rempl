@@ -146,7 +146,7 @@ module.exports = new Node({
 
     template: resource('./template/sandbox.tmpl'),
     binding: {
-        hasEndpoint: Value.query('data.id').as(Boolean),
+        hasPublisher: Value.query('data.id').as(Boolean),
         loading: 'loading',
         error: 'error',
         online: 'data:',
