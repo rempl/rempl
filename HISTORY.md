@@ -1,3 +1,7 @@
+## 1.0.0-alpha10 (March 3, 2017)
+
+- Fixed sandbox showing issue in server client
+
 ## 1.0.0-alpha9 (March 3, 2017)
 
 - Fixed npm publishing issue (some files of server client UI doesn't publish)
