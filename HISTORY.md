@@ -27,7 +27,7 @@
 
 - Fixed initialization of publisher UI with type `script`
 - Made pick a subscriber button toggable
-- Fixed ecode publisher name from URL in server client UI (@smelukov, #7)
+- Fixed fetching publisher name from URL in server client UI (@smelukov, #7)
 
 ## 1.0.0-alpha6 (January 9, 2017)
 
