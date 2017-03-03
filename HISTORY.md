@@ -1,4 +1,35 @@
-## 1.0.0-alpha6 (January 9, 2016)
+## 1.0.0-alpha7 (March 3, 2017)
+
+### Core
+
+- Implemented `Endpoint` class as base class for `Publisher` and `Subscriber`
+- Implemented `Namespace` class for channels and change RPC API
+    - Renamed `define()` method to `provide()`
+    - Implemented additional semantic for `provide()` method (i.e. `provide('name', function() { .. })`)
+    - Changed behaviour of `provide()` method to override already provided methods
+    - Implement `revoke()` method to revoke provided methods
+    - Renamed `hasMethod()` method to `isMethodProvided()`
+    - Renamed `invoke()` method to `callRemote()`
+    - Made callback call safe when callback is not pass to remote method
+- Changed `Token` API
+    - Implemented `get()` method
+    - Implemented `link()` method
+    - Renamed `attach()` method to `on()`
+    - Renamed `detach()` method to `off()`
+- Removed `features` feature
+
+### WS Server
+
+- Prevented inclusion `rempl.js` in `ws.js` by default
+- Reworked transport protocol
+
+### WS Server Client
+
+- Fixed initialization of publisher UI with type `script`
+- Made pick a subscriber button toggable
+- Fixed ecode publisher name from URL in server client UI (@smelukov, #7)
+
+## 1.0.0-alpha6 (January 9, 2017)
 
 - Added `url` UI type support
 - Set proper server web interface viewport size on mobile devices
