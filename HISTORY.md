@@ -1,3 +1,7 @@
+## 1.0.0-alpha9 (March 3, 2017)
+
+- Fixed npm publishing issue (some files of server client UI doesn't publish)
+
 ## 1.0.0-alpha8 (March 3, 2017)
 
 - Fixed npm publishing issue (server client UI doesn't publish)
