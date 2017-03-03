@@ -8,7 +8,15 @@ var router = require('basis.router');
 var Endpoint = require('../type.js').Endpoint;
 var Publisher = require('../type.js').Publisher;
 
-var selectedId = new Value();
+var selectedId = new Value({
+    proxy: function(value) {
+        if (value) {
+            return decodeURIComponent(value);
+        }
+
+        return value;
+    }
+});
 var pickMode = new Value({ value: false });
 var selectedPublisher = selectedId.as(Publisher.getSlot);
 var selectedEndpoint = selectedPublisher.query('data.endpointId').as(Endpoint.getSlot);
