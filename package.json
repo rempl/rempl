@@ -27,7 +27,6 @@
       "no-unused-vars": [2, {"vars": "all", "args": "after-used"}]
     }
   },
-  "main": "src/index.js",
   "scripts": {
     "codestyle": "jscs src server && eslint src server",
     "build": "npm run build:rempl && npm run build:server-assets",
@@ -40,7 +39,7 @@
     "browserify": "^13.0.0",
     "eslint": "^3.11.1",
     "jscs": "~3.0.7",
-    "uglify-js": "^2.6.1",
+    "uglify-js": "^2.8.9",
     "basisjs-tools-build": "^1.4.0"
   },
   "dependencies": {

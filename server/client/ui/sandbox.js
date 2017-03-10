@@ -6,6 +6,8 @@ var Node = require('basis.ui').Node;
 var transport = require('../transport.js');
 var sandboxApi = {};
 var initSandbox = require('rempl:sandbox/index.js');
+var createEnv = require('rempl:env/createEnv.js');
+var createHost = require('rempl:env/createHost.js');
 var SANDBOX_HTML = asset('./template/sandbox-blank.html');
 var remplScript = (function() {
     var xhr = new XMLHttpRequest();
@@ -80,7 +82,14 @@ function createSandboxAPI(endpoint, win) {
         });
         subscribers.data.push(api.send);
     });
-};
+
+    createEnv(parent, endpoint.data.name, function(env) {
+        createHost(win, function(host) {
+            env.subscribe(host.send);
+            host.subscribe(env.send);
+        });
+    })
+}
 
 var Frame = Node.subclass({
     type: null,
