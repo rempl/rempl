@@ -1,5 +1,8 @@
-var syncEnv = require('./sync-env.js');
+var EventTransport = require('../transport/event.js');
 
-module.exports = function createEnv(win, id, fn) {
-    syncEnv(win, id, fn);
+module.exports = function createEnv(win, name, fn) {
+    new EventTransport('rempl-env', 'rempl-host', {
+        name: name,
+        env: win
+    }).onInit({ id: name }, fn);
 };
