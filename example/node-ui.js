@@ -2,10 +2,10 @@
 /* global rempl */
 
 rempl.getSubscriber(function(api) {
-    var host;
+    var theEnv;
 
     rempl.createEnv(parent, api.id, function(env) {
-        host = env;
+        theEnv = env;
         env.connected.link(function(connected) {
             document.getElementById('env').hidden = !connected;
         });
@@ -23,7 +23,7 @@ rempl.getSubscriber(function(api) {
     api.subscribe(function(counter) {
         document.getElementById('counter').innerHTML = counter;
 
-        host.send({
+        theEnv.send({
             type: 'data',
             data: {
                 type: 'setStatusBarContent',
