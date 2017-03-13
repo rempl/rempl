@@ -13,7 +13,7 @@ rempl.getSubscriber(function(api) {
             switch (data.type) {
                 case 'DidChangeActivePaneItem':
                     if (data.pane.isEditor) {
-                        document.getElementById('env').innerHTML += `<li><b>${data.host}:</b> ${data.pane.title} (${data.pane.grammar})</li>`;
+                        document.getElementById('env-active-tab').innerHTML = `<b>${data.host}:</b> ${data.pane.title} (${data.pane.grammar})`;
                     }
                     break;
             }
@@ -23,13 +23,15 @@ rempl.getSubscriber(function(api) {
     api.subscribe(function(counter) {
         document.getElementById('counter').innerHTML = counter;
 
-        theEnv.send({
-            type: 'data',
-            data: {
-                type: 'setStatusBarContent',
-                content: counter
-            }
-        });
+        if (theEnv) {
+            theEnv.send({
+                type: 'data',
+                data: {
+                    type: 'setStatusBarContent',
+                    content: counter
+                }
+            });
+        }
     });
 
     window.reset = function() {
@@ -38,8 +40,7 @@ rempl.getSubscriber(function(api) {
 
     document.body
         .appendChild(document.createElement('div'))
-        .innerHTML = `<ul hidden id="env"></ul>
-          Counter:
-          <b id="counter"></b>
+        .innerHTML = `<div hidden id="env">Editor active tab: <span id="env-active-tab"></span></div>
+          Counter: <b id="counter"></b>
           <button onclick="reset()">reset</button>`;
 });
