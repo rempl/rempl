@@ -32,6 +32,7 @@ function createSandboxAPI(endpoint, win) {
     var online = Value.query(endpoint, 'data.online');
     var features = Value.query(endpoint, 'data.features');
     var retryTimer;
+    var envAPI = createEnv(parent, endpoint.data.name);
     var subscribers = {
         data: [],
         session: [],
@@ -83,12 +84,10 @@ function createSandboxAPI(endpoint, win) {
         subscribers.data.push(api.send);
     });
 
-    createEnv(parent, endpoint.data.name, function(env) {
-        createHost(win, function(host) {
-            env.subscribe(host.send);
-            host.subscribe(env.send);
-        });
-    })
+    createHost(win, function(host) {
+        envAPI.subscribe(host.send);
+        host.subscribe(envAPI.send);
+    });
 }
 
 var Frame = Node.subclass({
