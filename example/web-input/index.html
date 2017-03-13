@@ -1,0 +1,28 @@
+<!doctype html>
+
+<html>
+<head>
+    <!-- <meta name="rempl:server" value="1234"> -->
+    <title>Rempl test</title>
+</head>
+<body>
+    <h3>Rempl browser-publisher test</h3>
+    <div>Enter some value to the input:</div>
+
+    <input type="text" id="theInput" value="some value"/>
+
+    <script src="../../dist/rempl.js"></script>
+    <script>
+        /* eslint-env browser */
+        /* global rempl */
+
+        var publisher = rempl.createPublisher('web-input', rempl.scriptFromFile('browser-ui.js'));
+        var theInput = document.querySelector('#theInput');
+
+        theInput.addEventListener('input', function() {
+            publisher.publish(this.value);
+        });
+        publisher.publish(theInput.value);
+    </script>
+</body>
+</html>
