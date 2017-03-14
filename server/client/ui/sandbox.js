@@ -84,12 +84,14 @@ function createSandboxAPI(endpoint, win, env) {
         subscribers.data.push(api.send);
     });
 
-    this.host = createHost(win);
-    this.host.subscribe(env.send);
+    if(env) {
+        this.host = createHost(win);
+        this.host.subscribe(env.send);
 
-    env.send({
-        type: 'getHostInfo'
-    });
+        env.send({
+            type: 'getHostInfo'
+        });
+    }
 }
 
 var Frame = Node.subclass({
@@ -191,6 +193,11 @@ module.exports = new Node({
     init: function() {
         Node.prototype.init.call(this);
 
+        if (window == top) {
+            return
+        }
+
+        // create env
         this.env = createEnv(parent, 'env-transport');
         this.env.subscribe(function(payload) {
             switch (payload.type) {
@@ -218,7 +225,7 @@ module.exports = new Node({
                     id: this.data.id,
                     name: this.data.name,
                     type: this.data.type
-                }
+                };
             }
 
             this.env.send({
