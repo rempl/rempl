@@ -3,7 +3,6 @@
 
 var Token = require('../classes/Token.js');
 var utils = require('../utils/index.js');
-var global = new Function('return this')();
 var DEBUG = false;
 
 function subscribe(endpoint, fn) {
@@ -122,7 +121,7 @@ function onData(payload) {
 
         case 'getRemoteUI':
             if (!Object.prototype.hasOwnProperty.call(this.endpointGetUI, payload.endpoint)) {
-                utils.warn('[rempl][dom-event-transport] recieve unknown endpoint for getRemoteUI(): ' + payload.endpoint);
+                utils.warn('[rempl][dom-event-transport] receive unknown endpoint for getRemoteUI(): ' + payload.endpoint);
                 wrapCallback(this, payload.callback)('Wrong endpoint – ' + payload.endpoint);
             } else {
                 this.endpointGetUI[payload.endpoint](
@@ -213,7 +212,6 @@ EventTransport.prototype = {
             utils.log('[rempl][dom-event-transport] emit event', channelId, payload);
         }
 
-        // IE does not support CustomEvent constructor
         if (typeof this.env.postMessage === 'function') {
             this.env.postMessage({
                 channel: channelId,

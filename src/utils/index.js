@@ -1,6 +1,5 @@
 'use strict';
 
-var global = new Function('return this')();
 var document = global.document;
 var isNode = typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]';
 

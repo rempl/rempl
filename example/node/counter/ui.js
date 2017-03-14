@@ -12,7 +12,5 @@ rempl.getSubscriber(function(api) {
 
     document.body
         .appendChild(document.createElement('div'))
-        .innerHTML =
-            '<b id="counter"></b> ' +
-            '<button onclick="reset()">reset</button>';
+        .innerHTML = '<b id="counter"></b> <br> <button onclick="reset()">reset</button>';
 });

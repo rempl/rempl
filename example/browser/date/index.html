@@ -6,16 +6,17 @@
     <title>Rempl test</title>
 </head>
 <body>
-    Rempl test
-    <script src="../dist/rempl.js"></script>
+    <h3>Rempl browser-publisher test</h3>
+
+    <script src="../../../dist/rempl.js"></script>
     <script>
         /* eslint-env browser */
         /* global rempl */
 
-        var myTool = rempl.createPublisher('myTool', rempl.scriptFromFile('browser-ui.js'));
+        var publisher = rempl.createPublisher('web-input', rempl.scriptFromFile('browser-ui.js'));
 
         setInterval(function() {
-            myTool.publish(Date.now());
+            publisher.publish(Date.now());
         }, 1000);
     </script>
 </body>
