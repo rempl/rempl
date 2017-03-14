@@ -2,7 +2,7 @@
 
 ### Browser
 
-* [Watching a input value](web-input)
+* [Watching a input value](browser/input)
 
 ### Node.js
 

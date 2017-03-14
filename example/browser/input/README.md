@@ -12,4 +12,4 @@ The value is receiving from web page-publisher and displays to the UI. Just chan
 
 Subscribing to the publisher data and displaying received counter value. Publisher is publishing the data every time when input-field value is changed.
 
-![gif](https://cloud.githubusercontent.com/assets/6654581/23858791/afa3d57e-0812-11e7-8447-9f6f4f3db03b.gif)
+<img src="https://cloud.githubusercontent.com/assets/6654581/23896931/4641ac14-08bc-11e7-8f12-516aae853183.gif" width="500px"/>

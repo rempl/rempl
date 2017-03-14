@@ -198,7 +198,6 @@ module.exports = new Node({
                     var publisher = payload.publisher;
 
                     if (publisher && publisher.id) {
-                        console.log('setPublisher', publisher);
                         endpoints.selectedId.set(publisher.id)
                     }
                     break;

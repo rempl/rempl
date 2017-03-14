@@ -13,4 +13,4 @@ The counter is receiving from node-publisher and displays to the UI. Press the `
 
 Subscribing to the publisher data and displaying received counter value. `reset`-button calls remote `reset`-method that is provided by the publisher.
 
-![image](https://cloud.githubusercontent.com/assets/6654581/23858077/6329d650-0810-11e7-999b-5b3146d31517.png)
+<img src="https://cloud.githubusercontent.com/assets/6654581/23896920/384fe60c-08bc-11e7-9b12-e4dd62e44e3e.gif" width="500px"/>

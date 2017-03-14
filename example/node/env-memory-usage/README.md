@@ -13,4 +13,4 @@ Just watch current memory usage info from publisher in your editor.
 
 Subscribing to the `hostInfo` environment-event and sending data from publisher to the environment.
 
-![image](https://cloud.githubusercontent.com/assets/6654581/23857790/79c99efa-080f-11e7-98a3-8924966562bd.png)
+<img src="https://cloud.githubusercontent.com/assets/6654581/23896912/21cdfd60-08bc-11e7-8de2-1a0e39fa0694.gif" width="500px"/>

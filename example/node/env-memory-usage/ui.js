@@ -33,11 +33,8 @@ rempl.getSubscriber(function(api) {
 
         // sending memory usage to environment
         env.send({
-            type: 'data',
-            data: {
-                type: 'setStatusBarContent',
-                content: memoryUsage
-            }
+            type: 'setStatusBarContent',
+            content: memoryUsage
         });
     });
 });

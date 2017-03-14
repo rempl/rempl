@@ -15,5 +15,6 @@ Subscribing to the environment-events:
 * `hostInfo` - comes when subscriber is connected to the host
 * `activeTabChanged` - comes when changed the active tab in the host
 
-![image](https://cloud.githubusercontent.com/assets/6654581/23856848/1608c114-080c-11e7-9741-f9afda10f21d.png)
+<img src="https://cloud.githubusercontent.com/assets/6654581/23896819/c6c134c8-08bb-11e7-879b-7f625c9c7408.gif" width="500px"/>
+
 
