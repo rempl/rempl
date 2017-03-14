@@ -9,6 +9,7 @@ var initSandbox = require('rempl:sandbox/index.js');
 var createEnv = require('rempl:env/createEnv.js');
 var createHost = require('rempl:env/createHost.js');
 var SANDBOX_HTML = asset('./template/sandbox-blank.html');
+var endpoints = require('./endpoints.js');
 var remplScript = (function() {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', basis.path.resolve(asset('rempldist:rempl.js')), false);
@@ -20,7 +21,7 @@ var remplScript = (function() {
         : '';
 })();
 
-function createSandboxAPI(endpoint, win) {
+function createSandboxAPI(endpoint, win, env) {
     function notify(type, args) {
         for (var i = 0; i < subscribers[type].length; i++) {
             subscribers[type][i].apply(null, args);
@@ -32,7 +33,6 @@ function createSandboxAPI(endpoint, win) {
     var online = Value.query(endpoint, 'data.online');
     var features = Value.query(endpoint, 'data.features');
     var retryTimer;
-    var envAPI = createEnv(parent, endpoint.data.name);
     var subscribers = {
         data: [],
         session: [],
@@ -84,9 +84,11 @@ function createSandboxAPI(endpoint, win) {
         subscribers.data.push(api.send);
     });
 
-    createHost(win, function(host) {
-        envAPI.subscribe(host.send);
-        host.subscribe(envAPI.send);
+    this.host = createHost(win);
+    this.host.subscribe(env.send);
+
+    env.send({
+        type: 'getHostInfo'
     });
 }
 
@@ -124,7 +126,7 @@ var Frame = Node.subclass({
                 );
             }
 
-            createSandboxAPI.call(this, this.endpoint, contentWindow);
+            createSandboxAPI.call(this, this.endpoint, contentWindow, this.owner.env);
         }
     },
 
@@ -186,6 +188,46 @@ module.exports = new Node({
         // }
     },
 
+    init: function() {
+        Node.prototype.init.call(this);
+
+        this.env = createEnv(parent, 'env-transport');
+        this.env.subscribe(function(payload) {
+            switch (payload.type) {
+                case 'setPublisher':
+                    var publisher = payload.publisher;
+
+                    if (publisher && publisher.id) {
+                        console.log('setPublisher', publisher);
+                        endpoints.selectedId.set(publisher.id)
+                    }
+                    break;
+                default:
+                    var frame = this.satellite.frame;
+
+                    if (frame && frame.host) {
+                        frame.host.send.apply(null, arguments);
+                    }
+            }
+        }.bind(this));
+
+        Value.query(this, 'data.id').link(this, function(id) {
+            var publisherData = null;
+
+            if (id) {
+                publisherData = {
+                    id: this.data.id,
+                    name: this.data.name,
+                    type: this.data.type
+                }
+            }
+
+            this.env.send({
+                type: 'activePublisherChanged',
+                publisher: publisherData
+            });
+        });
+    },
     syncUI: function() {
         if (this.satellite.frame) {
             this.satellite.frame.destroy();
