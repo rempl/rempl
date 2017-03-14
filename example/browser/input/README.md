@@ -1,4 +1,4 @@
-## Node.js: Simple counter
+## Browser: Simple counter
 
 ### Usage
 

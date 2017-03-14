@@ -2,7 +2,8 @@
 
 ### Browser
 
-* [Watching a input value](browser/input)
+* [Date and time from publisher](browser/date)
+* [Watching an input value](browser/input)
 
 ### Node.js
 
