@@ -222,7 +222,7 @@ module.exports = new Node({
             }
 
             this.env.send({
-                type: 'activePublisherChanged',
+                type: 'publisherChanged',
                 publisher: publisherData
             });
         });
