@@ -84,7 +84,7 @@ function createSandboxAPI(endpoint, win, env) {
         subscribers.data.push(api.send);
     });
 
-    if(env) {
+    if (env) {
         this.host = createHost(win);
         this.host.subscribe(env.send);
 
@@ -193,8 +193,8 @@ module.exports = new Node({
     init: function() {
         Node.prototype.init.call(this);
 
-        if (window == top) {
-            return
+        if (window === top) {
+            return;
         }
 
         // create env
@@ -205,7 +205,7 @@ module.exports = new Node({
                     var publisher = payload.publisher;
 
                     if (publisher && publisher.id) {
-                        endpoints.selectedId.set(publisher.id)
+                        endpoints.selectedId.set(publisher.id);
                     }
                     break;
                 default:

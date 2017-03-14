@@ -7,7 +7,7 @@ module.exports = function createProxy(name, connectTo, win, remoteName) {
     var proxyApi = {
         send: function() {
             if (envApi) {
-                envApi.send.apply(envApi, arguments)
+                envApi.send.apply(envApi, arguments);
             }
         },
         subscribe: function(fn) {
@@ -23,7 +23,7 @@ module.exports = function createProxy(name, connectTo, win, remoteName) {
     new EventTransport(name, connectTo, {
         name: remoteName,
         env: win
-    }).onInit({id: remoteName}, function(api) {
+    }).onInit({ id: remoteName }, function(api) {
         envApi = api;
         api.connected.link(function(value) {
             proxyApi.connected.set(value);
