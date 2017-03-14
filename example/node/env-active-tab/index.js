@@ -1,4 +1,4 @@
-// process.env.REMPL_SERVER = 'localhost:1234';
+// process.env.REMPL_SERVER = 'host:1234';
 
 var rempl = require('../../../src');
 

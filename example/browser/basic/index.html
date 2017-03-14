@@ -2,7 +2,7 @@
 
 <html>
 <head>
-    <!-- <meta name="rempl:server" value="1234"> -->
+    <!-- <meta name="rempl:server" value="host:1234"> -->
     <title>Rempl test</title>
 </head>
 <body>
@@ -13,7 +13,7 @@
         /* eslint-env browser */
         /* global rempl */
 
-        var publisher = rempl.createPublisher('web-input', rempl.scriptFromFile('browser-ui.js'));
+        var publisher = rempl.createPublisher('example-basic', rempl.scriptFromFile('browser-ui.js'));
 
         setInterval(function() {
             publisher.publish(Date.now());
