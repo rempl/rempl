@@ -1,7 +1,6 @@
 /* eslint-env browser */
 /* global basis */
 
-var Value = require('basis.data').Value;
 var createEnv = require('rempl:env/createEnv.js');
 var endpoint = require('../endpoint.js');
 var subscribers = [];
