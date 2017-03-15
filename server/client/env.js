@@ -2,7 +2,7 @@
 /* global basis */
 
 var createEnv = require('rempl:env/createEnv.js');
-var endpoint = require('../endpoint.js');
+var endpoint = require('./endpoint.js');
 var subscribers = [];
 var env = null;
 
@@ -16,7 +16,7 @@ if (top !== window) {
                 var publisher = payload.publisher;
 
                 if (publisher && publisher.id) {
-                    endpoint.selectedById(publisher.id);
+                    endpoint.selectById(publisher.id);
                 }
                 break;
 

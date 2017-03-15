@@ -2,10 +2,10 @@
 
 var Value = require('basis.data').Value;
 var ObjectMerge = require('basis.data.object').Merge;
-var Endpoint = require('../type.js').Endpoint;
-var Publisher = require('../type.js').Publisher;
+var Endpoint = require('./type.js').Endpoint;
+var Publisher = require('./type.js').Publisher;
 var router = require('basis.router');
-var transport = require('../transport.js');
+var transport = require('./transport.js');
 
 var selectedId = new Value({
     proxy: function(value) {
