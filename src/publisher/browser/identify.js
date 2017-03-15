@@ -28,7 +28,7 @@ function createButton(name, callback) {
 
 function updatePublisherList() {
     if (publishers.length && pickPublisherCallback) {
-        publishersEl.innerHTML = '<div style="margin-bottom: 10px">Pick an publisher:</div>';
+        publishersEl.innerHTML = '<div style="margin-bottom: 10px">Pick a publisher:</div>';
         for (var i = 0; i < publishers.length; i++) {
             publishersEl.appendChild(createButton(publishers[i], pickPublisherCallback.bind(null, publishers[i])));
         }
