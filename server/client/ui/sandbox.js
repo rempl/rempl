@@ -30,14 +30,12 @@ function createSandboxAPI(endpoint, win) {
     var apiId = this.apiId;
     var sessionId = Value.query(endpoint, 'data.sessionId');
     var online = Value.query(endpoint, 'data.online');
-    var features = Value.query(endpoint, 'data.features');
     var envUnsubscribe;
     var retryTimer;
     var subscribers = {
         data: [],
         session: [],
-        connection: [],
-        features: []
+        connection: []
     };
 
     var socket = io('', { transports: ['websocket', 'polling'] })
@@ -63,7 +61,6 @@ function createSandboxAPI(endpoint, win) {
         clearTimeout(retryTimer);
         sessionId.unlink(subscribers);
         online.unlink(subscribers);
-        features.unlink(subscribers);
         socket.close();
         socket = null;
     };
@@ -73,9 +70,6 @@ function createSandboxAPI(endpoint, win) {
     });
     online.link(subscribers, function(online) {
         notify('connection', [online]);
-    });
-    features.link(subscribers, function(features) {
-        notify('features', [features]);
     });
 
     initSandbox(win, endpoint.data.name, function(api) {
