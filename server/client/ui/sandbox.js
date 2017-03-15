@@ -5,7 +5,6 @@ var Value = require('basis.data').Value;
 var Node = require('basis.ui').Node;
 var transport = require('../transport.js');
 var env = require('../env.js');
-var sandboxApi = {};
 var initSandbox = require('rempl:sandbox/index.js');
 var createHost = require('rempl:env/createHost.js');
 var SANDBOX_HTML = asset('./template/sandbox-blank.html');
@@ -20,14 +19,13 @@ var remplScript = (function() {
         : '';
 })();
 
-function createSandboxAPI(endpoint, win) {
+function createSandboxApi(endpoint, win) {
     function notify(type, args) {
         for (var i = 0; i < subscribers[type].length; i++) {
             subscribers[type][i].apply(null, args);
         }
     }
 
-    var apiId = this.apiId;
     var sessionId = Value.query(endpoint, 'data.sessionId');
     var online = Value.query(endpoint, 'data.online');
     var envUnsubscribe;
@@ -50,21 +48,6 @@ function createSandboxAPI(endpoint, win) {
             notify('data', arguments);
         });
 
-    // destroy old API
-    if (sandboxApi[apiId]) {
-        sandboxApi[apiId]();
-    }
-
-    sandboxApi[apiId] = function destroyApi() {
-        envUnsubscribe();
-        delete sandboxApi[apiId];
-        clearTimeout(retryTimer);
-        sessionId.unlink(subscribers);
-        online.unlink(subscribers);
-        socket.close();
-        socket = null;
-    };
-
     sessionId.link(subscribers, function(sessionId) {
         notify('session', [sessionId]);
     });
@@ -74,7 +57,7 @@ function createSandboxAPI(endpoint, win) {
 
     initSandbox(win, endpoint.data.name, function(api) {
         api.subscribe(function() {
-            socket.emit.apply(socket, ['rempl:to publisher'].concat(Array.prototype.slice.call(arguments)));
+            socket.emit.apply(socket, ['rempl:to publisher'].concat(basis.array(arguments)));
         });
         subscribers.data.push(api.send);
     });
@@ -87,15 +70,28 @@ function createSandboxAPI(endpoint, win) {
     env.send({
         type: 'getHostInfo'
     });
+
+    // return destroy function
+    return function destroySandboxApi() {
+        envUnsubscribe();
+        clearTimeout(retryTimer);
+        sessionId.unlink(subscribers);
+        online.unlink(subscribers);
+        socket.close();
+        socket = null;
+    };
 }
 
 var Frame = Node.subclass({
     type: null,
     script: null,
+    destroySandboxApi: null,
 
     template: resource('./template/sandbox-frame.tmpl'),
     binding: {
-        api: 'apiId',
+        api: function() {
+            return basis.genUID();
+        },
         src: function(node) {
             return node.url || SANDBOX_HTML;
         }
@@ -110,6 +106,7 @@ var Frame = Node.subclass({
             this.initUI();
         }
     },
+
     initUI: function() {
         if (this.ready && this.element) {
             var contentWindow = this.element.contentWindow;
@@ -123,21 +120,19 @@ var Frame = Node.subclass({
                 );
             }
 
-            createSandboxAPI.call(this, this.endpoint, contentWindow);
+            this.teardownApi();
+            this.destroySandboxApi = createSandboxApi(this.endpoint, contentWindow);
+        }
+    },
+    teardownApi: function() {
+        if (typeof this.destroySandboxApi === 'function') {
+            this.destroySandboxApi();
+            this.destroySandboxApi = null;
         }
     },
 
-    init: function() {
-        Node.prototype.init.call(this);
-        this.apiId = basis.genUID();
-    },
     destroy: function() {
-        // teardown socket connection
-        var destroyApi = this.apiId && sandboxApi[this.apiId];
-
-        if (destroyApi) {
-            destroyApi();
-        }
+        this.teardownApi();
 
         // teardown document
         this.element.setAttribute('srcdoc', '');
