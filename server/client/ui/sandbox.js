@@ -4,12 +4,11 @@
 var Value = require('basis.data').Value;
 var Node = require('basis.ui').Node;
 var transport = require('../transport.js');
+var env = require('../env.js');
 var sandboxApi = {};
 var initSandbox = require('rempl:sandbox/index.js');
-var createEnv = require('rempl:env/createEnv.js');
 var createHost = require('rempl:env/createHost.js');
 var SANDBOX_HTML = asset('./template/sandbox-blank.html');
-var endpoint = require('../endpoint.js');
 var remplScript = (function() {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', basis.path.resolve(asset('rempldist:rempl.js')), false);
@@ -21,7 +20,7 @@ var remplScript = (function() {
         : '';
 })();
 
-function createSandboxAPI(endpoint, win, env) {
+function createSandboxAPI(endpoint, win) {
     function notify(type, args) {
         for (var i = 0; i < subscribers[type].length; i++) {
             subscribers[type][i].apply(null, args);
@@ -32,6 +31,7 @@ function createSandboxAPI(endpoint, win, env) {
     var sessionId = Value.query(endpoint, 'data.sessionId');
     var online = Value.query(endpoint, 'data.online');
     var features = Value.query(endpoint, 'data.features');
+    var envUnsubscribe;
     var retryTimer;
     var subscribers = {
         data: [],
@@ -58,6 +58,7 @@ function createSandboxAPI(endpoint, win, env) {
     }
 
     sandboxApi[apiId] = function destroyApi() {
+        envUnsubscribe();
         delete sandboxApi[apiId];
         clearTimeout(retryTimer);
         sessionId.unlink(subscribers);
@@ -84,14 +85,14 @@ function createSandboxAPI(endpoint, win, env) {
         subscribers.data.push(api.send);
     });
 
-    if (env) {
-        this.host = createHost(win);
-        this.host.subscribe(env.send);
+    // link with host
+    var host = createHost(win);
+    host.subscribe(env.send);
 
-        env.send({
-            type: 'getHostInfo'
-        });
-    }
+    envUnsubscribe = env.subscribe(host.send);
+    env.send({
+        type: 'getHostInfo'
+    });
 }
 
 var Frame = Node.subclass({
@@ -128,7 +129,7 @@ var Frame = Node.subclass({
                 );
             }
 
-            createSandboxAPI.call(this, this.endpoint, contentWindow, this.owner.env);
+            createSandboxAPI.call(this, this.endpoint, contentWindow);
         }
     },
 
@@ -190,50 +191,6 @@ module.exports = new Node({
         // }
     },
 
-    init: function() {
-        Node.prototype.init.call(this);
-
-        if (window === top) {
-            return;
-        }
-
-        // create env
-        this.env = createEnv(parent, 'env-transport');
-        this.env.subscribe(function(payload) {
-            switch (payload.type) {
-                case 'setPublisher':
-                    var publisher = payload.publisher;
-
-                    if (publisher && publisher.id) {
-                        endpoint.selectedById(publisher.id);
-                    }
-                    break;
-                default:
-                    var frame = this.satellite.frame;
-
-                    if (frame && frame.host) {
-                        frame.host.send.apply(null, arguments);
-                    }
-            }
-        }.bind(this));
-
-        Value.query(this, 'data.id').link(this, function(id) {
-            var publisherData = null;
-
-            if (id) {
-                publisherData = {
-                    id: this.data.id,
-                    name: this.data.name,
-                    type: this.data.type
-                };
-            }
-
-            this.env.send({
-                type: 'publisherChanged',
-                publisher: publisherData
-            });
-        });
-    },
     syncUI: function() {
         if (this.satellite.frame) {
             this.satellite.frame.destroy();
