@@ -3,51 +3,29 @@
 
 var Node = require('basis.ui').Node;
 var transport = require('../transport.js');
-var endpoints = require('./endpoints.js');
+var endpoint = require('../endpoint.js');
 
-var mainView = new Node({
+module.exports = new Node({
     template: resource('./template/layout.tmpl'),
     binding: {
         online: transport.online,
-        pickMode: endpoints.pickMode,
+        pickMode: endpoint.isPickMode,
         endpoints: 'satellite:',
         sandbox: 'satellite:'
     },
     action: {
         togglePublisherPick: function() {
-            if (!endpoints.pickMode.value) {
-                endpoints.pickMode.set(true);
-                transport.pickPublisher(function(endpointId, publisherId) {
-                    endpoints.pickMode.set(false);
-                    endpoints.selectedId.set(endpointId + '/' + publisherId);
-                }.bind(this));
-            } else {
-                endpoints.pickMode.set(false);
-                transport.cancelPublisherPick();
-            }
+            endpoint.togglePickMode();
         }
     },
     satellite: {
-        endpoints: endpoints,
+        endpoints: require('./endpoint-list.js'),
         sandbox: {
-            delegate: endpoints.selectedPublisher,
+            delegate: endpoint.selected,
             instance: require('./sandbox.js')
         }
     },
     dropSelection: function() {
-        endpoints.selectedId.set(null);
+        endpoint.unselect();
     }
 });
-
-endpoints.selectedId.link(null, function() {
-    if (endpoints.pickMode.value) {
-        transport.cancelPublisherPick();
-    }
-});
-transport.online.link(endpoints.pickMode, function(online) {
-    if (!online) {
-        this.set(false);
-    }
-});
-
-module.exports = mainView;

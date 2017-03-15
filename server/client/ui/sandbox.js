@@ -9,7 +9,7 @@ var initSandbox = require('rempl:sandbox/index.js');
 var createEnv = require('rempl:env/createEnv.js');
 var createHost = require('rempl:env/createHost.js');
 var SANDBOX_HTML = asset('./template/sandbox-blank.html');
-var endpoints = require('./endpoints.js');
+var endpoint = require('../endpoint.js');
 var remplScript = (function() {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', basis.path.resolve(asset('rempldist:rempl.js')), false);
@@ -205,7 +205,7 @@ module.exports = new Node({
                     var publisher = payload.publisher;
 
                     if (publisher && publisher.id) {
-                        endpoints.selectedId.set(publisher.id);
+                        endpoint.selectedById(publisher.id);
                     }
                     break;
                 default:
