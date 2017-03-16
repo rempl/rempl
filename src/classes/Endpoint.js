@@ -26,15 +26,64 @@ Endpoint.prototype = {
 
         return this.namespaces[name];
     },
+    setRemoteApi: function(api) {
+        var changed = [];
+
+        for (var name in api) {
+            if (Array.isArray(api[name])) {
+                var ns = this.ns(name);
+                var methods = api[name].slice().sort();
+                var different = ns.remoteMethods.some(function(value, idx) {
+                    return value !== methods[idx];
+                });
+
+                if (different) {
+                    ns.remoteMethods = methods;
+                    changed.push(ns);
+                }
+            }
+        }
+
+        for (var name in this.namespaces) {
+            if (Array.isArray(api[name]) === false) {
+                var ns = this.namespaces[name];
+
+                ns.remoteMethods = [];
+                changed.push(ns);
+            }
+        }
+
+        changed.forEach(function(ns) {
+            Namespace.emit(ns, 'remoteMethodsChanged');
+        });
+    },
+    getProvidedApi: function() {
+        var api = {};
+
+        for (var name in this.namespaces) {
+            api[name] = Object.keys(this.namespaces[name].methods).sort();
+        }
+
+        return api;
+    },
+    getRemoteApi: function() {
+        var api = {};
+
+        for (var name in this.namespaces) {
+            api[name] = Object.keys(this.namespaces[name].methods).sort();
+        }
+
+        return api;
+    },
     processInput: function(packet, callback) {
-        var ns = packet.ns || '*';
+        var ns = this.ns(packet.ns || '*');
 
         if (packet.type === 'call') {
-            if (!this.ns(ns).isMethodProvided(packet.method)) {
-                return utils.warn('[rempl][sync] ' + this.getName() + ' has no remote command:', packet.method);
+            if (!ns.isMethodProvided(packet.method)) {
+                return utils.warn('[rempl][sync] ' + this.getName() + ' (namespace: ' + (packet.ns || 'default') + ') has no remote method:', packet.method);
             }
 
-            Namespace.invoke(this.ns(ns), packet.method, packet.args, callback);
+            Namespace.invoke(ns, packet.method, packet.args, callback);
         } else {
             utils.warn('[rempl][sync] Unknown packet type:', packet.type);
         }
