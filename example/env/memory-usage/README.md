@@ -1,4 +1,4 @@
-## Node.js: Sending memory usage to environment
+## Environment: Sending memory usage from publisher to environment
 
 ### Usage
 
