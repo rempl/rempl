@@ -1,5 +1,5 @@
 /* eslint-env browser */
-/* global resource */
+/* global basis, resource */
 
 var Node = require('basis.ui').Node;
 var transport = require('../transport.js');
@@ -8,12 +8,16 @@ var endpoint = require('../endpoint.js');
 module.exports = new Node({
     template: resource('./template/layout.tmpl'),
     binding: {
+        /** @cut */ dev: basis.fn.$const(true),
         online: transport.online,
         pickMode: endpoint.isPickMode,
         endpoints: 'satellite:',
         sandbox: 'satellite:'
     },
     action: {
+        reload: function() {
+            location.reload();
+        },
         togglePublisherPick: function() {
             endpoint.togglePickMode();
         }

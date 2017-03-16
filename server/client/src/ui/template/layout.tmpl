@@ -12,6 +12,10 @@
       <b:set-attr name="event-click" value="togglePublisherPick"/>
       {l10n:togglePickMode.{pickMode}}
     </b:include>
+    <b:include src="./button.tmpl" show="{dev}" isolate>
+      <b:set-attr name="event-click" value="reload"/>
+      reload
+    </b:include>
   </div>
   <!--{endpoints}-->
   <!--{sandbox}-->

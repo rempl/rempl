@@ -14,7 +14,7 @@ function syncEndpointList(data) {
 // connection events
 socket
     .on('connect', function() {
-        socket.emit('rempl:subscriber connect', function(data) {
+        socket.emit('rempl:host connect', function(data) {
             syncEndpointList(data.endpoints);
             online.set(true);
         });
