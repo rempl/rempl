@@ -1,7 +1,7 @@
 /* eslint-env browser */
 /* global rempl */
 
-rempl.getSubscriber(function(api) {
+rempl.getSubscriber(function() {
     document.body
         .appendChild(document.createElement('div'))
         .innerHTML = '\
@@ -31,7 +31,7 @@ rempl.getSubscriber(function(api) {
             case 'activeTabChanged':
                 if (data.tab.isEditor) {
                     activeTabElement.innerHTML = data.tab.title;
-                    activeGrammarElement.innerHTML = data.tab.grammar;
+                    activeGrammarElement.innerHTML = data.file.grammar;
                 }
         }
     });

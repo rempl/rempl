@@ -8,5 +8,9 @@
 ### Node.js
 
 * [Simple counter](node/counter)
-* [Watching active tab in the host](node/env-active-tab)
-* [Sending publisher memory usage to the host](node/env-memory-usage)
+
+### Working with environment
+
+* [Watching active tab in your editor](env/active-tab)
+* [Watching selections and cursor position in your editor](env/watch-selections)
+* [Publisher memory usage in your editor](env/memory-usage)

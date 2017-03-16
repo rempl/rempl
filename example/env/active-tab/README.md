@@ -1,4 +1,4 @@
-## Node.js: Environment active tab info
+## Environment: Watching active tab
 
 ### Usage
 
