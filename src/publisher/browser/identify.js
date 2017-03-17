@@ -10,7 +10,7 @@ function createOverlay() {
     var temp = document.createElement('div');
     temp.innerHTML =
         '<div style="position:fixed;overflow:auto;top:0;left:0;bottom:0;right:0;z-index:100000000;background:rgba(255,255,255,.9);text-align:center;line-height:1.5;font-family:Tahoma,Verdana,Arial,sans-serif">' +
-             '<div style="font-size:100px;font-size:33vh">#</div>' +
+            '<div style="font-size:100px;font-size:33vh">#</div>' +
         '</div>';
     temp.firstChild.appendChild(publishersEl);
     return temp.firstChild;

@@ -8,6 +8,11 @@
 <body>
     <h3>Rempl browser-publisher test</h3>
 
+    <label>
+        <input type="checkbox" id="provide-test"> Provide `test` method
+    </label>
+
+
     <script src="../../../dist/rempl.js"></script>
     <script>
         /* eslint-env browser */
@@ -18,6 +23,16 @@
         setInterval(function() {
             publisher.publish(Date.now());
         }, 1000);
+
+        document.getElementById('provide-test').addEventListener('change', function() {
+            if (this.checked) {
+                publisher.provide('test', function() {
+                    console.info('test invoked');
+                });
+            } else {
+                publisher.revoke('test');
+            }
+        })
     </script>
 </body>
 </html>

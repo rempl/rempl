@@ -14,6 +14,7 @@ Namespace.prototype = {
         if (typeof methodName === 'string') {
             if (typeof fn === 'function') {
                 this.methods[methodName] = fn;
+                this.owner.scheduleProvidedMethodsUpdate();
             }
         } else {
             var methods = methodName;
@@ -21,6 +22,7 @@ Namespace.prototype = {
                 if (this.isMethodProvided(methodName) &&
                     typeof methods[methodName] === 'function') {
                     this.methods[methodName] = methods[methodName];
+                    this.owner.scheduleProvidedMethodsUpdate();
                 }
             }
         }
@@ -31,6 +33,7 @@ Namespace.prototype = {
         } else {
             if (this.isMethodProvided(methodName)) {
                 delete this.methods[methodName];
+                this.owner.scheduleProvidedMethodsUpdate();
             }
         }
     },
@@ -54,26 +57,31 @@ Namespace.prototype = {
         }, callback]);
     },
 
-    on: function(eventName, callback) {
-        this.listeners = {
-            event: eventName,
+    onRemoteMethodsChanged: function(callback) {
+        var listener = {
+            event: 'remoteMethodsChanged',
             callback: callback,
             listeners: this.listeners
         };
-    },
-    off: function(eventName, callback) {
-        var cursor = this.listeners;
-        var prev = this;
 
-        while (cursor !== null) {
-            if (cursor.event === eventName && cursor.callback === callback) {
-                prev.listeners = cursor.listeners;
-                break;
+        this.listeners = listener;
+
+        callback(this.remoteMethods.slice());
+
+        return function() {
+            var cursor = this.listeners;
+            var prev = this;
+
+            while (cursor !== null) {
+                if (cursor === listener) {
+                    prev.listeners = cursor.listeners;
+                    break;
+                }
+
+                prev = cursor;
+                cursor = cursor.listeners;
             }
-
-            prev = cursor;
-            cursor = cursor.listeners;
-        }
+        }.bind(this);
     }
 };
 
@@ -86,13 +94,12 @@ Namespace.invoke = function invoke(namespace, method, args, callback) {
     namespace.methods[method].apply(null, args);
 };
 
-Namespace.emit = function(namespace, eventName/*, ...args*/) {
+Namespace.notifyRemoteMethodsChanged = function(namespace) {
     var cursor = namespace.listeners;
-    var args = Array.prototype.slice.call(arguments, 2);
 
     while (cursor !== null) {
-        if (cursor.event === eventName) {
-            cursor.callback.apply(null, args);
+        if (cursor.event === 'remoteMethodsChanged') {
+            cursor.callback.call(null, namespace.remoteMethods.slice());
         }
         cursor = cursor.listeners;
     }

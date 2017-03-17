@@ -1,6 +1,6 @@
 /* eslint-env browser */
 
-var WsTransport = require('../../transport/ws.js');
+var WsTransport = require('../../transport/ws-publisher.js');
 var global = new Function('return this')();
 var sessionStorage = global.sessionStorage || {};
 var STORAGE_KEY = 'rempl:id';

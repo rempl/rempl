@@ -1,6 +1,6 @@
 var fs = require('fs');
 var path = require('path');
-var WsTransport = require('../../transport/ws.js');
+var WsTransport = require('../../transport/ws-publisher.js');
 var CLIENT_ID_FILENAME = '.rempl_endpoint_id'; // FIXME: dirty solution
 
 function NodeWsTransport() {

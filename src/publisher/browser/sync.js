@@ -29,6 +29,9 @@ module.exports = function createSync(publisher) {
         api.connected.link(function(connected) {
             // remoteSubscribers.set(connected);
             publisher.channels.wsserver = connected ? api.send : null;
+            if (connected) {
+                publisher.scheduleProvidedMethodsUpdate();
+            }
         });
     });
 

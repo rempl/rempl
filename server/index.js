@@ -27,7 +27,7 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
 
     wsServer.on('connect', function(socket) {
         //
-        // endpoint
+        // endpoint (publishers) -> ws server
         //
         socket.on('rempl:endpoint connect', function(data, connectCallback) {
             data = data || {};
@@ -75,9 +75,9 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
         });
 
         //
-        // subscriber
+        // host -> ws server
         //
-        socket.on('rempl:subscriber connect', function(connectCallback) {
+        socket.on('rempl:host connect', function(connectCallback) {
             this.on('rempl:pick publisher', function(pickCallback) {
                 function startIdentify(endpoint) {
                     endpoint.emitIfPossible('rempl:identify', endpoint.num, function(publisherId) {
@@ -125,7 +125,7 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
         });
 
         //
-        // session publisher
+        // subscriber -> ws server (endpoint/publisher)
         //
         socket.on('rempl:connect to publisher', function(id, publisherId, callback) {
             var endpoint = endpoints.get('id', id);

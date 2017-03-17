@@ -8,6 +8,7 @@ module.exports = function createSync(subscriber) {
 
             // TODO: make it better
             if (connected) {
+                subscriber.requestRemoteApi();
                 for (var name in subscriber.namespaces) {
                     var ns = subscriber.namespaces[name];
                     if (ns.subscribers.length) {

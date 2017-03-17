@@ -26,6 +26,14 @@ Endpoint.prototype = {
 
         return this.namespaces[name];
     },
+    requestRemoteApi: function() {
+        Namespace.send(this, [{
+            type: 'getProvidedMethods',
+            methods: this.getProvidedApi()
+        }, function(methods) {
+            this.setRemoteApi(methods);
+        }.bind(this)]);
+    },
     setRemoteApi: function(api) {
         var changed = [];
 
@@ -33,9 +41,11 @@ Endpoint.prototype = {
             if (Array.isArray(api[name])) {
                 var ns = this.ns(name);
                 var methods = api[name].slice().sort();
-                var different = ns.remoteMethods.some(function(value, idx) {
-                    return value !== methods[idx];
-                });
+                var different =
+                    ns.remoteMethods.length !== methods.length ||
+                    ns.remoteMethods.some(function(value, idx) {
+                        return value !== methods[idx];
+                    });
 
                 if (different) {
                     ns.remoteMethods = methods;
@@ -54,7 +64,7 @@ Endpoint.prototype = {
         }
 
         changed.forEach(function(ns) {
-            Namespace.emit(ns, 'remoteMethodsChanged');
+            Namespace.notifyRemoteMethodsChanged(ns);
         });
     },
     getProvidedApi: function() {
@@ -66,26 +76,39 @@ Endpoint.prototype = {
 
         return api;
     },
-    getRemoteApi: function() {
-        var api = {};
-
-        for (var name in this.namespaces) {
-            api[name] = Object.keys(this.namespaces[name].methods).sort();
+    scheduleProvidedMethodsUpdate: function() {
+        if (!this.providedMethodsUpdateTimer) {
+            this.providedMethodsUpdateTimer = setTimeout(function() {
+                this.providedMethodsUpdateTimer = null;
+                Namespace.send(this, [{
+                    type: 'remoteMethods',
+                    methods: this.getProvidedApi()
+                }]);
+            }.bind(this), 0);
         }
-
-        return api;
     },
     processInput: function(packet, callback) {
-        var ns = this.ns(packet.ns || '*');
+        switch (packet.type) {
+            case 'call':
+                var ns = this.ns(packet.ns || '*');
 
-        if (packet.type === 'call') {
-            if (!ns.isMethodProvided(packet.method)) {
-                return utils.warn('[rempl][sync] ' + this.getName() + ' (namespace: ' + (packet.ns || 'default') + ') has no remote method:', packet.method);
-            }
+                if (!ns.isMethodProvided(packet.method)) {
+                    return utils.warn('[rempl][sync] ' + this.getName() + ' (namespace: ' + (packet.ns || 'default') + ') has no remote method:', packet.method);
+                }
 
-            Namespace.invoke(ns, packet.method, packet.args, callback);
-        } else {
-            utils.warn('[rempl][sync] Unknown packet type:', packet.type);
+                Namespace.invoke(ns, packet.method, packet.args, callback);
+                break;
+
+            case 'remoteMethods':
+                this.setRemoteApi(packet.methods);
+                break;
+
+            case 'getProvidedMethods':
+                callback(this.getProvidedApi());
+                break;
+
+            default:
+                utils.warn('[rempl][sync] Unknown packet type:', packet.type);
         }
     }
 };

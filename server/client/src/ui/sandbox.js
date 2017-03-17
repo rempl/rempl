@@ -113,7 +113,10 @@ var Frame = Node.subclass({
 
             // run publisher UI script
             if (this.script) {
-                contentWindow.eval(remplScript);
+                contentWindow.eval(
+                    remplScript +
+                    '\n//# sourceURL=rempl.js'
+                );
                 contentWindow.eval(
                     this.script +
                     '\n//# sourceURL=publisher-ui.js'
