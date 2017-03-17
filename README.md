@@ -1,5 +1,6 @@
 [![NPM version](https://img.shields.io/npm/v/rempl.svg)](https://www.npmjs.com/package/rempl)
 [![Build Status](https://travis-ci.org/rempl/rempl.svg?branch=master)](https://travis-ci.org/rempl/rempl)
+[![Twitter](https://img.shields.io/badge/Twitter-@rempljs-blue.svg)](https://twitter.com/rempljs)
 
 The general idea behind `Rempl` is to simplify moderated remote access to JavaScript runtime. `Rempl` provides a transport between environments and a set of UI hosts.
 
