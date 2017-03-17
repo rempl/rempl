@@ -2,6 +2,7 @@ var Token = require('../classes/Token.js');
 var utils = require('../utils');
 var socketIO = require('socket.io-client');
 var endpoints = Object.create(null);
+var INFO_UPDATE_TIME = 100;
 var DEBUG = false;
 
 function valuesChanged(a, b) {
@@ -50,7 +51,7 @@ function onConnect() {
             this.setClientId(data.id);
         }
 
-        this.sendInfoTimer = setInterval(this.sendInfo.bind(this), this.sendInfoTimerTTL);
+        this.sendInfoTimer = setInterval(this.sendInfo.bind(this), INFO_UPDATE_TIME);
     }.bind(this));
 
     if (DEBUG) {
@@ -103,12 +104,11 @@ function WSTransport(uri) {
     this.sessionId = utils.genUID();
     this.id = null;
 
+    this.sendInfoTimer = null;
     this.info = {};
+
     this.publishers = [];
     this.publishersMap = {};
-
-    this.sendInfoTimer = null;
-    this.sendInfoTimerTTL = 150;
 
     this.connected = new Token(false);
 

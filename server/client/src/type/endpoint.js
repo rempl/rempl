@@ -13,11 +13,7 @@ var Endpoint = entity.createType('Endpoint', {
     location: String,
     pid: Number,
     num: Number,
-    publishers: entity.createSetType('Publisher'),
-    features: {
-        defValue: [],
-        type: Array
-    }
+    publishers: entity.createSetType('Publisher')
 });
 
 Endpoint.extendReader(function(data) {

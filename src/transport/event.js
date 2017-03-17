@@ -1,6 +1,7 @@
 /* eslint-env browser */
 /* global CustomEvent */
 
+var hasOwnProperty = Object.prototype.hasOwnProperty;
 var Token = require('../classes/Token.js');
 var utils = require('../utils/index.js');
 var DEBUG = false;
@@ -35,18 +36,18 @@ function send(endpoint) {
     });
 }
 
-function handshake(channel) {
-    channel.send(channel.name + ':connect', {
-        name: channel.remoteName,  // FIXME: temporary solution to pass subscriber name from sandbox
-        input: channel.inputChannelId,
-        output: channel.outputChannelId,
-        publishers: channel.publishers
+function handshake(transport) {
+    transport.send(transport.name + ':connect', {
+        name: transport.remoteName,  // FIXME: temporary solution to pass subscriber name from sandbox
+        input: transport.inputChannelId,
+        output: transport.outputChannelId,
+        publishers: transport.publishers
     });
 }
 
-function wrapCallback(channel, callback) {
+function wrapCallback(transport, callback) {
     return function() {
-        channel.send(channel.outputChannelId, {
+        transport.send(transport.outputChannelId, {
             type: 'callback',
             callback: callback,
             data: Array.prototype.slice.call(arguments)
@@ -55,7 +56,7 @@ function wrapCallback(channel, callback) {
 }
 
 function onConnect(payload) {
-    if (this.outputChannelId) {
+    if (this.outputChannelId !== null) {
         return;
     }
 
@@ -98,7 +99,7 @@ function onData(payload) {
             break;
 
         case 'callback':
-            if (this.callbacks.hasOwnProperty(payload.callback)) {
+            if (hasOwnProperty.call(this.callbacks, payload.callback)) {
                 this.callbacks[payload.callback].apply(null, payload.data);
                 delete this.callbacks[payload.callback];
             }
@@ -120,7 +121,7 @@ function onData(payload) {
             break;
 
         case 'getRemoteUI':
-            if (!Object.prototype.hasOwnProperty.call(this.endpointGetUI, payload.endpoint)) {
+            if (!hasOwnProperty.call(this.endpointGetUI, payload.endpoint)) {
                 utils.warn('[rempl][dom-event-transport] receive unknown endpoint for getRemoteUI(): ' + payload.endpoint);
                 wrapCallback(this, payload.callback)('Wrong endpoint – ' + payload.endpoint);
             } else {

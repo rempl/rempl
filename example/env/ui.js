@@ -110,12 +110,12 @@ rempl.getSubscriber(function(api) {
 
                 return {
                     start: {
-                        line: start[0].trim(),
-                        column: start[1].trim()
+                        line: start[0],
+                        column: start[1]
                     },
                     end: {
-                        line: end[0].trim(),
-                        column: end[1].trim()
+                        line: end[0],
+                        column: end[1]
                     }
                 };
             });
