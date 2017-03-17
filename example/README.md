@@ -4,5 +4,5 @@
 
 * [Web: Date and time from publisher](browser/date)
 * [Web: Watching an input value](browser/input)
-* [Node.js: Simple counter on node.js](node)
-* [Node.js: Working with environment](env)
+* [Node.js: Simple counter on node.js](node/counter)
+* [Node.js: Working with environment](node/env)
