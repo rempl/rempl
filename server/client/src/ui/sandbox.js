@@ -176,11 +176,10 @@ module.exports = new Node({
         update: function(sender, delta) {
             if ('id' in delta) {
                 this.syncUI();
+            } else if ('online' in delta && this.data.online && this.error.value) {
+                this.syncUI();
             }
         }
-        // targetChanged: function() {
-        //     this.syncUI();
-        // }
     },
 
     syncUI: function() {
