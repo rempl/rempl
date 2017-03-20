@@ -1,5 +1,6 @@
 var Namespace = require('../classes/Namespace.js');
 var Endpoint = require('../classes/Endpoint.js');
+var Token = require('../classes/Token.js');
 
 var SubscriberNamespace = function(name, owner) {
     Namespace.call(this, name, owner);
@@ -15,6 +16,7 @@ SubscriberNamespace.prototype.subscribe = function(fn) {
 };
 
 var Subscriber = function() {
+    this.connected = new Token(false);
     Endpoint.call(this);
 };
 
@@ -24,12 +26,23 @@ Subscriber.prototype.getName = function() {
     return 'Subscriber';
 };
 Subscriber.prototype.processInput = function(packet, callback) {
-    if (packet.type === 'data') {
-        this.ns(packet.ns || '*').subscribers.forEach(function(subscriber) {
-            subscriber(packet.payload);
-        });
-    } else {
-        Endpoint.prototype.processInput.call(this, packet, callback);
+    switch (packet.type) {
+        case 'publisher:connect':
+            this.connected.set(true);
+            break;
+
+        case 'publisher:disconnect':
+            this.connected.set(false);
+            break;
+
+        case 'data':
+            this.ns(packet.ns || '*').subscribers.forEach(function(callback) {
+                callback(packet.payload);
+            });
+            break;
+
+        default:
+            Endpoint.prototype.processInput.call(this, packet, callback);
     }
 };
 

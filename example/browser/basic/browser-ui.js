@@ -12,4 +12,8 @@ rempl.getSubscriber(function(api) {
     api.onRemoteMethodsChanged(function(methods) {
         providedMethods.innerHTML = '<ul>' + methods.map(x => '<li>' + x + '</li>').join('') + '</ul>';
     });
+
+    api.connected.link(function(state) {
+        console.log('publisher connected:', state);
+    });
 });

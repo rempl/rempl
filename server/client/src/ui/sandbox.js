@@ -28,6 +28,7 @@ function createSandboxApi(endpoint, win) {
 
     var sessionId = Value.query(endpoint, 'data.sessionId');
     var online = Value.query(endpoint, 'data.online');
+    var publisherConnected = Value.query(endpoint, 'delegate.sources.publisher.delegate').as(Boolean);
     var envUnsubscribe;
     var retryTimer;
     var subscribers = {
@@ -60,6 +61,11 @@ function createSandboxApi(endpoint, win) {
             socket.emit.apply(socket, ['rempl:to publisher'].concat(basis.array(arguments)));
         });
         subscribers.data.push(api.send);
+        publisherConnected.link(null, function(connected) {
+            api.send({
+                type: connected ? 'publisher:connect' : 'publisher:disconnect'
+            });
+        });
     });
 
     // link with host

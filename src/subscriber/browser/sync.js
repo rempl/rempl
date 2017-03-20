@@ -5,7 +5,9 @@ module.exports = function createSync(subscriber) {
         api.subscribe(subscriber.processInput);
         api.connected.link(function(connected) {
             subscriber.setupChannel('sandbox', api.send, connected);
+        });
 
+        subscriber.connected.link(function(connected) {
             // TODO: make it better
             if (connected) {
                 subscriber.requestRemoteApi();
