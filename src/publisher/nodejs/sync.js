@@ -4,7 +4,7 @@ module.exports = function createSync(publisher) {
     syncWs(publisher, function(api) {
         api.subscribe(publisher.processInput);
         api.connected.link(function(connected) {
-            publisher.channels.ws = connected ? api.send : null;
+            publisher.setupChannel('ws', api.send, connected);
         });
     });
 

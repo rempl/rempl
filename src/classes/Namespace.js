@@ -106,11 +106,9 @@ Namespace.notifyRemoteMethodsChanged = function(namespace) {
 };
 
 Namespace.send = function send(owner, args) {
-    for (var channel in owner.channels) {
-        if (typeof owner.channels[channel] === 'function') {
-            owner.channels[channel].apply(null, args);
-        }
-    }
+    owner.channels.forEach(function(channel) {
+        channel.send.apply(null, args);
+    });
 };
 
 module.exports = Namespace;

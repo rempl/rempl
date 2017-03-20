@@ -3,7 +3,7 @@ var utils = require('../utils/index.js');
 
 var Endpoint = function() {
     this.namespaces = Object.create(null);
-    this.channels = Object.create(null);
+    this.channels = [];
     this.processInput = this.processInput.bind(this);
 
     var defaultNS = this.ns('*');
@@ -109,6 +109,22 @@ Endpoint.prototype = {
 
             default:
                 utils.warn('[rempl][sync] Unknown packet type:', packet.type);
+        }
+    },
+    setupChannel: function(type, send, available) {
+        if (available) {
+            this.channels.push({
+                type: type,
+                send: send
+            });
+        } else {
+            for (var i = 0; i < this.channels.length; i++) {
+                if (this.channels[i].type === type &&
+                    this.channels[i].send === send) {
+                    this.channels.splice(i, 1);
+                    break;
+                }
+            }
         }
     }
 };

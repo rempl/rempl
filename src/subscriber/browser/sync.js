@@ -4,7 +4,7 @@ module.exports = function createSync(subscriber) {
     syncSandbox(subscriber, function(api) {
         api.subscribe(subscriber.processInput);
         api.connected.link(function(connected) {
-            subscriber.channels.sandbox = connected ? api.send : null;
+            subscriber.setupChannel('sandbox', api.send, connected);
 
             // TODO: make it better
             if (connected) {
@@ -13,8 +13,8 @@ module.exports = function createSync(subscriber) {
                     var ns = subscriber.namespaces[name];
                     if (ns.subscribers.length) {
                         ns.callRemote('init', function(data) {
-                            this.subscribers.forEach(function(subscriber) {
-                                subscriber(data);
+                            this.subscribers.forEach(function(callback) {
+                                callback(data);
                             });
                         }.bind(ns));
                     }
