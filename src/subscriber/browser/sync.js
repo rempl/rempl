@@ -10,7 +10,7 @@ module.exports = function createSync(subscriber) {
         });
 
         subscriber.connected.link(function(connected) {
-            setOverlayVisible(connected);
+            setOverlayVisible(!connected);
 
             // TODO: make it better
             if (connected) {
