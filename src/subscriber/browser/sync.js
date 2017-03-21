@@ -1,3 +1,4 @@
+var setOverlayVisible = require('./disconnected-overlay.js');
 module.exports = function createSync(subscriber) {
     var syncSandbox = require('./sync-sandbox.js');
 
@@ -8,6 +9,8 @@ module.exports = function createSync(subscriber) {
         });
 
         subscriber.connected.link(function(connected) {
+            setOverlayVisible(connected);
+
             // TODO: make it better
             if (connected) {
                 subscriber.requestRemoteApi();
