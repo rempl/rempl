@@ -144,6 +144,8 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
                 .on('disconnect', function() {
                     endpoint.removeSubscriber(this);
                 }.bind(this));
+
+            callback();
         });
     });
 

@@ -2,6 +2,7 @@
 /* global io, basis, resource, asset */
 
 var Value = require('basis.data').Value;
+var Expression = require('basis.data.value').Expression;
 var Node = require('basis.ui').Node;
 var transport = require('../transport.js');
 var env = require('../env.js');
@@ -28,7 +29,11 @@ function createSandboxApi(endpoint, win) {
 
     var sessionId = Value.query(endpoint, 'data.sessionId');
     var online = Value.query(endpoint, 'data.online');
-    var publisherConnected = Value.query(endpoint, 'delegate.sources.publisher.delegate').as(Boolean);
+    var publisherExists = Value.query(endpoint, 'delegate.sources.publisher.delegate').as(Boolean);
+    var sessionOpenned = new Value({ value: false });
+    var publisherConnected = new Expression(publisherExists, sessionOpenned, function(publisherExists, sessionOpenned) {
+        return publisherExists && sessionOpenned;
+    });
     var envUnsubscribe;
     var retryTimer;
     var subscribers = {
@@ -42,8 +47,13 @@ function createSandboxApi(endpoint, win) {
             socket.emit('rempl:connect to publisher', endpoint.data.endpointId, endpoint.data.name, function(err) {
                 if (err) {
                     retryTimer = setTimeout(joinSession, 2000);
+                } else {
+                    sessionOpenned.set(true);
                 }
             });
+        })
+        .on('disconnect', function() {
+            sessionOpenned.set(false);
         })
         .on('rempl:to subscriber', function() {
             notify('data', arguments);
