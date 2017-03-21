@@ -69,7 +69,7 @@ function onGetUI(id, settings, callback) {
         return;
     }
 
-    this.publishersMap[id].getRemoteUI.call(null, settings, callback);
+    this.publishersMap[id].getRemoteUI.call(null, settings || {}, callback);
 }
 
 function onData(id) {
