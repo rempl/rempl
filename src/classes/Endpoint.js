@@ -37,6 +37,10 @@ Endpoint.prototype = {
     setRemoteApi: function(api) {
         var changed = [];
 
+        if (!api) {
+            api = {};
+        }
+
         for (var name in api) {
             if (Array.isArray(api[name])) {
                 var ns = this.ns(name);
