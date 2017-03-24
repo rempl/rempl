@@ -40,12 +40,12 @@ Publisher.onPublishersChange = function(/* publishers */) {
     /* stub method */
 };
 
-Publisher.factory = function createPublisherFactory(Publisher) {
-    return function getPublisher(id, getRemoteUI, endpoint) {
+Publisher.factory = function createPublisherFactory(createPublisher) {
+    return function getPublisher(id, getRemoteUI, options) {
         var publisher = publishers[id];
 
         if (!publisher) {
-            publisher = new Publisher(id, getRemoteUI, endpoint);
+            publisher = createPublisher(id, getRemoteUI, options);
         }
 
         return publisher;
