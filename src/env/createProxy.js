@@ -2,11 +2,18 @@ var Token = require('../classes/Token');
 var EventTransport = require('../transport/event.js');
 
 module.exports = function createProxy(name, connectTo, win, remoteName) {
+    var envApi;
     var subscribers = [];
     var proxyApi = {
-        send: function() {},
+        send: function() {
+            if (envApi) {
+                envApi.send.apply(envApi, arguments);
+            }
+        },
         subscribe: function(fn) {
-            if (subscribers.indexOf(fn) === -1) {
+            if (envApi) {
+                envApi.subscribe(fn);
+            } else if (subscribers.indexOf(fn) == -1) {
                 subscribers.push(fn);
             }
         },
@@ -17,16 +24,14 @@ module.exports = function createProxy(name, connectTo, win, remoteName) {
         name: remoteName,
         env: win
     }).onInit({ id: remoteName }, function(api) {
-        proxyApi.send = function() {
-            api.send.apply(api, arguments);
-        };
-        proxyApi.subscribe = api.subscribe;
+        envApi = api;
         api.connected.link(function(value) {
             proxyApi.connected.set(value);
         });
 
-        subscribers.forEach(api.subscribe);
-        subscribers = null;
+        if (subscribers.length) {
+            subscribers.splice(0).forEach(api.subscribe);
+        }
     });
 
     return proxyApi;
