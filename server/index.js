@@ -13,6 +13,7 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
     var endpoints = new EndpointList(wsServer);
     var onEndpointConnectMode = null;
     var lastNum = 0;
+    var exclusiveEndpointId = options.remplExclusivePublisher ? genUID() : null;
 
     wsServer.addClientApi(path.join(__dirname, 'ws-client-api.js'), function(content) {
         if (options.remplEndpoint) {
@@ -32,7 +33,7 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
         socket.on('rempl:endpoint connect', function(data, connectCallback) {
             data = data || {};
 
-            var id = data.id || genUID();
+            var id = exclusiveEndpointId || data.id || genUID();
             var endpoint = endpoints.get('id', id);
 
             if (!endpoint) {
@@ -120,7 +121,10 @@ module.exports = function initDevtool(wsServer, httpServer, options) {
             });
 
             connectCallback({
-                endpoints: endpoints.getList()
+                endpoints: endpoints.getList(),
+                exclusivePublisher: exclusiveEndpointId
+                    ? exclusiveEndpointId + '/' + options.remplExclusivePublisher
+                    : null
             });
         });
 

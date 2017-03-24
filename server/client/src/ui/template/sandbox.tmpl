@@ -3,7 +3,7 @@
 <b:define name="online" type="bool"/>
 
 <div class="layout" b:visible="{hasPublisher}">
-  <div class="toolbar">
+  <div class="toolbar" b:show="{nonExclusiveMode}">
     <b:include src="./button.tmpl" isolate>
       <b:set-attr name="event-click" value="drop"/>
       &slarr; Back

@@ -7,6 +7,7 @@ var Publisher = require('./type.js').Publisher;
 var router = require('basis.router');
 var transport = require('./transport.js');
 
+var route = Value.from(router.route('*id').param('id'));
 var selectedId = new Value({
     proxy: function(value) {
         return value && decodeURIComponent(value);
@@ -30,15 +31,6 @@ var selected = new ObjectMerge({
     }
 });
 
-// link with router
-Value
-    .from(router.route('*id').param('id'))
-    .link(selectedId, selectedId.set);
-
-selectedId.link(location, function(value) {
-    this.hash = value || '';
-});
-
 // link with transport
 selectedId.link(null, function() {
     if (pickMode.value) {
@@ -48,6 +40,19 @@ selectedId.link(null, function() {
 transport.online.link(pickMode, function(online) {
     if (!online) {
         this.set(false);
+    }
+});
+transport.exclusivePublisher.link(null, function(exclusiveId) {
+    if (exclusiveId) {
+        route.unlink(selectedId);
+        selectedId.unlink(location);
+        selectedId.set(exclusiveId);
+    } else {
+        // link with router
+        route.link(selectedId, selectedId.set);
+        selectedId.link(location, function(value) {
+            this.hash = value || '';
+        });
     }
 });
 

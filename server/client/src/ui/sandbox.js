@@ -168,6 +168,7 @@ module.exports = new Node({
     template: resource('./template/sandbox.tmpl'),
     binding: {
         hasPublisher: Value.query('data.id').as(Boolean),
+        nonExclusiveMode: transport.exclusivePublisher.as(basis.bool.invert),
         loading: 'loading',
         error: 'error',
         online: 'data:',
