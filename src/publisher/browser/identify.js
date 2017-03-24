@@ -58,8 +58,10 @@ function stopIdentify() {
 }
 
 module.exports = {
-    start: startIdentify,
-    stop: stopIdentify,
+    wrapTransport: function(transport) {
+        transport.startIdentify = startIdentify;
+        transport.stopIdentify = stopIdentify;
+    },
     updatePublisherList: function(value) {
         publishers = value;
         updatePublisherList();

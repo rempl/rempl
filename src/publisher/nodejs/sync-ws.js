@@ -1,11 +1,14 @@
 var Transport = require('./transport-ws.js');
 var endpoint = process.env.REMPL_SERVER || 'ws://localhost:8177';
-var transport;
+var api;
 
 module.exports = function(publisher, callback) {
-    if (!transport) {
-        transport = new Transport(endpoint);
+    if (!api) {
+        api = new Transport(publisher.wsendpoint || endpoint).createApi(
+            publisher.id,
+            publisher.getRemoteUI
+        );
     }
 
-    callback(transport.createApi(publisher.id, publisher.getRemoteUI));
+    callback(api);
 };
