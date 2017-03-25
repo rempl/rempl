@@ -1,3 +1,15 @@
+## 1.0.0-alpha11 (March 24, 2017)
+
+- Implemented basic integration with host environment
+- Implemented remote methods synchronization
+    - Added `SubscriberNamespace#onRemoteMethodsChanged()` method
+- Implemented `Subscriber#connected` property (a Token instance) to indicate publisher is connected
+- Implemented default subscriber overlay on publisher connection losing (set `subscriber.connected.defaultOverlay` to `false` to disable it)
+- Improved publisher connection tracking and reconnection in WS server
+- Improved `scriptFromFile` to use cache and `settings.dev` option
+- Make possible manual sync for `Publisher` on node.js as temporary solution
+- Implemented exclusive publisher mode in WS server by setting `exclusivePublisher` option
+
 ## 1.0.0-alpha10 (March 3, 2017)
 
 - Fixed sandbox showing issue in server client
