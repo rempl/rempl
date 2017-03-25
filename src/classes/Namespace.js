@@ -1,3 +1,5 @@
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+
 var Namespace = function(name, owner) {
     this.name = name;
     this.owner = owner;
@@ -19,7 +21,7 @@ Namespace.prototype = {
         } else {
             var methods = methodName;
             for (methodName in methods) {
-                if (this.isMethodProvided(methodName) &&
+                if (hasOwnProperty.call(methods, methodName) &&
                     typeof methods[methodName] === 'function') {
                     this.methods[methodName] = methods[methodName];
                     this.owner.scheduleProvidedMethodsUpdate();
