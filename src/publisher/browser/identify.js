@@ -61,6 +61,7 @@ module.exports = {
     wrapTransport: function(transport) {
         transport.startIdentify = startIdentify;
         transport.stopIdentify = stopIdentify;
+        return transport;
     },
     updatePublisherList: function(value) {
         publishers = value;
