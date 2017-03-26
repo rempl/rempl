@@ -1,3 +1,8 @@
+## 1.0.0-alpha12 (March 26, 2017)
+
+- Fixed exception on publisher init in browser
+- Fixed `Namespace#provide()` method to not define methods when map of methods is passed
+
 ## 1.0.0-alpha11 (March 24, 2017)
 
 - Implemented basic integration with host environment
