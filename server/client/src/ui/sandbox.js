@@ -9,16 +9,7 @@ var env = require('../env.js');
 var initSandbox = require('rempl:sandbox/index.js');
 var createHost = require('rempl:env/createHost.js');
 var SANDBOX_HTML = asset('./template/sandbox-blank.html');
-var remplScript = (function() {
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', basis.path.resolve(asset('rempldist:rempl.js')), false);
-    xhr.setRequestHeader('If-Modified-Since', new Date(0).toGMTString());
-    xhr.send('');
-
-    return xhr.status >= 200 && xhr.status < 400
-        ? xhr.responseText
-        : '';
-})();
+var remplScript = asset('rempldist:rempl.js', true);
 
 function createSandboxApi(endpoint, win) {
     function notify(type, args) {
