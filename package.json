@@ -49,7 +49,7 @@
   },
   "files": [
     "dist",
-    "server",
+    "server/*.js",
     "src",
     "HISTORY.md",
     "LICENSE",
