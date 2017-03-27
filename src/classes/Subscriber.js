@@ -2,6 +2,7 @@ var Namespace = require('../classes/Namespace.js');
 var Endpoint = require('../classes/Endpoint.js');
 var Token = require('../classes/Token.js');
 var setOverlayVisible = require('../subscriber/browser/disconnected-overlay.js');
+var utils = require('../utils/index.js');
 
 var SubscriberNamespace = function(name, owner) {
     Namespace.call(this, name, owner);
@@ -13,7 +14,7 @@ SubscriberNamespace.prototype = Object.create(Namespace.prototype);
 SubscriberNamespace.prototype._lastData = null;
 SubscriberNamespace.prototype.subscribe = function(fn) {
     this.callRemote('init', fn);
-    this.subscribers.push(fn);
+    return utils.subscribe(this.subscribers, fn);
 };
 
 var Subscriber = function() {
@@ -44,6 +45,19 @@ var Subscriber = function() {
             this.setRemoteApi();
         }
     }, this);
+
+    this.envSubscribers = [];
+    this.env = {
+        subscribe: function(fn) {
+            return utils.subscribe(this.envSubscribers, fn);
+        }.bind(this),
+        send: function(payload, callback) {
+            Namespace.send(this, [{
+                type: 'to-env',
+                payload: payload
+            }, callback]);
+        }.bind(this)
+    };
 };
 
 Subscriber.prototype = Object.create(Endpoint.prototype);
@@ -61,8 +75,14 @@ Subscriber.prototype.processInput = function(packet, callback) {
             this.connected.set(false);
             break;
 
+        case 'env:data':
+            this.envSubscribers.slice().forEach(function(callback) {
+                callback(packet.payload);
+            });
+            break;
+
         case 'data':
-            this.ns(packet.ns || '*').subscribers.forEach(function(callback) {
+            this.ns(packet.ns || '*').subscribers.slice().forEach(function(callback) {
                 callback(packet.payload);
             });
             break;

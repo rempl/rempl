@@ -7,7 +7,7 @@ var utils = require('../utils/index.js');
 var DEBUG = false;
 
 function subscribe(endpoint, fn) {
-    this.subscribers.push({
+    return utils.subscribe(this.subscribers, {
         endpoint: endpoint,
         fn: fn
     });

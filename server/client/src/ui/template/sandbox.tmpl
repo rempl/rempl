@@ -14,11 +14,10 @@
       <span b:show="{isNode}" class="pid">PID: {pid}</span>
     </div>
   </div>
-  <div class="frame-wrapper">
+  <div{frameWrapper} class="frame-wrapper">
     <b:include src="./spinner.tmpl" show="{loading}" isolate>
       Fetching UI...
     </b:include>
     <div class="error" b:show="{error}">{error}</div>
-    <!--{frame}-->
   </div>
 </div>

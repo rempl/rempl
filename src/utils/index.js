@@ -36,6 +36,17 @@ function genUID(len) {
     return result.substr(0, len);
 }
 
+function subscribe(list, item) {
+    list.push(item);
+
+    return function() {
+        var idx = list.indexOf(item);
+        if (idx !== -1) {
+            list.splice(idx, 1);
+        }
+    };
+}
+
 var ready = (function() {
     var eventFired = !document || document.readyState == 'complete';
     var readyHandlers = [];
@@ -167,6 +178,7 @@ module.exports = {
     complete: complete,
     slice: slice,
     genUID: genUID,
+    subscribe: subscribe,
     ready: ready,
     waitForGlobal: waitForGlobal,
     log: consoleMethods.log,

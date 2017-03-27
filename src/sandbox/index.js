@@ -1,8 +1,7 @@
-var EventTransport = require('../transport/event.js');
+var isNode = require('../utils/index.js').isNode;
 
-module.exports = function initSandbox(win, name, fn) {
-    new EventTransport('rempl-sandbox', 'rempl-subscriber', {
-        name: name,
-        env: win
-    }).onInit({ id: name }, fn);
-};
+module.exports = !isNode
+    ? require('./browser/index.js')
+    : function() {
+        throw new Error('[rempl] createSundbox() doesn\'t supported on node.js');
+    };

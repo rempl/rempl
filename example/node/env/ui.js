@@ -2,13 +2,13 @@
 /* global rempl */
 
 rempl.getSubscriber(function(api) {
-    api.subscribe(function(memoryUsage) {
-        // sending memory usage to environment
-        env.send({
-            type: 'setStatusBarContent',
-            content: memoryUsage
-        });
-    });
+    // api.subscribe(function(memoryUsage) {
+    //     // sending memory usage to environment
+    //     env.send({
+    //         type: 'setStatusBarContent',
+    //         content: memoryUsage
+    //     });
+    // });
 
     document.body
         .appendChild(document.createElement('div'))
@@ -48,7 +48,7 @@ rempl.getSubscriber(function(api) {
 ';
 
     // refs to dom-nodes
-    var env = rempl.createEnv(parent);
+    var env = api.env;
     var envElement = document.getElementById('env');
     var noEnv = document.getElementById('no-env');
     var envName = document.getElementById('env-name');
@@ -131,7 +131,7 @@ rempl.getSubscriber(function(api) {
     });
 
     envGetContentButton.addEventListener('click', function() {
-        env.send({type: 'getContent'}, function(response) {
+        env.send({ type: 'getContent' }, function(response) {
             envGetContentResponse.innerText = response.status ? response.content : 'not allowed';
         });
     });

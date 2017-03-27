@@ -5,13 +5,10 @@ var Value = require('basis.data').Value;
 var Expression = require('basis.data.value').Expression;
 var Node = require('basis.ui').Node;
 var transport = require('../transport.js');
-var env = require('../env.js');
-var initSandbox = require('rempl:sandbox/index.js');
-var createHost = require('rempl:env/createHost.js');
-var SANDBOX_HTML = asset('./template/sandbox-blank.html');
+var createRemplSandbox = require('rempl:sandbox/index.js');
 var remplScript = asset('rempldist:rempl.js', true);
 
-function createSandboxApi(endpoint, win) {
+function createSandbox(endpoint, options) {
     function notify(type, args) {
         for (var i = 0; i < subscribers[type].length; i++) {
             subscribers[type][i].apply(null, args);
@@ -25,7 +22,6 @@ function createSandboxApi(endpoint, win) {
     var publisherConnected = new Expression(publisherExists, sessionOpenned, function(publisherExists, sessionOpenned) {
         return publisherExists && sessionOpenned;
     });
-    var envUnsubscribe;
     var retryTimer;
     var subscribers = {
         data: [],
@@ -57,7 +53,7 @@ function createSandboxApi(endpoint, win) {
         notify('connection', [online]);
     });
 
-    initSandbox(win, endpoint.data.name, function(api) {
+    var sandbox = createRemplSandbox(options, function(api) {
         api.subscribe(function() {
             socket.emit.apply(socket, ['rempl:to publisher'].concat(basis.array(arguments)));
         });
@@ -69,90 +65,20 @@ function createSandboxApi(endpoint, win) {
         });
     });
 
-    // link with host
-    var host = createHost(win);
-    host.subscribe(env.send);
-
-    envUnsubscribe = env.subscribe(host.send);
-    env.send({
-        type: 'getHostInfo'
-    });
-
     // return destroy function
     return function destroySandboxApi() {
-        envUnsubscribe();
         clearTimeout(retryTimer);
         sessionId.unlink(subscribers);
         online.unlink(subscribers);
+        sandbox.destroy();
+        sandbox = null;
         socket.close();
         socket = null;
     };
 }
 
-var Frame = Node.subclass({
-    type: null,
-    script: null,
-    destroySandboxApi: null,
-
-    template: resource('./template/sandbox-frame.tmpl'),
-    binding: {
-        api: function() {
-            return basis.genUID();
-        },
-        src: function(node) {
-            return node.url || SANDBOX_HTML;
-        }
-    },
-    action: {
-        ready: function() {
-            if (this.ready) {
-                return;
-            }
-
-            this.ready = true;
-            this.initUI();
-        }
-    },
-
-    initUI: function() {
-        if (this.ready && this.element) {
-            var contentWindow = this.element.contentWindow;
-
-            // run publisher UI script
-            if (this.script) {
-                contentWindow.eval(
-                    remplScript +
-                    '\n//# sourceURL=rempl.js'
-                );
-                contentWindow.eval(
-                    this.script +
-                    '\n//# sourceURL=publisher-ui.js'
-                );
-            }
-
-            this.teardownApi();
-            this.destroySandboxApi = createSandboxApi(this.endpoint, contentWindow);
-        }
-    },
-    teardownApi: function() {
-        if (typeof this.destroySandboxApi === 'function') {
-            this.destroySandboxApi();
-            this.destroySandboxApi = null;
-        }
-    },
-
-    destroy: function() {
-        this.teardownApi();
-
-        // teardown document
-        this.element.setAttribute('srcdoc', '');
-        this.element.setAttribute('src', '');
-
-        Node.prototype.destroy.call(this);
-    }
-});
-
 module.exports = new Node({
+    destroySandbox: null,
     loading: new basis.Token(false),
     error: new basis.Token(false),
 
@@ -191,8 +117,9 @@ module.exports = new Node({
     },
 
     syncUI: function() {
-        if (this.satellite.frame) {
-            this.satellite.frame.destroy();
+        if (typeof this.destroySandbox === 'function') {
+            this.destroySandbox();
+            this.destroySandbox = null;
         }
 
         if (this.data.id) {
@@ -204,11 +131,13 @@ module.exports = new Node({
                 if (err) {
                     this.error.set(err);
                 } else if (this.data.uiContent != null) {
-                    this.setSatellite('frame', new Frame({
-                        endpoint: this,
-                        url: type === 'url' ? content : null,
-                        script: type === 'script' ? content : ''
-                    }));
+                    this.destroySandbox = createSandbox(this, {
+                        type: type,
+                        content: content,
+                        publisher: this.data.name,
+                        remplScript: remplScript,
+                        container: this.tmpl.frameWrapper
+                    });
                 }
             }.bind(this));
         }
