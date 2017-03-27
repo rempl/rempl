@@ -15,22 +15,20 @@ module.exports = function createSandbox(settings, callback) {
         var contentWindow = iframe.contentWindow;
 
         if (settings.type === 'script') {
-            contentWindow.eval(
-                settings.remplScript +
-                '\n//# sourceURL=rempl.js'
-            );
-            contentWindow.eval(
-                settings.content +
-                '\n//# sourceURL=publisher-ui.js'
-            );
+            for (var name in settings.content) {
+                contentWindow.eval(
+                    settings.content[name] +
+                    '\n//# sourceURL=' + name
+                );
+            }
         }
 
         // host <-> subscriber transport
         // TODO: teardown transport
         new EventTransport('rempl-sandbox', 'rempl-subscriber', {
-            name: settings.publisher,
+            name: utils.genUID(),
             env: contentWindow
-        }).onInit({ id: settings.publisher }, function(api) {
+        }).onInit({}, function(api) {
             var env = getEnv();
             envUnsubscribe = env.subscribe(function(data) {
                 api.send({

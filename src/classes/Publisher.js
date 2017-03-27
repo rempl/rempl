@@ -1,6 +1,7 @@
 var Namespace = require('../classes/Namespace.js');
 var Endpoint = require('../classes/Endpoint.js');
 var publishers = Object.create(null);
+var remplSource = require('../source.js');
 
 var PublisherNamespace = function(name, owner) {
     Namespace.call(this, name, owner);
@@ -23,8 +24,21 @@ PublisherNamespace.prototype.publish = function(payload) {
 
 var Publisher = function(id, getRemoteUI) {
     Endpoint.call(this);
+
     this.id = id;
-    this.getRemoteUI = getRemoteUI;
+    this.getRemoteUI = function(settings, callback) {
+        getRemoteUI(settings, function(error, type, content) {
+            if (!error && type === 'script') {
+                // send with user script rempl source too
+                content = {
+                    'rempl.js': remplSource,
+                    'publisher-ui.js': content
+                };
+            }
+
+            callback(error, type, content);
+        });
+    };
 
     publishers[id] = this;
     Publisher.onPublishersChange(Object.keys(publishers));

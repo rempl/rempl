@@ -27,8 +27,6 @@ var selected = new ObjectMerge({
         id: 'publisher:id',
         endpointId: 'publisher',
         name: 'publisher',
-        uiType: 'publisher',
-        uiContent: 'publisher',
         '*': 'endpoint'
     }
 });

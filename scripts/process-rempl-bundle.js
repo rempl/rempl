@@ -11,8 +11,8 @@ process.stdin
             (buffer
                 .join('')
                 .replace(
-                    /source: require\('fs'\).+?(?=,?\r?\n)/,
-                    'source: "(" + __selfScript + ").call(this);"'
+                    /module.exports = require\('fs'\).+?(?=;)/,
+                    'module.exports = "(" + __selfScript + ").call(this);"'
                 )
             ) +
             '}).call(this);'

@@ -31,13 +31,12 @@ module.exports = {
     exclusivePublisher: exclusivePublisher,
     getPublisherUI: function(id, callback) {
         var publisher = Publisher(id);
-        socket.emit('rempl:get publisher ui', publisher.data.endpointId, publisher.data.name, function(err, type, content) {
-            publisher.update({
-                uiType: type,
-                uiContent: content
-            });
-            callback(err, type, content);
-        });
+        socket.emit(
+            'rempl:get publisher ui',
+            publisher.data.endpointId,
+            publisher.data.name,
+            callback
+        );
     },
     pickPublisher: function(callback) {
         socket.emit('rempl:pick publisher', callback);

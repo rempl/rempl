@@ -1,12 +1,11 @@
 /* eslint-env browser */
-/* global io, basis, resource, asset */
+/* global io, basis, resource */
 
 var Value = require('basis.data').Value;
 var Expression = require('basis.data.value').Expression;
 var Node = require('basis.ui').Node;
 var transport = require('../transport.js');
 var createRemplSandbox = require('rempl:sandbox/index.js');
-var remplScript = asset('rempldist:rempl.js', true);
 
 function createSandbox(endpoint, options) {
     function notify(type, args) {
@@ -130,12 +129,10 @@ module.exports = new Node({
 
                 if (err) {
                     this.error.set(err);
-                } else if (this.data.uiContent != null) {
+                } else {
                     this.destroySandbox = createSandbox(this, {
                         type: type,
                         content: content,
-                        publisher: this.data.name,
-                        remplScript: remplScript,
                         container: this.tmpl.frameWrapper
                     });
                 }
