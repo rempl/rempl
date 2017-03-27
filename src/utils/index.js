@@ -1,6 +1,5 @@
 'use strict';
 
-var document = global.document;
 var isNode = typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]';
 
 function complete(dest, source) {
