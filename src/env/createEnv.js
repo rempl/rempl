@@ -1,5 +1,6 @@
 var Token = require('../classes/Token');
 var EventTransport = require('../transport/event.js');
+var utils = require('../utils/index.js');
 
 module.exports = function createProxy(name, connectTo, win, remoteName) {
     var envApi;
@@ -16,13 +17,7 @@ module.exports = function createProxy(name, connectTo, win, remoteName) {
             if (envApi) {
                 return envApi.subscribe(fn);
             } else if (subscribers.indexOf(fn) == -1) {
-                subscribers.push(fn);
-                unsubscribe.set(fn, function() {
-                    var idx = subscribers.indexOf(fn);
-                    if (idx !== -1) {
-                        subscribers.splice(idx, 1);
-                    }
-                });
+                unsubscribe.set(fn, utils.subscribe(subscribers, fn));
 
                 return function() {
                     unsubscribe.get(fn)();

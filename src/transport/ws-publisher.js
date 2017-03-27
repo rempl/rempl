@@ -220,7 +220,7 @@ WSTransport.prototype.createApi = function(id, getRemoteUI) {
             );
         },
         subscribe: function(fn) {
-            subscribers.push(fn);
+            return utils.subscribe(subscribers, fn);
         }
     };
 };
