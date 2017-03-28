@@ -28,7 +28,7 @@ module.exports = function createProxy() {
         }
     };
 
-    new EventTransport('rempl-env', 'rempl-host', {
+    new EventTransport('rempl-host', 'rempl-env', {
         name: utils.genUID(),
         window: parent
     }).onInit({}, function(api) {
