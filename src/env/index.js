@@ -1,11 +1,10 @@
-/* eslint-env browser */
 var utils = require('../utils/index.js');
 var createEnv = require('./createEnv.js');
 var env = null;
 
 module.exports = function getEnv() {
     if (env === null) {
-        env = createEnv('rempl-env', 'rempl-host', parent, utils.genUID());
+        env = createEnv();
     }
 
     return env;

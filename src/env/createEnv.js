@@ -1,12 +1,14 @@
+/* eslint-env browser */
 var Token = require('../classes/Token');
 var EventTransport = require('../transport/event.js');
 var utils = require('../utils/index.js');
 
-module.exports = function createProxy(name, connectTo, win, remoteName) {
+module.exports = function createProxy() {
     var envApi;
     var subscribers = [];
     var unsubscribe = new WeakMap();
     var proxyApi = {
+        enabled: parent !== self,
         connected: new Token(false),
         send: function() {
             if (envApi) {
@@ -26,10 +28,10 @@ module.exports = function createProxy(name, connectTo, win, remoteName) {
         }
     };
 
-    new EventTransport(name, connectTo, {
-        name: remoteName,
-        window: win
-    }).onInit({ id: remoteName }, function(api) {
+    new EventTransport('rempl-env', 'rempl-host', {
+        name: utils.genUID(),
+        window: parent
+    }).onInit({}, function(api) {
         envApi = api;
         api.connected.link(function(value) {
             proxyApi.connected.set(value);

@@ -30,20 +30,23 @@ module.exports = function createSandbox(settings, callback) {
             window: contentWindow
         }).onInit({}, function(api) {
             var env = getEnv();
-            envUnsubscribe = env.subscribe(function(data) {
-                api.send({
-                    type: 'env:data',
-                    payload: data
+
+            if (env.enabled) {
+                envUnsubscribe = env.subscribe(function(data) {
+                    api.send({
+                        type: 'env:data',
+                        payload: data
+                    });
                 });
-            });
-            api.subscribe(function(data) {
-                if (data.type === 'to-env') {
-                    env.send(data.payload);
-                }
-            });
-            env.send({
-                type: 'getHostInfo'
-            });
+                api.subscribe(function(data) {
+                    if (data.type === 'to-env') {
+                        env.send(data.payload);
+                    }
+                });
+                env.send({
+                    type: 'getHostInfo'
+                });
+            }
 
             callback(api);
         });
