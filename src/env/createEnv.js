@@ -28,7 +28,7 @@ module.exports = function createProxy(name, connectTo, win, remoteName) {
 
     new EventTransport(name, connectTo, {
         name: remoteName,
-        env: win
+        window: win
     }).onInit({ id: remoteName }, function(api) {
         envApi = api;
         api.connected.link(function(value) {

@@ -162,9 +162,9 @@ function EventTransport(name, connectTo, options) {
     this.subscribers = [];
     this.inited = false;
     this.onInit = this.onInit.bind(this);
-    this.env = options.env || global;
+    this.window = options.window || global;
 
-    if (typeof this.env.postMessage !== 'function') {
+    if (typeof this.window.postMessage !== 'function') {
         utils.warn('[rempl][dom-event-transport] Event (postMessage) transport isn\'t supported');
         return;
     }
@@ -213,8 +213,8 @@ EventTransport.prototype = {
             utils.log('[rempl][dom-event-transport] emit event', channelId, payload);
         }
 
-        if (typeof this.env.postMessage === 'function') {
-            this.env.postMessage({
+        if (typeof this.window.postMessage === 'function') {
+            this.window.postMessage({
                 channel: channelId,
                 payload: payload
             }, '*');
