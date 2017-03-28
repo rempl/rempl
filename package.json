@@ -35,7 +35,7 @@
   },
   "scripts": {
     "lint": "jscs scripts server src && eslint scripts server src",
-    "build": "npm run build:rempl-prod && npm run build:server-assets",
+    "build": "npm run build:rempl && npm run build:server-assets",
     "build:rempl": "browserify -t package-json-versionify --standalone rempl src/index.js | node scripts/process-rempl-bundle.js | uglifyjs --compress --mangle -o dist/rempl.js",
     "build:rempl-dev": "browserify -t package-json-versionify --standalone rempl src/index.js | node scripts/process-rempl-bundle.js > dist/rempl.js",
     "build:server-assets": "node node_modules/basisjs-tools-build/bin/build --config server/client/build.config",
