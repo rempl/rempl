@@ -1,6 +1,6 @@
 module.exports = function createSync(publisher) {
     var syncBrowserExtension = require('./sync-browser-extension.js');
-    // var inpageSync = require('./sync-in-page.js');
+    var inpageSync = require('./sync-in-page.js');
     var syncWs = require('./sync-ws.js');
 
     // browser extension
@@ -12,13 +12,12 @@ module.exports = function createSync(publisher) {
     });
 
     // // in page
-    // inpageSync(publisher, function(api) {
-    //     api.subscribe(publisher.processInput);
-    //     api.connected.link(function(connected) {
-    //         // devtools.set(connected);
-    //         publisher.channels.inPage = connected ? api.send : null;
-    //     });
-    // });
+    inpageSync(publisher, function(api) {
+        api.subscribe(publisher.processInput);
+        api.connected.link(function(connected) {
+            publisher.setupChannel('in-page', api.send, connected);
+        });
+    });
 
     // ws server
     syncWs(publisher, function(api) {
