@@ -81,43 +81,20 @@
     flex: 0 0 auto;
     width: 28px;
     height: 24px;
+    color: rgb(90, 90, 90);
 }
-
-.layout-button:hover {
+.layout-button:hover
+{
     background: rgb(66, 128, 236);
+    color: white;
 }
-
-.layout-button:hover .layout-button-part {
-    border-color: white;
-}
-
-.layout-button-part {
+.layout-button:before
+{
+    content: '';
     width: 15px;
     height: 13px;
-    border: 2px solid rgb(90, 90, 90);
+    border: 2px solid currentColor;
     box-sizing: border-box;
-}
-
-.layout-button-part-wrapper {
-    position: relative;
-    width: 15px;
-    height: 13px;
-}
-
-.layout-button-part-wrapper .layout-button-part {
-    position: absolute;
-}
-
-.layout-button_active:hover {
-    background: none;
-}
-
-.host[side=left] .layout-button[side=left] .layout-button-part,
-.host[side=right] .layout-button[side=right] .layout-button-part,
-.host[side=top] .layout-button[side=top] .layout-button-part,
-.host[side=bottom] .layout-button[side=bottom] .layout-button-part,
-.host[side=full] .layout-button[side=full] .layout-button-part {
-    border-color: rgb(66, 128, 236);
 }
 
 .host[side=left] .layout-button[side=left],
@@ -125,6 +102,7 @@
 .host[side=top] .layout-button[side=top],
 .host[side=bottom] .layout-button[side=bottom],
 .host[side=full] .layout-button[side=full] {
+    color: rgb(66, 128, 236);
     background: none;
 }
 
@@ -134,7 +112,7 @@
     position: relative;
     width: 28px;
     text-align: center;
-    font: 15px "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font: 20px Arial, sans-serif;
     color: rgb(90, 90, 90);
 }
 
@@ -143,49 +121,50 @@
 }
 
 .close-button:after {
-    content: 'x';
+    content: '×';
     line-height: 24px;
 }
 
 /* external part */
 
-.layout-button[side=external] .layout-button-part:first-child {
-    left: 0;
-    bottom: 0;
-    height: 11px;
+.layout-button[side=external]:before {
+    height: 10px;
     width: 13px;
-    border-top: none;
-    border-right: none;
+    border-width: 0 0 2px 2px;
+    margin-bottom: -3px;
 }
 
-.layout-button[side=external] .layout-button-part:last-child {
-    top: 0;
-    right: 0;
+.layout-button[side=external]:after {
+    content: '';
     height: 10px;
-    width: 12px;
+    width: 13px;
+    border: 2px solid currentColor;
+    box-sizing: border-box;
+    margin-top: -3px;
+    margin-left: -10px;
 }
 
 /* top part */
 
-.layout-button[side=top] .layout-button-part {
+.layout-button[side=top]:before {
     border-top-width: 5px;
 }
 
 /* top right */
 
-.layout-button[side=right] .layout-button-part {
+.layout-button[side=right]:before {
     border-right-width: 5px;
 }
 
 /* top bottom */
 
-.layout-button[side=bottom] .layout-button-part {
+.layout-button[side=bottom]:before {
     border-bottom-width: 5px;
 }
 
 /* top left */
 
-.layout-button[side=left] .layout-button-part {
+.layout-button[side=left]:before {
     border-left-width: 5px;
 }
 
