@@ -4,30 +4,21 @@ var utils = require('../../utils/index.js');
 var getEnv = require('../../env/index.js');
 
 module.exports = function createSandbox(settings, callback) {
-    settings = settings || {};
-
-    var container = settings.container || document.documentElement;
-    var iframe = document.createElement('iframe');
-    var envUnsubscribe;
-
-    iframe.name = utils.genUID(); // to avoid cache
-    iframe.onload = function() {
-        var contentWindow = iframe.contentWindow;
-
+    function initSandbox(sandboxWindow) {
         if (settings.type === 'script') {
             for (var name in settings.content) {
-                contentWindow.eval(
+                sandboxWindow.eval(
                     settings.content[name] +
                     '\n//# sourceURL=' + name
                 );
             }
         }
 
-        // host <-> subscriber transport
+        // sandbox <-> subscriber transport
         // TODO: teardown transport
         new EventTransport('rempl-sandbox', 'rempl-subscriber', {
             name: utils.genUID(),
-            window: contentWindow
+            window: sandboxWindow
         }).onInit({}, function(api) {
             var env = getEnv();
 
@@ -50,27 +41,44 @@ module.exports = function createSandbox(settings, callback) {
 
             callback(api);
         });
-    };
-
-    if (settings.type === 'url') {
-        iframe.src = settings.content;
-    } else {
-        iframe.srcdoc = '<!doctype html>';
     }
 
-    container.appendChild(iframe);
+    var envUnsubscribe = null;
+    var iframe = null;
+
+    settings = settings || {};
+
+    if (settings.window) {
+        initSandbox(settings.window);
+    } else {
+        iframe = document.createElement('iframe');
+        iframe.name = utils.genUID(); // to avoid cache
+        iframe.onload = function() {
+            initSandbox(iframe.contentWindow);
+        };
+
+        if (settings.type === 'url') {
+            iframe.src = settings.content;
+        } else {
+            iframe.srcdoc = '<!doctype html>';
+        }
+
+        (settings.container || document.documentElement).appendChild(iframe);
+    }
 
     return {
         destroy: function() {
-            if (typeof envUnsubscribe === 'function') {
+            if (envUnsubscribe !== null) {
                 envUnsubscribe();
                 envUnsubscribe = null;
             }
 
-            iframe.parentNode.removeChild(iframe);
-            iframe.setAttribute('srcdoc', '');
-            iframe.setAttribute('src', '');
-            iframe = null;
+            if (iframe !== null) {
+                iframe.parentNode.removeChild(iframe);
+                iframe.setAttribute('srcdoc', '');
+                iframe.setAttribute('src', '');
+                iframe = null;
+            }
         }
     };
 };
