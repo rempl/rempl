@@ -89,17 +89,19 @@ function getView() {
                                 createLayoutButton('external', function() {
                                     // if (externalWindow === null || externalWindow.closed) {
                                     //     externalWindow = window.open('about:blank', 'rempl');
-                                    //     _publisher.getRemoteUI({}, function(error, type, content) {
-                                    //         cleanupSandbox();
-                                    //         sandbox = createSandbox({
-                                    //             container: view.sandbox,
-                                    //             type: type,
-                                    //             content: content,
-                                    //             window: externalWindow
-                                    //         }, function(api) {
-                                    //             _callback(api);
-                                    //             api.send({
-                                    //                 type: 'publisher:connect'
+                                    //     transport.onInit({ id: selectedPublisher }, function(papi) {
+                                    //         papi.getRemoteUI(function(error, type, content) {
+                                    //             cleanupSandbox();
+                                    //             sandbox = createSandbox({
+                                    //                 container: view.sandbox,
+                                    //                 type: type,
+                                    //                 content: content,
+                                    //                 window: externalWindow
+                                    //             }, function(api) {
+                                    //                 // _callback(api);
+                                    //                 api.send({
+                                    //                     type: 'publisher:connect'
+                                    //                 });
                                     //             });
                                     //         });
                                     //     });
@@ -196,11 +198,14 @@ module.exports = function getHost() {
         return host;
     }
 
-    transport = new EventTransport('rempl-inpage-host', 'rempl-inpage-publisher')
-        .onPublishersChanged(function(endpointPublishers) {
-            publishers = endpointPublishers;
-            updatePublisherList();
-        });
+    transport = new EventTransport('rempl-inpage-host', 'rempl-inpage-publisher');
+    transport.remoteEndpoints.on(function(endpoints) {
+        publishers = endpoints;
+        updatePublisherList();
+    });
+    // transport._debug = function() {
+    //     console.info(arguments[0]);
+    // };
 
     return host = {
         activate: function(publisherId) {

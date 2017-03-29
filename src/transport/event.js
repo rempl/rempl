@@ -19,19 +19,27 @@ function send(endpoint, type) {
         return;
     }
 
+    // if (endpoint !== this.remoteName && this.remoteEndpoints.value.indexOf(endpoint) === -1) {
+    //     // console.warn(this.name, endpoint, this.remoteName, this.remoteEndpoints.value);
+    //     if (1||DEBUG) {
+    //         utils.warn('[rempl][dom-event-transport] ' + this.name + ' send({ type: `' + type + '` }) to endpoint is cancelled since no `' + endpoint + '` in remote endpoint list [' + this.remoteEndpoints.value.join(', ') + ']', arguments[2]);
+    //     }
+    //     return;
+    // }
+
     var args = Array.prototype.slice.call(arguments, 2);
     var callback = false;
 
     if (args.length && typeof args[args.length - 1] === 'function') {
         callback = utils.genUID();
-        this.callbacks[callback] = args.pop();
+        this.sendCallbacks[callback] = args.pop();
     }
 
     this.send(this.outputChannelId, {
         type: type,
         endpoint: endpoint,
-        callback: callback,
-        data: args
+        data: args,
+        callback: callback
     });
 }
 
@@ -40,7 +48,7 @@ function handshake(transport) {
         name: transport.remoteName,  // FIXME: temporary solution to pass subscriber name from sandbox
         input: transport.inputChannelId,
         output: transport.outputChannelId,
-        publishers: transport.publishers
+        endpoints: transport.ownEndpoints.value
     });
 }
 
@@ -54,25 +62,38 @@ function wrapCallback(transport, callback) {
     };
 }
 
-function onConnect(payload) {
-    if (this.outputChannelId !== null) {
-        return;
-    }
+function setEndpointList(endpoints, value) {
+    var oldList = endpoints.value;
+    var newList = value.filter(function(endpoint, idx, array) { // unique values
+        return idx === 0 || array.lastIndexOf(endpoint, idx - 1) === -1;
+    });
+    var diff = newList.length !== oldList.length
+            || newList.every(function(endpoint) {
+                return oldList.indexOf(endpoint) !== -1;
+            });
 
+    if (diff) {
+        endpoints.set(newList);
+    }
+}
+
+function onConnect(payload) {
     this.outputChannelId = payload.input;
 
     if (!payload.output) {
         handshake(this);
+        // return;
     }
 
     if (payload.name && !this.remoteName) { // FIXME: temporary solution to pass subscriber name from sandbox
         this.remoteName = payload.name;
     }
 
-    this.endpoints.on(function(publishers) {
+    setEndpointList(this.remoteEndpoints, payload.endpoints || []);
+    this.ownEndpoints.on(function(endpoints) {
         this.send(this.outputChannelId, {
-            type: 'publishers',
-            data: [publishers]
+            type: 'endpoints',
+            data: [endpoints]
         });
     }, this);
 
@@ -95,12 +116,13 @@ function onData(payload) {
 
         case 'disconnect':
             this.connected.set(false);
+            setEndpointList(this.remoteEndpoints, []);
             break;
 
         case 'callback':
-            if (hasOwnProperty.call(this.callbacks, payload.callback)) {
-                this.callbacks[payload.callback].apply(null, payload.data);
-                delete this.callbacks[payload.callback];
+            if (hasOwnProperty.call(this.sendCallbacks, payload.callback)) {
+                this.sendCallbacks[payload.callback].apply(null, payload.data);
+                delete this.sendCallbacks[payload.callback];
             }
             break;
 
@@ -131,11 +153,8 @@ function onData(payload) {
             }
             break;
 
-        case 'publishers':
-            this.publishers = payload.data[0];
-            this.publishersChangedCallbacks.forEach(function(callback) {
-                callback(this.publishers);
-            }, this);
+        case 'endpoints':
+            setEndpointList(this.remoteEndpoints, payload.data[0]);
             break;
 
         default:
@@ -156,14 +175,20 @@ function EventTransport(name, connectTo, options) {
     this.outputChannelId = null;
 
     this.connected = new Token(true); // TODO: set false by default
-    this.endpoints = new Token([]);
+    this.ownEndpoints = new Token([]);
+    this.remoteEndpoints = new Token([]);
     this.endpointGetUI = {};
+
+    // this.ownEndpoints.on(function(value) {
+    //     console.log('>>>', this.name, this.connectTo, value, window.location.href);
+    // }, this);
+    // this.remoteEndpoints.on(function(value) {
+    //     console.log('<<<', this.name, this.connectTo, value, window.location.href);
+    // }, this);
 
     this.initCallbacks = [];
     this.dataCallbacks = [];
-    this.publishersChangedCallbacks = [];
-    this.publishers = [];
-    this.callbacks = {};
+    this.sendCallbacks = {};
     this.inited = false;
     this.onInit = this.onInit.bind(this);
     this.window = options.window || global;
@@ -175,6 +200,10 @@ function EventTransport(name, connectTo, options) {
 
     addEventListener('message', function(e) {
         var data = e.data || {};
+
+        if (typeof this._debug === 'function') {
+            this._debug(e.data);
+        }
 
         switch (data.channel) {
             case this.connectTo + ':connect':
@@ -192,16 +221,18 @@ function EventTransport(name, connectTo, options) {
 
 EventTransport.prototype = {
     onInit: function(endpoint, callback) {
-        if (this.inited) {
-            if (!endpoint.id && this.remoteName) { // FIXME: temporary solution to pass subscriber name from sandbox
-                endpoint.id = this.remoteName;
-            }
+        if (!endpoint.id && this.remoteName) { // FIXME: temporary solution to pass subscriber name from sandbox
+            endpoint.id = this.remoteName;
+        }
 
-            this.endpoints.set(this.endpoints.value.concat(endpoint.id));
+        if (endpoint.id) {
+            setEndpointList(this.ownEndpoints, this.ownEndpoints.value.concat(endpoint.id));
             if (typeof endpoint.getRemoteUI === 'function') {
                 this.endpointGetUI[endpoint.id] = endpoint.getRemoteUI;
             }
+        }
 
+        if (this.inited) {
             callback({
                 connected: this.connected,
                 getRemoteUI: send.bind(this, endpoint.id, 'getRemoteUI'),
@@ -212,10 +243,6 @@ EventTransport.prototype = {
             this.initCallbacks.push(arguments);
         }
 
-        return this;
-    },
-    onPublishersChanged: function(callback) {
-        this.publishersChangedCallbacks.push(callback);
         return this;
     },
 
