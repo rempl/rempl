@@ -6,6 +6,7 @@ var createElement = require('./createElement.js');
 var uid = require('../../utils/index.js').genUID();
 var publishers = [];
 var selectedPublisher = null;
+var teardownTimer;
 var transport = null;
 // var externalWindow = null;
 var sandbox = null;
@@ -160,7 +161,13 @@ function injectElement(container, element) {
 }
 
 function showView() {
-    injectElement(document.body, getView().element);
+    var element = getView().element;
+    element.display = '';
+    injectElement(document.body, element);
+}
+
+function softHideView() {
+    getView().element.display = 'none';
 }
 
 function hideView() {
@@ -176,6 +183,8 @@ function cleanupSandbox() {
 
 function selectPublisher(publisher) {
     if (publisher !== selectedPublisher) {
+        clearTimeout(teardownTimer);
+
         selectedPublisher = publisher;
         Array.prototype.forEach.call(getView().tabs.children, updateTabSelectedState);
 
@@ -224,11 +233,19 @@ module.exports = function getHost() {
     // };
 
     return host = {
-        activate: function(publisherId) {
+        activate: function(publisher) {
+            var publisherId = (publisher && publisher.id) || publisher;
             selectPublisher(publisherId);
         },
-        deactivate: function() {
-            selectPublisher();
+        deactivate: function(publisher) {
+            var publisherId = (publisher && publisher.id) || publisher;
+            if (!publisherId || publisherId === selectedPublisher) {
+                softHideView();
+                // tear down subscriber in 15 sec
+                teardownTimer = setTimeout(function() {
+                    selectPublisher();
+                }, 15000);
+            }
         }
     };
 };
