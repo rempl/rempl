@@ -11,7 +11,7 @@ process.stdin
             (buffer
                 .join('')
                 .replace(
-                    /require\('fs'\)\.readFileSync\(__dirname \+ '\/style\.js', 'utf8'\)/,
+                    /typeof asset(.|\s)+?require\('fs'\)\.readFileSync\(__dirname \+ '\/style\.js', 'utf8'\)/,
                     JSON.stringify(require('fs').readFileSync(__dirname + '/../src/host/in-page/style.css', 'utf8'))
                 )
                 .replace(
