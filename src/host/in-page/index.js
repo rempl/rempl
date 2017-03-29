@@ -1,93 +1,101 @@
 /* eslint-env browser */
-var utils = require('../../utils/index.js');
+var EventTransport = require('../../transport/event.js');
 var createSandbox = require('../../sandbox/index.js');
+var createElement = require('./createElement.js');
+var publishers = [];
+var selectedPublisher = null;
+var transport = null;
+// var externalWindow = null;
 var sandbox = null;
 var view = null;
+var host = null;
 
-function createElement(options) {
-    var element = document.createElement(options.tagName || 'div');
-
-    for (var name in options) {
-        switch (name) {
-            case 'tagName':
-                break;
-
-            case 'style':
-                element.style = Object.keys(options.style).reduce(function(style, property) {
-                    return style + property + ':' + options.style[property] + ';';
-                }, '');
-                break;
-
-            case 'events':
-                for (var event in options.events) {
-                    element.addEventListener(event, options.events[event], false);
+function updatePublisherList() {
+    var list = getView().tabs;
+    list.innerHTML = '';
+    publishers.forEach(function(publisher) {
+        list.appendChild(createElement({
+            publisher: publisher,
+            class: publisher === selectedPublisher ? 'tab tab_selected' : 'tab',
+            children: [publisher],
+            events: {
+                click: function() {
+                    selectPublisher(publisher);
                 }
-                break;
-
-            case 'children':
-                options.children.forEach(function(child) {
-                    element.appendChild(
-                        typeof child === 'string'
-                            ? document.createTextNode(child)
-                            : createElement(child)
-                    );
-                });
-                break;
-
-            default:
-                element.setAttribute(name, options[name]);
-        }
-    }
-
-    return element;
+            }
+        }).element);
+    });
 }
 
 function getView() {
     if (view === null) {
-        var id = utils.genUID();
         view = createElement({
-            id: id,
-            style: {
-                position: 'fixed',
-                'z-index': 100000,
-                display: 'flex',
-                'flex-direction': 'column',
-                left: 0,
-                right: 0,
-                bottom: 0,
-                height: '50%',
-                'border-top': '2px solid #AAA',
-                background: '#EEE',
-                opacity: .9
-            },
+            class: 'host',
             children: [
                 {
                     tagName: 'style',
+                    children: [require('./style.js')]
+                },
+                {
+                    class: 'toolbar',
                     children: [
-                        '#' + id + ' iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0;background:white}'
+                        {
+                            ref: 'tabs',
+                            style: {
+                                display: 'flex',
+                                flex: 1
+                            }
+                        },
+                        {
+                            children: [
+                                {
+                                    class: 'button',
+                                    children: ['close'],
+                                    events: {
+                                        click: function() {
+                                            selectPublisher();
+                                        }
+                                    }
+                                }
+                                // {
+                                //     class: 'button',
+                                //     children: ['open'],
+                                //     events: {
+                                //         click: function() {
+                                //             if (externalWindow === null || externalWindow.closed) {
+                                //                 externalWindow = window.open('about:blank', 'rempl');
+                                //                 _publisher.getRemoteUI({}, function(error, type, content) {
+                                //                     cleanupSandbox();
+                                //                     sandbox = createSandbox({
+                                //                         container: view.sandbox,
+                                //                         type: type,
+                                //                         content: content,
+                                //                         window: externalWindow
+                                //                     }, function(api) {
+                                //                         _callback(api);
+                                //                         api.send({
+                                //                             type: 'publisher:connect'
+                                //                         });
+                                //                     });
+                                //                 });
+                                //             } else {
+                                //                 externalWindow.focus();
+                                //             }
+                                //         }
+                                //     }
+                                // }
+                            ]
+                        }
                     ]
                 },
                 {
-                    style: {
-                        padding: '4px',
-                        background: '#EEE'
-                    },
-                    children: ['close'],
-                    events: {
-                        click: function() {
-                            hideView();
-                            cleanupSandbox();
-                        }
-                    }
-                },
-                {
-                    style: {
-                        flex: 1,
-                        position: 'relative'
-                    }
+                    ref: 'sandbox',
+                    class: 'sandbox'
                 }
             ]
         });
+
+        updatePublisherList();
     }
 
     return view;
@@ -102,11 +110,11 @@ function injectElement(container, element) {
 }
 
 function showView() {
-    injectElement(document.body, getView());
+    injectElement(document.body, getView().element);
 }
 
 function hideView() {
-    getView().remove();
+    getView().element.remove();
 }
 
 function cleanupSandbox() {
@@ -116,32 +124,65 @@ function cleanupSandbox() {
     }
 }
 
-module.exports = function createHost() {
+function selectPublisher(publisher) {
+    if (publisher !== selectedPublisher) {
+        selectedPublisher = publisher;
+        Array.prototype.slice.call(getView().tabs.children).forEach(function(tab) {
+            tab.classList.toggle('tab_selected', tab.getAttribute('publisher') === selectedPublisher);
+        });
+
+        if (selectedPublisher) {
+            showView();
+            transport.onInit({ id: selectedPublisher }, function(papi) {
+                papi.getRemoteUI(function(error, type, content) {
+                    cleanupSandbox();
+                    sandbox = createSandbox({
+                        container: view.sandbox,
+                        type: type,
+                        content: content
+                    }, function(api) {
+                        papi.subscribe(api.send);
+                        api.subscribe(papi.send);
+                        api.send({
+                            type: 'publisher:connect'
+                        });
+                    });
+                });
+            });
+        } else {
+            hideView();
+            cleanupSandbox();
+        }
+    }
+}
+
+module.exports = function getHost() {
     // supported only in browser env
     if (typeof document === 'undefined') {
         return;
     }
 
-    return {
-        activate: function(publisher, callback) {
-            showView();
-            publisher.getRemoteUI({}, function(error, type, content) {
-                cleanupSandbox();
-                sandbox = createSandbox({
-                    container: view.lastChild,
-                    type: type,
-                    content: content
-                }, function(api) {
-                    callback(api);
-                    api.send({
-                        type: 'publisher:connect'
-                    });
-                });
-            });
+    if (host !== null) {
+        return host;
+    }
+
+    // disable it by default since it's a basic implementation
+    // if (true) {
+    //     return;
+    // }
+
+    transport = new EventTransport('rempl-inpage-host', 'rempl-inpage-publisher')
+        .onPublishersChanged(function(endpointPublishers) {
+            publishers = endpointPublishers;
+            updatePublisherList();
+        });
+
+    return host = {
+        activate: function(publisherId) {
+            selectPublisher(publisherId);
         },
         deactivate: function() {
-            hideView();
-            cleanupSandbox();
+            selectPublisher();
         }
     };
 };

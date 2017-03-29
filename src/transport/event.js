@@ -7,20 +7,19 @@ var utils = require('../utils/index.js');
 var DEBUG = false;
 
 function subscribe(endpoint, fn) {
-    return utils.subscribe(this.subscribers, {
+    return utils.subscribe(this.dataCallbacks, {
         endpoint: endpoint,
         fn: fn
     });
 }
 
-function send(endpoint) {
+function send(endpoint, type) {
     if (!this.inited) {
         utils.warn('[rempl][dom-event-transport] send() call on init is prohibited');
         return;
     }
 
-    // utils.log('[devpanel] send to devtools', arguments);
-    var args = Array.prototype.slice.call(arguments, 1);
+    var args = Array.prototype.slice.call(arguments, 2);
     var callback = false;
 
     if (args.length && typeof args[args.length - 1] === 'function') {
@@ -29,7 +28,7 @@ function send(endpoint) {
     }
 
     this.send(this.outputChannelId, {
-        type: 'data',
+        type: type,
         endpoint: endpoint,
         callback: callback,
         data: args
@@ -113,9 +112,9 @@ function onData(payload) {
                 args = args.concat(wrapCallback(this, callback));
             }
 
-            this.subscribers.forEach(function(subscriber) {
-                if (subscriber.endpoint === payload.endpoint) {
-                    subscriber.fn.apply(null, args);
+            this.dataCallbacks.forEach(function(callback) {
+                if (callback.endpoint === null || callback.endpoint === payload.endpoint) {
+                    callback.fn.apply(null, args);
                 }
             });
             break;
@@ -133,7 +132,10 @@ function onData(payload) {
             break;
 
         case 'publishers':
-            // nothing to do for now
+            this.publishers = payload.data[0];
+            this.publishersChangedCallbacks.forEach(function(callback) {
+                callback(this.publishers);
+            }, this);
             break;
 
         default:
@@ -158,8 +160,10 @@ function EventTransport(name, connectTo, options) {
     this.endpointGetUI = {};
 
     this.initCallbacks = [];
+    this.dataCallbacks = [];
+    this.publishersChangedCallbacks = [];
+    this.publishers = [];
     this.callbacks = {};
-    this.subscribers = [];
     this.inited = false;
     this.onInit = this.onInit.bind(this);
     this.window = options.window || global;
@@ -200,12 +204,19 @@ EventTransport.prototype = {
 
             callback({
                 connected: this.connected,
+                getRemoteUI: send.bind(this, endpoint.id, 'getRemoteUI'),
                 subscribe: subscribe.bind(this, endpoint.id),
-                send: send.bind(this, endpoint.id)
+                send: send.bind(this, endpoint.id, 'data')
             });
         } else {
             this.initCallbacks.push(arguments);
         }
+
+        return this;
+    },
+    onPublishersChanged: function(callback) {
+        this.publishersChangedCallbacks.push(callback);
+        return this;
     },
 
     send: function(channelId, payload) {

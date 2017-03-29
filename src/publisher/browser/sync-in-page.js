@@ -1,10 +1,3 @@
-var createHost = require('../../host/in-page/index.js');
+var EventTransport = require('../../transport/event.js');
 
-module.exports = function(publisher, callback) {
-    // disable it by default since it's a basic implementation
-    if (true) {
-        return;
-    }
-
-    return createHost().activate(publisher, callback);
-};
+module.exports = new EventTransport('rempl-inpage-publisher', 'rempl-inpage-host').onInit;

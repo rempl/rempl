@@ -11,11 +11,11 @@ module.exports = function createSync(publisher) {
         });
     });
 
-    // // in page
+    // in page
     inpageSync(publisher, function(api) {
         api.subscribe(publisher.processInput);
         api.connected.link(function(connected) {
-            publisher.setupChannel('in-page', api.send, connected);
+            publisher.setupChannel('inpage', api.send, connected);
         });
     });
 
