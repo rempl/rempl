@@ -1,0 +1,108 @@
+.host
+{
+    position: fixed;
+    z-index: 100000;
+    display: flex;
+    flex-direction: column;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #EEE;
+    opacity: .9;
+    font-family: Tahoma, Verdana, Arial, sans-serif;
+    font-size: 12px;
+    transition: all cubic-bezier(0.25, 0.59, 0, 1.11) .2s;
+}
+.host[side=left]
+{
+    right: 50%;
+    border-right: 2px solid #AAA;
+}
+.host[side=right]
+{
+    left: 50%;
+    border-left: 2px solid #AAA;
+}
+.host[side=top]
+{
+    bottom: 50%;
+    border-bottom: 2px solid #AAA;
+}
+.host[side=bottom]
+{
+    top: 50%;
+    border-top: 2px solid #AAA;
+}
+
+.toolbar
+{
+    display: -webkit-flex;
+    display: flex;
+    padding: 0;
+    background: #F8F8F8;
+    border-bottom: 1px solid #DDD;
+    white-space: nowrap;
+}
+
+.tab
+{
+    display: inline-block;
+    padding: 5px 10px;
+    color: #666;
+    line-height: 1;
+    cursor: pointer;
+    border-bottom: 1px solid transparent;
+}
+.tab:hover
+{
+    background: #EEE;
+}
+.tab_selected
+{
+    color: #444;
+    border-bottom: 2px solid rgba(62, 130, 247, .6);
+    margin-bottom: -1px;
+}
+
+.layout-button,
+.close-button
+{
+    display: inline-block;
+    vertical-align: middle;
+    width: 24px;
+    height: 21px;
+    overflow: hidden;
+    background: #CCC;
+    margin: 1px;
+    cursor: pointer;
+}
+.layout-button:hover,
+.close-button:hover
+{
+    background: #BBB;
+}
+.host[side=left] .layout-button[side=left],
+.host[side=right] .layout-button[side=right],
+.host[side=top] .layout-button[side=top],
+.host[side=bottom] .layout-button[side=bottom],
+.host[side=full] .layout-button[side=full]
+{
+    color: red;
+}
+
+.sandbox
+{
+    flex: 1;
+    position: relative;
+}
+.sandbox > iframe
+{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: white;
+}
