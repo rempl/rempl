@@ -120,6 +120,14 @@
     border-color: rgb(66, 128, 236);
 }
 
+.host[side=left] .layout-button[side=left],
+.host[side=right] .layout-button[side=right],
+.host[side=top] .layout-button[side=top],
+.host[side=bottom] .layout-button[side=bottom],
+.host[side=full] .layout-button[side=full] {
+    background: none;
+}
+
 /* close part */
 
 .close-button {
