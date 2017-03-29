@@ -12,6 +12,18 @@ var sandbox = null;
 var view = null;
 var host = null;
 
+// settings persistance
+var settingsStorage = global.localStorage || {};
+var settings = {};
+try {
+    settings = JSON.parse(settingsStorage.rempl || '{}');
+} catch (e) {}
+
+function setSetting(name, value) {
+    settings[name] = value;
+    settingsStorage.rempl = JSON.stringify(settings);
+}
+
 function updateTabSelectedState(tab) {
     tab.classList.toggle(
         isolateName('tab_selected'),
@@ -41,10 +53,12 @@ function updatePublisherList() {
 function createLayoutButton(side, onclick) {
     return {
         side: side,
+        title: 'Dock to ' + side,
         class: isolateName('layout-button'),
         events: {
             click: typeof onclick === 'function' ? onclick : function() {
                 view.element.setAttribute('side', side);
+                setSetting('host-dock', side);
             }
         }
     };
@@ -62,14 +76,16 @@ function getView() {
     if (view === null) {
         view = createElement({
             class: isolateName('host'),
-            side: 'bottom',
+            side: settings['host-dock'] || 'bottom',
             children: [
                 {
                     tagName: 'style',
                     children: [
-                        preprocessCSS(typeof asset === 'function'
-                            ? asset('./style.css', true)
-                            : require('fs').readFileSync(__dirname + '/style.js', 'utf8'))
+                        preprocessCSS(
+                            typeof asset === 'function'
+                                ? asset('./style.css', true)
+                                : require('fs').readFileSync(__dirname + '/style.js', 'utf8')
+                        )
                     ]
                 },
                 {
@@ -86,30 +102,30 @@ function getView() {
                             ref: 'buttons',
                             class: isolateName('layout-buttons'),
                             children: [].concat(
-                                createLayoutButton('external', function() {
-                                    // if (externalWindow === null || externalWindow.closed) {
-                                    //     externalWindow = window.open('about:blank', 'rempl');
-                                    //     transport.onInit({ id: selectedPublisher }, function(papi) {
-                                    //         papi.getRemoteUI(function(error, type, content) {
-                                    //             cleanupSandbox();
-                                    //             sandbox = createSandbox({
-                                    //                 container: view.sandbox,
-                                    //                 type: type,
-                                    //                 content: content,
-                                    //                 window: externalWindow
-                                    //             }, function(api) {
-                                    //                 // _callback(api);
-                                    //                 api.send({
-                                    //                     type: 'publisher:connect'
-                                    //                 });
-                                    //             });
-                                    //         });
-                                    //     });
-                                    // } else {
-                                    //     externalWindow.focus();
-                                    // }
-                                }),
-                                ['left', 'top', 'bottom', 'right', 'full'].map(createLayoutButton),
+                                // createLayoutButton('external', function() {
+                                //     if (externalWindow === null || externalWindow.closed) {
+                                //         externalWindow = window.open('about:blank', 'rempl');
+                                //         transport.onInit({ id: selectedPublisher }, function(papi) {
+                                //             papi.getRemoteUI(function(error, type, content) {
+                                //                 cleanupSandbox();
+                                //                 sandbox = createSandbox({
+                                //                     container: view.sandbox,
+                                //                     type: type,
+                                //                     content: content,
+                                //                     window: externalWindow
+                                //                 }, function(api) {
+                                //                     // _callback(api);
+                                //                     api.send({
+                                //                         type: 'publisher:connect'
+                                //                     });
+                                //                 });
+                                //             });
+                                //         });
+                                //     } else {
+                                //         externalWindow.focus();
+                                //     }
+                                // }),
+                                ['left', 'top', 'bottom', 'right', 'fit the page'].map(createLayoutButton),
                                 {
                                     class: isolateName('close-button'),
                                     events: {

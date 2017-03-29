@@ -13,26 +13,27 @@
     font-family: Tahoma, Verdana, Arial, sans-serif;
     font-size: 12px;
     transition: all cubic-bezier(0.25, 0.59, 0, 1.11) .2s;
+    border: 0 solid #AAA;
 }
 .host[side=left]
 {
     right: 50%;
-    border-right: 2px solid #AAA;
+    border-right-width: 2px;
 }
 .host[side=right]
 {
     left: 50%;
-    border-left: 2px solid #AAA;
+    border-left-width: 2px;
 }
 .host[side=top]
 {
     bottom: 50%;
-    border-bottom: 2px solid #AAA;
+    border-bottom-width: 2px;
 }
 .host[side=bottom]
 {
     top: 50%;
-    border-top: 2px solid #AAA;
+    border-top-width: 2px;
 }
 
 .toolbar
@@ -101,31 +102,10 @@
 .host[side=right] .layout-button[side=right],
 .host[side=top] .layout-button[side=top],
 .host[side=bottom] .layout-button[side=bottom],
-.host[side=full] .layout-button[side=full] {
+.host[side='fit the page'] .layout-button[side='fit the page'] {
     color: rgb(66, 128, 236);
     background: none;
 }
-
-/* close part */
-
-.close-button {
-    position: relative;
-    width: 28px;
-    text-align: center;
-    font: 20px Arial, sans-serif;
-    color: rgb(90, 90, 90);
-}
-
-.close-button:hover {
-    color: black;
-}
-
-.close-button:after {
-    content: '×';
-    line-height: 24px;
-}
-
-/* external part */
 
 .layout-button[side=external]:before {
     height: 10px;
@@ -133,7 +113,6 @@
     border-width: 0 0 2px 2px;
     margin-bottom: -3px;
 }
-
 .layout-button[side=external]:after {
     content: '';
     height: 10px;
@@ -144,28 +123,32 @@
     margin-left: -10px;
 }
 
-/* top part */
-
 .layout-button[side=top]:before {
     border-top-width: 5px;
 }
-
-/* top right */
-
 .layout-button[side=right]:before {
     border-right-width: 5px;
 }
-
-/* top bottom */
-
 .layout-button[side=bottom]:before {
     border-bottom-width: 5px;
 }
-
-/* top left */
-
 .layout-button[side=left]:before {
     border-left-width: 5px;
+}
+
+.close-button {
+    position: relative;
+    width: 28px;
+    text-align: center;
+    font: 20px Arial, sans-serif;
+    color: rgb(90, 90, 90);
+}
+.close-button:hover {
+    color: black;
+}
+.close-button:after {
+    content: '×';
+    line-height: 24px;
 }
 
 .sandbox
