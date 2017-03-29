@@ -65,30 +65,120 @@
     margin-bottom: -1px;
 }
 
-.layout-button,
-.close-button
-{
-    display: inline-block;
-    vertical-align: middle;
-    width: 24px;
-    height: 21px;
-    overflow: hidden;
-    background: #CCC;
-    margin: 1px;
-    cursor: pointer;
+.layout-buttons {
+    display: -webkit-flex;
+    display: flex;
 }
-.layout-button:hover,
-.close-button:hover
-{
-    background: #BBB;
+
+.layout-button {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    -webkit-flex: 0 0 auto;
+    flex: 0 0 auto;
+    width: 28px;
+    height: 24px;
 }
-.host[side=left] .layout-button[side=left],
-.host[side=right] .layout-button[side=right],
-.host[side=top] .layout-button[side=top],
-.host[side=bottom] .layout-button[side=bottom],
-.host[side=full] .layout-button[side=full]
-{
-    color: red;
+
+.layout-button:hover {
+    background: rgb(66, 128, 236);
+}
+
+.layout-button:hover .layout-button-part {
+    border-color: white;
+}
+
+.layout-button-part {
+    width: 15px;
+    height: 13px;
+    border: 2px solid rgb(90, 90, 90);
+    box-sizing: border-box;
+}
+
+.layout-button-part-wrapper {
+    position: relative;
+    width: 15px;
+    height: 13px;
+}
+
+.layout-button-part-wrapper .layout-button-part {
+    position: absolute;
+}
+
+.layout-button_active:hover {
+    background: none;
+}
+
+.host[side=left] .layout-button[side=left] .layout-button-part,
+.host[side=right] .layout-button[side=right] .layout-button-part,
+.host[side=top] .layout-button[side=top] .layout-button-part,
+.host[side=bottom] .layout-button[side=bottom] .layout-button-part,
+.host[side=full] .layout-button[side=full] .layout-button-part {
+    border-color: rgb(66, 128, 236);
+}
+
+/* close part */
+
+.close-button {
+    position: relative;
+    width: 28px;
+    text-align: center;
+    font: 15px "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: rgb(90, 90, 90);
+}
+
+.close-button:hover {
+    color: black;
+}
+
+.close-button:after {
+    content: 'x';
+    line-height: 24px;
+}
+
+/* external part */
+
+.layout-button[side=external] .layout-button-part:first-child {
+    left: 0;
+    bottom: 0;
+    height: 11px;
+    width: 13px;
+    border-top: none;
+    border-right: none;
+}
+
+.layout-button[side=external] .layout-button-part:last-child {
+    top: 0;
+    right: 0;
+    height: 10px;
+    width: 12px;
+}
+
+/* top part */
+
+.layout-button[side=top] .layout-button-part {
+    border-top-width: 5px;
+}
+
+/* top right */
+
+.layout-button[side=right] .layout-button-part {
+    border-right-width: 5px;
+}
+
+/* top bottom */
+
+.layout-button[side=bottom] .layout-button-part {
+    border-bottom-width: 5px;
+}
+
+/* top left */
+
+.layout-button[side=left] .layout-button-part {
+    border-left-width: 5px;
 }
 
 .sandbox

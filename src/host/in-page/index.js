@@ -38,11 +38,13 @@ function updatePublisherList() {
     });
 }
 
-function createLayoutButton(side, onclick) {
+function createLayoutButton(side, onclick, children) {
     return {
         side: side,
         class: isolateName('layout-button'),
-        children: [side],
+        children: children ? children : [{
+            class: isolateName('layout-button-part')
+        }],
         events: {
             click: typeof onclick === 'function' ? onclick : function() {
                 view.element.setAttribute('side', side);
@@ -85,6 +87,7 @@ function getView() {
                         },
                         {
                             ref: 'buttons',
+                            class: isolateName('layout-buttons'),
                             children: [].concat(
                                 createLayoutButton('external', function() {
                                     // if (externalWindow === null || externalWindow.closed) {
@@ -106,11 +109,19 @@ function getView() {
                                     // } else {
                                     //     externalWindow.focus();
                                     // }
+                                }, [{
+                                    class: isolateName('layout-button-part-wrapper'),
+                                    children: [{
+                                        class: isolateName('layout-button-part')
+                                    }, {
+                                        class: isolateName('layout-button-part')
+                                    }]
+                                }]),
+                                ['left', 'top', 'bottom', 'right', 'full'].map(function(side) {
+                                    return createLayoutButton(side);
                                 }),
-                                ['left', 'top', 'bottom', 'right', 'full'].map(createLayoutButton),
                                 {
                                     class: isolateName('close-button'),
-                                    children: ['close'],
                                     events: {
                                         click: function() {
                                             selectPublisher();
