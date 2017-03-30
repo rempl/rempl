@@ -183,8 +183,6 @@ function cleanupSandbox() {
 
 function selectPublisher(publisher) {
     if (publisher !== selectedPublisher) {
-        clearTimeout(teardownTimer);
-
         selectedPublisher = publisher;
         Array.prototype.forEach.call(getView().tabs.children, updateTabSelectedState);
 
@@ -235,6 +233,7 @@ module.exports = function getHost() {
     return host = {
         activate: function(publisher) {
             var publisherId = (publisher && publisher.id) || publisher;
+            clearTimeout(teardownTimer);
             selectPublisher(publisherId);
             showView();
         },
@@ -243,6 +242,7 @@ module.exports = function getHost() {
             if (!publisherId || publisherId === selectedPublisher) {
                 softHideView();
                 // tear down subscriber in 15 sec
+                clearTimeout(teardownTimer);
                 teardownTimer = setTimeout(function() {
                     selectPublisher();
                 }, 15000);
