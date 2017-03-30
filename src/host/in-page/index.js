@@ -162,12 +162,12 @@ function injectElement(container, element) {
 
 function showView() {
     var element = getView().element;
-    element.display = '';
+    element.style.display = '';
     injectElement(document.body, element);
 }
 
 function softHideView() {
-    getView().element.display = 'none';
+    getView().element.style.display = 'none';
 }
 
 function hideView() {
@@ -236,6 +236,7 @@ module.exports = function getHost() {
         activate: function(publisher) {
             var publisherId = (publisher && publisher.id) || publisher;
             selectPublisher(publisherId);
+            showView();
         },
         deactivate: function(publisher) {
             var publisherId = (publisher && publisher.id) || publisher;
