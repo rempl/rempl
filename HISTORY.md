@@ -1,3 +1,21 @@
+## 1.0.0-alpha13 (March 30, 2017)
+
+- Implemented `rempl.source` that contains source or rempl itself (like a [quine](https://en.wikipedia.org/wiki/Quine_(computing)))
+- Implemented `rempl.version`
+- Implemented in-page host. It may be activated via `rempl.getHost().activate(publisherId)` and deactivated via `rempl.getHost().deactivate(publisherId)` or `rempl.getHost().deactivate()`
+- Reworked `Sandbox`
+    - Removed `rempl.initSandbox()`
+    - Implemented `rempl.createSandbox(settings, onInit)`
+    - From now publisher's `rempl` version for `script` type subscribers is used instead of process that creates a sandbox
+- Initial refactoring of `Env`
+    - Removed `rempl.createEnv()`
+    - Implemented `Subscriber#env` to provide an access to env interface
+    - Implemented `env.enabled` and link env with sandbox only when env is enabled
+- Reworked event transport to use own and remote endpoint lists. Currently it has a limited usage of these lists, in future it will be used for better traffic filter.
+- Fixed `Publisher`'s WS transport sync when multiple publishers is used
+- Excluded dev version of ws server UI from `npm` package, so `rempl-cli` is always use `prod` version when `rempl` installed from `npm` 
+- Various small fixes and improvements
+
 ## 1.0.0-alpha12 (March 26, 2017)
 
 - Fixed exception on publisher init in browser
