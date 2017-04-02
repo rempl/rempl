@@ -7,5 +7,10 @@ module.exports = function(fn) {
         subscriber = makeSync(new Subscriber());
     }
 
-    fn(subscriber);
+    if (typeof fn === 'function') {
+        console.warn('[rempl] Passing function to rempl.getSubscriber() is deprecated, please use a return value instead');
+        fn(subscriber);
+    }
+
+    return subscriber;
 };
