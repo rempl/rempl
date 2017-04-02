@@ -4,6 +4,7 @@ var socketIO = require('socket.io-client');
 var endpoints = Object.create(null);
 var INFO_UPDATE_TIME = 100;
 var DEBUG = false;
+var DEBUG_PREFIX = '[rempl][ws-transport] ';
 
 function valuesChanged(a, b) {
     for (var key in a) {
@@ -34,10 +35,17 @@ function normalizeUri(uri) {
     return uri.replace(/^([a-z]+:)\/\/|^/i, 'ws://');
 }
 
-function callMethod(obj, method) {
-    return function() {
-        return obj[method].apply(this, arguments);
-    };
+function subscribe(endpoint, fn) {
+    return utils.subscribe(this.dataCallbacks, {
+        endpoint: endpoint,
+        fn: fn
+    });
+}
+
+function send(endpoint) {
+    this.transport.emit.apply(this.transport,
+        ['rempl:from publisher', endpoint].concat(Array.prototype.slice.call(arguments, 1))
+    );
 }
 
 function onConnect() {
@@ -55,17 +63,17 @@ function onConnect() {
     }.bind(this));
 
     if (DEBUG) {
-        console.log('[rempl][ws-transport] connected');
+        console.log(DEBUG_PREFIX + 'connected');
     }
 }
 
 function onGetUI(id, settings, callback) {
     if (!this.publishersMap.hasOwnProperty(id)) {
         if (DEBUG) {
-            console.error('[rempl][ws-transport] Publisher `' + id + '` isn\'t registered on page');
+            console.error(DEBUG_PREFIX + 'Publisher `' + id + '` isn\'t registered');
         }
 
-        callback('[rempl][ws-transport] Publisher `' + id + '` isn\'t registered on page');
+        callback('Publisher `' + id + '` isn\'t registered');
         return;
     }
 
@@ -75,29 +83,28 @@ function onGetUI(id, settings, callback) {
 function onData(id) {
     if (!this.publishersMap.hasOwnProperty(id)) {
         if (DEBUG) {
-            console.error('[rempl][ws-transport] Publisher `' + id + '` isn\'t registered on page');
+            console.error(DEBUG_PREFIX + 'Publisher `' + id + '` isn\'t registered');
         }
 
         return;
     }
 
-    var subscribers = this.publishersMap[id].subscribers;
     var args = Array.prototype.slice.call(arguments, 1);
 
-    for (var i = 0; i < subscribers.length; i++) {
-        subscribers[i].apply(null, args);
-    }
+    this.dataCallbacks.forEach(function(callback) {
+        if (callback.endpoint === id) {
+            callback.fn.apply(null, args);
+        }
+    });
 }
 
 function onDisconnect() {
     if (DEBUG) {
-        console.log('[rempl] disconnected');
+        console.log(DEBUG_PREFIX + 'disconnected');
     }
 
-    this.connected.set(false);
-
     clearInterval(this.sendInfoTimer);
-    this.stopIdentify();
+    this.connected.set(false);
 }
 
 function WSTransport(uri) {
@@ -109,22 +116,19 @@ function WSTransport(uri) {
 
     this.publishers = [];
     this.publishersMap = {};
+    this.dataCallbacks = [];
 
     this.connected = new Token(false);
 
     if (DEBUG) {
-        console.log('[rempl][ws-transport] connecting to ' + normalizeUri(uri));
+        console.log(DEBUG_PREFIX + 'connecting to ' + normalizeUri(uri));
     }
 
     this.transport = socketIO.connect(normalizeUri(uri))
         .on('connect', onConnect.bind(this))
         .on('disconnect', onDisconnect.bind(this))
-
         .on('rempl:get ui', onGetUI.bind(this))
-        .on('rempl:to publisher', onData.bind(this))
-
-        .on('rempl:identify', callMethod(this, 'startIdentify'))
-        .on('rempl:stop identify', callMethod(this, 'stopIdentify'));
+        .on('rempl:to publisher', onData.bind(this));
 }
 
 WSTransport.create = function(endpoint) {
@@ -180,48 +184,26 @@ WSTransport.prototype.sendInfo = function() {
     }
 };
 
-WSTransport.prototype.startIdentify = function() {
-    if (DEBUG) {
-        console.error('[rempl] #startIdentify not implemented');
-    }
-};
-
-WSTransport.prototype.stopIdentify = function() {
-    if (DEBUG) {
-        console.error('[rempl] #stopIdentify not implemented');
-    }
-};
-
 WSTransport.prototype.createApi = function(id, getRemoteUI) {
-    var subscribers = [];
-    var endpoint = this;
-
-    if (endpoint.publishersMap.hasOwnProperty(id)) {
+    if (this.publishersMap.hasOwnProperty(id)) {
         if (DEBUG) {
-            console.error('[rempl][ws-transport] Publisher `' + id + '` is already registered on page');
+            console.error(DEBUG_PREFIX + 'Publisher `' + id + '` is already registered');
         }
 
         return;
     }
 
-    endpoint.publishers.push(id);
-    endpoint.publishersMap[id] = {
-        getRemoteUI: getRemoteUI,
-        subscribers: subscribers
+    this.publishers.push(id);
+    this.publishersMap[id] = {
+        getRemoteUI: getRemoteUI
     };
 
-    endpoint.sendInfo();
+    this.sendInfo();
 
     return {
-        connected: endpoint.connected,
-        send: function() {
-            endpoint.transport.emit.apply(endpoint.transport,
-                ['rempl:from publisher', id].concat(Array.prototype.slice.call(arguments))
-            );
-        },
-        subscribe: function(fn) {
-            return utils.subscribe(subscribers, fn);
-        }
+        connected: this.connected,
+        send: send.bind(this, id),
+        subscribe: subscribe.bind(this, id)
     };
 };
 

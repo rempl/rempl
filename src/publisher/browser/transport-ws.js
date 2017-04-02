@@ -12,8 +12,10 @@ function BrowserWsTransport(uri) {
     WsTransport.call(this, uri || REMPL_SERVER);
 
     this.id = sessionStorage[STORAGE_KEY];
-    this.startIdentify = identify.start;
-    this.stopIdentify = identify.stop;
+    this.transport
+        .on('rempl:identify', identify.start)
+        .on('rempl:stop identify', identify.stop)
+        .on('disconnect', identify.stop);
 }
 
 BrowserWsTransport.create = WsTransport.create;
