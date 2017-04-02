@@ -28,10 +28,8 @@ module.exports = function createProxy() {
         }
     };
 
-    new EventTransport('rempl-host', 'rempl-env', {
-        name: utils.genUID(),
-        window: parent
-    }).onInit({}, function(api) {
+    new EventTransport('rempl-host', 'rempl-env', parent)
+    .onInit({}, function(api) {
         envApi = api;
         api.connected.link(function(value) {
             proxyApi.connected.set(value);

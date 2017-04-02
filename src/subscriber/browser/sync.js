@@ -1,12 +1,10 @@
-module.exports = function createSync(subscriber) {
-    var syncSandbox = require('./sync-sandbox.js');
+/* eslint-env browser */
+var EventTransport = require('../../transport/event.js');
 
-    syncSandbox(subscriber, function(api) {
-        api.subscribe(subscriber.processInput);
-        api.connected.link(function(connected) {
-            subscriber.setupChannel('sandbox', api.send, connected);
-        });
-    });
+module.exports = function createSync(subscriber) {
+    EventTransport
+        .create('rempl-subscriber', 'rempl-sandbox', opener || parent)
+        .sync(subscriber);
 
     return subscriber;
 };

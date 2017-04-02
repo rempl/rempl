@@ -1,17 +1,19 @@
 /* eslint-env browser */
 
 var WsTransport = require('../../transport/ws-publisher.js');
+var identify = require('./identify.js');
 var global = new Function('return this')();
-var sessionStorage = global.sessionStorage || {};
+var meta = document.querySelector && document.querySelector('meta[name="rempl:server"]');
+var REMPL_SERVER = (meta && meta.getAttribute('value')) || ('ws://' + (location.hostname || 'localhost') + ':8177');
 var STORAGE_KEY = 'rempl:id';
+var sessionStorage = global.sessionStorage || {};
 
-function BrowserWsTransport() {
-    this.title = global.top.document.title;
-    this.location = String(location);
-
-    WsTransport.apply(this, arguments);
+function BrowserWsTransport(uri) {
+    WsTransport.call(this, uri || REMPL_SERVER);
 
     this.id = sessionStorage[STORAGE_KEY];
+    this.startIdentify = identify.start;
+    this.stopIdentify = identify.stop;
 }
 
 BrowserWsTransport.create = WsTransport.create;
@@ -27,7 +29,6 @@ BrowserWsTransport.prototype.infoFields = WsTransport.prototype.infoFields.conca
     'title',
     'location'
 );
-
 BrowserWsTransport.prototype.getInfo = function() {
     this.title = global.top.document.title;
     this.location = String(location);

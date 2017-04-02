@@ -16,10 +16,8 @@ module.exports = function createSandbox(settings, callback) {
 
         // sandbox <-> subscriber transport
         // TODO: teardown transport
-        new EventTransport('rempl-sandbox', 'rempl-subscriber', {
-            name: utils.genUID(),
-            window: sandboxWindow
-        }).onInit({}, function(api) {
+        new EventTransport('rempl-sandbox', 'rempl-subscriber', sandboxWindow)
+        .onInit({}, function(api) {
             var env = getEnv();
 
             if (env.enabled) {

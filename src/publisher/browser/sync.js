@@ -1,31 +1,21 @@
-module.exports = function createSync(publisher) {
-    var syncBrowserExtension = require('./sync-browser-extension.js');
-    var inpageSync = require('./sync-in-page.js');
-    var syncWs = require('./sync-ws.js');
+var EventTransport = require('../../transport/event.js');
+var WSTransport = require('./transport-ws.js');
 
+module.exports = function createSync(publisher) {
     // browser extension
-    syncBrowserExtension(publisher, function(api) {
-        api.subscribe(publisher.processInput);
-        api.connected.link(function(connected) {
-            publisher.setupChannel('browserExtension', api.send, connected);
-        });
-    });
+    EventTransport
+        .create('rempl-browser-extension-publisher', 'rempl-browser-extension-host')
+        .sync(publisher);
 
     // in page
-    inpageSync(publisher, function(api) {
-        api.subscribe(publisher.processInput);
-        api.connected.link(function(connected) {
-            publisher.setupChannel('inpage', api.send, connected);
-        });
-    });
+    EventTransport
+        .create('rempl-inpage-publisher', 'rempl-inpage-host')
+        .sync(publisher);
 
     // ws server
-    syncWs(publisher, function(api) {
-        api.subscribe(publisher.processInput);
-        api.connected.link(function(connected) {
-            publisher.setupChannel('ws', api.send, connected);
-        });
-    });
+    WSTransport
+        .create(publisher.wsendpoint)
+        .sync(publisher);
 
     return publisher;
 };

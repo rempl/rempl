@@ -132,7 +132,7 @@ WSTransport.create = function(endpoint) {
         return endpoints[endpoint];
     }
 
-    return endpoints[endpoint] = new WSTransport(endpoint);
+    return endpoints[endpoint] = new this(endpoint);
 };
 
 WSTransport.prototype.type = 'unknown';
@@ -223,6 +223,14 @@ WSTransport.prototype.createApi = function(id, getRemoteUI) {
             return utils.subscribe(subscribers, fn);
         }
     };
+};
+
+WSTransport.prototype.sync = function(endpoint) {
+    var api = this.createApi(endpoint.id, endpoint.getRemoteUI);
+    api.subscribe(endpoint.processInput);
+    api.connected.link(function(connected) {
+        endpoint.setupChannel('ws', api.send, connected);
+    });
 };
 
 module.exports = WSTransport;

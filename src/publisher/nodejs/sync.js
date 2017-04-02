@@ -1,12 +1,10 @@
-module.exports = function createSync(publisher) {
-    var syncWs = require('./sync-ws.js');
+var WSTransport = require('./transport-ws.js');
 
-    syncWs(publisher, function(api) {
-        api.subscribe(publisher.processInput);
-        api.connected.link(function(connected) {
-            publisher.setupChannel('ws', api.send, connected);
-        });
-    });
+module.exports = function createSync(publisher) {
+    // ws server
+    WSTransport
+        .create(publisher.wsendpoint)
+        .sync(publisher);
 
     return publisher;
 };

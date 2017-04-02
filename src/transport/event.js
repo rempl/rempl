@@ -4,6 +4,7 @@
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 var Token = require('../classes/Token.js');
 var utils = require('../utils/index.js');
+var instances = [];
 var DEBUG = false;
 
 function subscribe(endpoint, fn) {
@@ -45,7 +46,6 @@ function send(endpoint, type) {
 
 function handshake(transport) {
     transport.send(transport.name + ':connect', {
-        name: transport.remoteName,  // FIXME: temporary solution to pass subscriber name from sandbox
         input: transport.inputChannelId,
         output: transport.outputChannelId,
         endpoints: transport.ownEndpoints.value
@@ -83,10 +83,6 @@ function onConnect(payload) {
     if (!payload.output) {
         handshake(this);
         // return;
-    }
-
-    if (payload.name && !this.remoteName) { // FIXME: temporary solution to pass subscriber name from sandbox
-        this.remoteName = payload.name;
     }
 
     setEndpointList(this.remoteEndpoints, payload.endpoints || []);
@@ -135,7 +131,7 @@ function onData(payload) {
             }
 
             this.dataCallbacks.forEach(function(callback) {
-                if (callback.endpoint === null || callback.endpoint === payload.endpoint) {
+                if (callback.endpoint === payload.endpoint) {
                     callback.fn.apply(null, args);
                 }
             });
@@ -162,14 +158,9 @@ function onData(payload) {
     }
 }
 
-function EventTransport(name, connectTo, options) {
-    if (!options) {
-        options = {};
-    }
-
+function EventTransport(name, connectTo, win) {
     this.name = name;
     this.connectTo = connectTo;
-    this.remoteName = options.name || null; // FIXME: temporary solution to pass subscriber name from sandbox
 
     this.inputChannelId = name + ':' + utils.genUID();
     this.outputChannelId = null;
@@ -191,7 +182,7 @@ function EventTransport(name, connectTo, options) {
     this.sendCallbacks = {};
     this.inited = false;
     this.onInit = this.onInit.bind(this);
-    this.window = options.window || global;
+    this.window = win || global;
 
     if (typeof this.window.postMessage !== 'function') {
         utils.warn('[rempl][dom-event-transport] Event (postMessage) transport isn\'t supported');
@@ -219,12 +210,27 @@ function EventTransport(name, connectTo, options) {
     handshake(this);
 }
 
+EventTransport.create = function(name, connectTo, win) {
+    if (!win) {
+        win = global;
+    }
+
+    for (var i = 0; i < instances.length; i++) {
+        var instance = instances[i];
+        if (instance.connectTo === connectTo &&
+            instance.window === win &&
+            instance.name === name) {
+            return instance;
+        }
+    }
+
+    var instance = new EventTransport(name, connectTo, win);
+    instances.push(instance);
+    return instance;
+};
+
 EventTransport.prototype = {
     onInit: function(endpoint, callback) {
-        if (!endpoint.id && this.remoteName) { // FIXME: temporary solution to pass subscriber name from sandbox
-            endpoint.id = this.remoteName;
-        }
-
         if (endpoint.id) {
             setEndpointList(this.ownEndpoints, this.ownEndpoints.value.concat(endpoint.id));
             if (typeof endpoint.getRemoteUI === 'function') {
@@ -244,6 +250,16 @@ EventTransport.prototype = {
         }
 
         return this;
+    },
+
+    sync: function(endpoint) {
+        var channel = this.connectTo;
+        this.onInit(endpoint, function(api) {
+            api.subscribe(endpoint.processInput);
+            api.connected.link(function(connected) {
+                endpoint.setupChannel(channel, api.send, connected);
+            });
+        });
     },
 
     send: function(channelId, payload) {
