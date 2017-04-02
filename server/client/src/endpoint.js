@@ -47,7 +47,9 @@ transport.exclusivePublisher.link(null, function(exclusiveId) {
         route.unlink(selectedId);
         selectedId.unlink(location);
         selectedId.set(exclusiveId);
+        document.title = selected.data.name;
     } else {
+        document.title = 'Rempl WS server';
         // link with router
         route.link(selectedId, selectedId.set);
         selectedId.link(location, function(value) {
