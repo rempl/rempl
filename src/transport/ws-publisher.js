@@ -43,7 +43,7 @@ function subscribe(endpoint, fn) {
 }
 
 function send(endpoint) {
-    this.transport.emit.apply(this.transport,
+    this.send.apply(this,
         ['rempl:from publisher', endpoint].concat(Array.prototype.slice.call(arguments, 1))
     );
 }
@@ -184,31 +184,31 @@ WSTransport.prototype.sendInfo = function() {
     }
 };
 
-WSTransport.prototype.createApi = function(id, getRemoteUI) {
-    if (this.publishersMap.hasOwnProperty(id)) {
+WSTransport.prototype.createApi = function(endpoint) {
+    if (this.publishersMap.hasOwnProperty(endpoint.id)) {
         if (DEBUG) {
-            console.error(DEBUG_PREFIX + 'Publisher `' + id + '` is already registered');
+            console.error(DEBUG_PREFIX + 'Publisher `' + endpoint.id + '` is already registered');
         }
 
         return;
     }
 
-    this.publishers.push(id);
-    this.publishersMap[id] = {
-        getRemoteUI: getRemoteUI
+    this.publishers.push(endpoint.id);
+    this.publishersMap[endpoint.id] = {
+        getRemoteUI: endpoint.getRemoteUI
     };
 
     this.sendInfo();
 
     return {
         connected: this.connected,
-        send: send.bind(this, id),
-        subscribe: subscribe.bind(this, id)
+        send: send.bind(this, endpoint.id),
+        subscribe: subscribe.bind(this, endpoint.id)
     };
 };
 
 WSTransport.prototype.sync = function(endpoint) {
-    var api = this.createApi(endpoint.id, endpoint.getRemoteUI);
+    var api = this.createApi(endpoint);
     api.subscribe(endpoint.processInput);
     api.connected.link(function(connected) {
         endpoint.setupChannel('ws', api.send, connected);

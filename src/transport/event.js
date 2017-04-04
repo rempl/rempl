@@ -6,6 +6,7 @@ var Token = require('../classes/Token.js');
 var utils = require('../utils/index.js');
 var instances = [];
 var DEBUG = false;
+var DEBUG_PREFIX = '[rempl][dom-event-transport] ';
 
 function subscribe(endpoint, fn) {
     return utils.subscribe(this.dataCallbacks, {
@@ -16,14 +17,14 @@ function subscribe(endpoint, fn) {
 
 function send(endpoint, type) {
     if (!this.inited) {
-        utils.warn('[rempl][dom-event-transport] send() call on init is prohibited');
+        utils.warn(DEBUG_PREFIX + 'send() call on init is prohibited');
         return;
     }
 
     // if (endpoint !== this.remoteName && this.remoteEndpoints.value.indexOf(endpoint) === -1) {
     //     // console.warn(this.name, endpoint, this.remoteName, this.remoteEndpoints.value);
     //     if (1||DEBUG) {
-    //         utils.warn('[rempl][dom-event-transport] ' + this.name + ' send({ type: `' + type + '` }) to endpoint is cancelled since no `' + endpoint + '` in remote endpoint list [' + this.remoteEndpoints.value.join(', ') + ']', arguments[2]);
+    //         utils.warn(DEBUG_PREFIX + '' + this.name + ' send({ type: `' + type + '` }) to endpoint is cancelled since no `' + endpoint + '` in remote endpoint list [' + this.remoteEndpoints.value.join(', ') + ']', arguments[2]);
     //     }
     //     return;
     // }
@@ -95,6 +96,9 @@ function onConnect(payload) {
 
     // invoke onInit callbacks
     this.inited = true;
+    this.send(this.outputChannelId, {
+        type: 'connect'
+    });
     this.initCallbacks.splice(0).forEach(function(args) {
         this.onInit.apply(this, args);
     }, this);
@@ -102,7 +106,7 @@ function onConnect(payload) {
 
 function onData(payload) {
     if (DEBUG) {
-        utils.log('[rempl][dom-event-transport] receive from ' + this.connectTo, payload.type, payload);
+        utils.log(DEBUG_PREFIX + 'receive from ' + this.connectTo, payload.type, payload);
     }
 
     switch (payload.type) {
@@ -139,7 +143,7 @@ function onData(payload) {
 
         case 'getRemoteUI':
             if (!hasOwnProperty.call(this.endpointGetUI, payload.endpoint)) {
-                utils.warn('[rempl][dom-event-transport] receive unknown endpoint for getRemoteUI(): ' + payload.endpoint);
+                utils.warn(DEBUG_PREFIX + 'receive unknown endpoint for getRemoteUI(): ' + payload.endpoint);
                 wrapCallback(this, payload.callback)('Wrong endpoint – ' + payload.endpoint);
             } else {
                 this.endpointGetUI[payload.endpoint](
@@ -154,7 +158,7 @@ function onData(payload) {
             break;
 
         default:
-            utils.warn('[rempl][dom-event-transport] Unknown message type `' + payload.type + '` for `' + name + '`', payload);
+            utils.warn(DEBUG_PREFIX + 'Unknown message type `' + payload.type + '` for `' + name + '`', payload);
     }
 }
 
@@ -165,7 +169,7 @@ function EventTransport(name, connectTo, win) {
     this.inputChannelId = name + ':' + utils.genUID();
     this.outputChannelId = null;
 
-    this.connected = new Token(true); // TODO: set false by default
+    this.connected = new Token(false);
     this.ownEndpoints = new Token([]);
     this.remoteEndpoints = new Token([]);
     this.endpointGetUI = {};
@@ -185,7 +189,7 @@ function EventTransport(name, connectTo, win) {
     this.window = win || global;
 
     if (typeof this.window.postMessage !== 'function') {
-        utils.warn('[rempl][dom-event-transport] Event (postMessage) transport isn\'t supported');
+        utils.warn(DEBUG_PREFIX + 'Event (postMessage) transport isn\'t supported');
         return;
     }
 
@@ -264,7 +268,7 @@ EventTransport.prototype = {
 
     send: function(channelId, payload) {
         if (DEBUG) {
-            utils.log('[rempl][dom-event-transport] emit event', channelId, payload);
+            utils.log(DEBUG_PREFIX + 'emit event', channelId, payload);
         }
 
         if (typeof this.window.postMessage === 'function') {
