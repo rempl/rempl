@@ -17,8 +17,8 @@ SubscriberNamespace.prototype.subscribe = function(fn) {
     return utils.subscribe(this.subscribers, fn);
 };
 
-var Subscriber = function() {
-    Endpoint.call(this);
+var Subscriber = function(id) {
+    Endpoint.call(this, id);
 
     this.connected = new Token(false);
     this.connected.defaultOverlay = true;

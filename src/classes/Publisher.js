@@ -23,9 +23,8 @@ PublisherNamespace.prototype.publish = function(payload) {
 };
 
 var Publisher = function(id, getRemoteUI) {
-    Endpoint.call(this);
+    Endpoint.call(this, id);
 
-    this.id = id;
     this.getRemoteUI = function(settings, callback) {
         getRemoteUI(settings, function(error, type, content) {
             if (!error && type === 'script') {
@@ -39,9 +38,6 @@ var Publisher = function(id, getRemoteUI) {
             callback(error, type, content);
         });
     };
-
-    publishers[id] = this;
-    Publisher.onPublishersChange(Object.keys(publishers));
 };
 
 Publisher.prototype = Object.create(Endpoint.prototype);
@@ -54,15 +50,15 @@ Publisher.onPublishersChange = function(/* publishers */) {
     /* stub method */
 };
 
-Publisher.factory = function createPublisherFactory(createPublisher) {
+Publisher.factory = function createPublisherFactory(fn) {
     return function getPublisher(id, getRemoteUI, options) {
-        var publisher = publishers[id];
-
-        if (!publisher) {
-            publisher = createPublisher(id, getRemoteUI, options);
+        if (id in publishers === false) {
+            publishers[id] = new Publisher(id, getRemoteUI);
+            fn(publishers[id], options);
+            Publisher.onPublishersChange(Object.keys(publishers));
         }
 
-        return publisher;
+        return publishers[id];
     };
 };
 

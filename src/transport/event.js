@@ -235,19 +235,21 @@ EventTransport.create = function(name, connectTo, win) {
 
 EventTransport.prototype = {
     onInit: function(endpoint, callback) {
-        if (endpoint.id) {
-            setEndpointList(this.ownEndpoints, this.ownEndpoints.value.concat(endpoint.id));
+        var id = endpoint.id || null;
+
+        if (id) {
+            setEndpointList(this.ownEndpoints, this.ownEndpoints.value.concat(id));
             if (typeof endpoint.getRemoteUI === 'function') {
-                this.endpointGetUI[endpoint.id] = endpoint.getRemoteUI;
+                this.endpointGetUI[id] = endpoint.getRemoteUI;
             }
         }
 
         if (this.inited) {
             callback({
                 connected: this.connected,
-                getRemoteUI: send.bind(this, endpoint.id, 'getRemoteUI'),
-                subscribe: subscribe.bind(this, endpoint.id),
-                send: send.bind(this, endpoint.id, 'data')
+                getRemoteUI: send.bind(this, id, 'getRemoteUI'),
+                subscribe: subscribe.bind(this, id),
+                send: send.bind(this, id, 'data')
             });
         } else {
             this.initCallbacks.push(arguments);

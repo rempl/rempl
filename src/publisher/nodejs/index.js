@@ -1,9 +1,14 @@
 var Publisher = require('../../classes/Publisher.js');
-var makeSync = require('./sync.js');
+var WSTransport = require('./transport-ws.js');
 
-module.exports = Publisher.factory(function(id, getRemoteUI, options) {
-    var publisher = new Publisher(id, getRemoteUI);
+function makeSync(publisher) {
+    // ws server
+    WSTransport
+        .create(publisher.wsendpoint)
+        .sync(publisher);
+}
 
+module.exports = Publisher.factory(function(publisher, options) {
     if (options && options.manualSync) {
         publisher.sync = function() {
             makeSync(publisher);
@@ -11,6 +16,4 @@ module.exports = Publisher.factory(function(id, getRemoteUI, options) {
     } else {
         makeSync(publisher);
     }
-
-    return publisher;
 });

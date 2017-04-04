@@ -1,7 +1,8 @@
 var Namespace = require('./Namespace.js');
 var utils = require('../utils/index.js');
 
-var Endpoint = function() {
+var Endpoint = function(id) {
+    this.id = id || null;
     this.namespaces = Object.create(null);
     this.channels = [];
     this.processInput = this.processInput.bind(this);

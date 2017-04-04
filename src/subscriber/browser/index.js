@@ -1,10 +1,14 @@
+/* eslint-env browser */
 var Subscriber = require('../../classes/Subscriber.js');
-var makeSync = require('./sync.js');
+var EventTransport = require('../../transport/event.js');
 var subscriber;
 
 module.exports = function(fn) {
     if (!subscriber) {
-        subscriber = makeSync(new Subscriber());
+        subscriber = new Subscriber();
+        EventTransport
+            .create('rempl-subscriber', 'rempl-sandbox', opener || parent)
+            .sync(subscriber);
     }
 
     if (typeof fn === 'function') {
