@@ -35,12 +35,13 @@
   },
   "scripts": {
     "lint": "jscs scripts server src && eslint scripts server src",
+    "test": "mocha",
     "build": "npm run build:rempl && npm run build:server-assets",
     "build:rempl": "browserify -t package-json-versionify --standalone rempl src/index.js | node scripts/process-rempl-bundle.js | uglifyjs --compress --mangle -o dist/rempl.js",
     "build:rempl-dev": "browserify -t package-json-versionify --standalone rempl src/index.js | node scripts/process-rempl-bundle.js > dist/rempl.js",
     "build:server-assets": "node node_modules/basisjs-tools-build/bin/build -c server/client/build.config",
     "watch": "watch \"npm run build:rempl-dev\" src --interval .2",
-    "travis": "npm run lint",
+    "travis": "npm run lint && npm run test",
     "prepublish": "npm run build"
   },
   "devDependencies": {
@@ -49,6 +50,7 @@
     "browserify": "^13.0.0",
     "eslint": "^3.11.1",
     "jscs": "~3.0.7",
+    "mocha": "^3.2.0",
     "package-json-versionify": "^1.0.4",
     "uglify-js": "^2.8.9",
     "watch": "^1.0.2"

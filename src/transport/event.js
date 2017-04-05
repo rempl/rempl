@@ -8,61 +8,6 @@ var instances = [];
 var DEBUG = false;
 var DEBUG_PREFIX = '[rempl][dom-event-transport] ';
 
-function subscribe(endpoint, fn) {
-    return utils.subscribe(this.dataCallbacks, {
-        endpoint: endpoint,
-        fn: fn
-    });
-}
-
-function send(endpoint, type) {
-    if (!this.inited) {
-        utils.warn(DEBUG_PREFIX + 'send() call on init is prohibited');
-        return;
-    }
-
-    // if (endpoint !== this.remoteName && this.remoteEndpoints.value.indexOf(endpoint) === -1) {
-    //     // console.warn(this.name, endpoint, this.remoteName, this.remoteEndpoints.value);
-    //     if (1||DEBUG) {
-    //         utils.warn(DEBUG_PREFIX + '' + this.name + ' send({ type: `' + type + '` }) to endpoint is cancelled since no `' + endpoint + '` in remote endpoint list [' + this.remoteEndpoints.value.join(', ') + ']', arguments[2]);
-    //     }
-    //     return;
-    // }
-
-    var args = Array.prototype.slice.call(arguments, 2);
-    var callback = false;
-
-    if (args.length && typeof args[args.length - 1] === 'function') {
-        callback = utils.genUID();
-        this.sendCallbacks[callback] = args.pop();
-    }
-
-    this.send(this.outputChannelId, {
-        type: type,
-        endpoint: endpoint,
-        data: args,
-        callback: callback
-    });
-}
-
-function handshake(transport) {
-    transport.send(transport.name + ':connect', {
-        input: transport.inputChannelId,
-        output: transport.outputChannelId,
-        endpoints: transport.ownEndpoints.value
-    });
-}
-
-function wrapCallback(transport, callback) {
-    return function() {
-        transport.send(transport.outputChannelId, {
-            type: 'callback',
-            callback: callback,
-            data: Array.prototype.slice.call(arguments)
-        });
-    };
-}
-
 function setEndpointList(endpoints, value) {
     var oldList = endpoints.value;
     var newList = value.filter(function(endpoint, idx, array) { // unique values
@@ -75,90 +20,6 @@ function setEndpointList(endpoints, value) {
 
     if (diff) {
         endpoints.set(newList);
-    }
-}
-
-function onConnect(payload) {
-    this.outputChannelId = payload.input;
-
-    if (!payload.output) {
-        handshake(this);
-        // return;
-    }
-
-    setEndpointList(this.remoteEndpoints, payload.endpoints || []);
-    this.ownEndpoints.on(function(endpoints) {
-        this.send(this.outputChannelId, {
-            type: 'endpoints',
-            data: [endpoints]
-        });
-    }, this);
-
-    // invoke onInit callbacks
-    this.inited = true;
-    this.send(this.outputChannelId, {
-        type: 'connect'
-    });
-    this.initCallbacks.splice(0).forEach(function(args) {
-        this.onInit.apply(this, args);
-    }, this);
-}
-
-function onData(payload) {
-    if (DEBUG) {
-        utils.log(DEBUG_PREFIX + 'receive from ' + this.connectTo, payload.type, payload);
-    }
-
-    switch (payload.type) {
-        case 'connect':
-            this.connected.set(true);
-            break;
-
-        case 'disconnect':
-            this.connected.set(false);
-            setEndpointList(this.remoteEndpoints, []);
-            break;
-
-        case 'callback':
-            if (hasOwnProperty.call(this.sendCallbacks, payload.callback)) {
-                this.sendCallbacks[payload.callback].apply(null, payload.data);
-                delete this.sendCallbacks[payload.callback];
-            }
-            break;
-
-        case 'data':
-            var args = Array.prototype.slice.call(payload.data);
-            var callback = payload.callback;
-
-            if (callback) {
-                args = args.concat(wrapCallback(this, callback));
-            }
-
-            this.dataCallbacks.forEach(function(callback) {
-                if (callback.endpoint === payload.endpoint) {
-                    callback.fn.apply(null, args);
-                }
-            });
-            break;
-
-        case 'getRemoteUI':
-            if (!hasOwnProperty.call(this.endpointGetUI, payload.endpoint)) {
-                utils.warn(DEBUG_PREFIX + 'receive unknown endpoint for getRemoteUI(): ' + payload.endpoint);
-                wrapCallback(this, payload.callback)('Wrong endpoint – ' + payload.endpoint);
-            } else {
-                this.endpointGetUI[payload.endpoint](
-                    payload.data[0] || false,
-                    payload.callback ? wrapCallback(this, payload.callback) : Function
-                );
-            }
-            break;
-
-        case 'endpoints':
-            setEndpointList(this.remoteEndpoints, payload.data[0]);
-            break;
-
-        default:
-            utils.warn(DEBUG_PREFIX + 'Unknown message type `' + payload.type + '` for `' + name + '`', payload);
     }
 }
 
@@ -193,25 +54,8 @@ function EventTransport(name, connectTo, win) {
         return;
     }
 
-    addEventListener('message', function(e) {
-        var data = e.data || {};
-
-        if (typeof this._debug === 'function') {
-            this._debug(e.data);
-        }
-
-        switch (data.channel) {
-            case this.connectTo + ':connect':
-                onConnect.call(this, data.payload || {});
-                break;
-
-            case this.inputChannelId:
-                onData.call(this, data.payload || {});
-                break;
-        }
-    }.bind(this), false);
-
-    handshake(this);
+    addEventListener('message', this._onMessage.bind(this), false);
+    this._handshake();
 }
 
 EventTransport.create = function(name, connectTo, win) {
@@ -234,6 +78,174 @@ EventTransport.create = function(name, connectTo, win) {
 };
 
 EventTransport.prototype = {
+    _handshake: function() {
+        this._send(this.name + ':connect', {
+            connectTo: this.connectTo,
+            input: this.inputChannelId,
+            output: this.outputChannelId,
+            endpoints: this.ownEndpoints.value
+        });
+    },
+    _onMessage: function(e) {
+        var data = e.data || {};
+        var payload = data.payload || {};
+
+        switch (data.channel) {
+            case this.connectTo + ':connect':
+                if (payload.connectTo === this.name) {
+                    this._onConnect(payload);
+                }
+                break;
+
+            case this.inputChannelId:
+                this._onData(payload);
+                break;
+        }
+    },
+    _onConnect: function(payload) {
+        this.outputChannelId = payload.input;
+
+        if (!payload.output) {
+            this._handshake();
+        }
+
+        setEndpointList(this.remoteEndpoints, payload.endpoints || []);
+        this.ownEndpoints.on(function(endpoints) {
+            this.send({
+                type: 'endpoints',
+                data: [endpoints]
+            });
+        }, this);
+
+        // invoke onInit callbacks
+        this.inited = true;
+        this.send({
+            type: 'connect',
+            data: [this.ownEndpoints.value]
+        });
+    },
+    _onData: function(payload) {
+        if (DEBUG) {
+            utils.log(DEBUG_PREFIX + 'receive from ' + this.connectTo, payload.type, payload);
+        }
+
+        switch (payload.type) {
+            case 'connect':
+                this.connected.set(true);
+                this.initCallbacks.splice(0).forEach(function(args) {
+                    this.onInit.apply(this, args);
+                }, this);
+                break;
+
+            case 'disconnect':
+                setEndpointList(this.remoteEndpoints, []);
+                this.connected.set(false);
+                break;
+
+            case 'callback':
+                if (hasOwnProperty.call(this.sendCallbacks, payload.callback)) {
+                    this.sendCallbacks[payload.callback].apply(null, payload.data);
+                    delete this.sendCallbacks[payload.callback];
+                }
+                break;
+
+            case 'data':
+                var args = Array.prototype.slice.call(payload.data);
+                var callback = payload.callback;
+
+                if (callback) {
+                    args = args.concat(this._wrapCallback(callback));
+                }
+
+                this.dataCallbacks.forEach(function(callback) {
+                    if (callback.endpoint === payload.endpoint) {
+                        callback.fn.apply(null, args);
+                    }
+                });
+                break;
+
+            case 'getRemoteUI':
+                if (!hasOwnProperty.call(this.endpointGetUI, payload.endpoint)) {
+                    utils.warn(DEBUG_PREFIX + 'receive unknown endpoint for getRemoteUI(): ' + payload.endpoint);
+                    this._wrapCallback(payload.callback)('Wrong endpoint – ' + payload.endpoint);
+                } else {
+                    this.endpointGetUI[payload.endpoint](
+                        payload.data[0] || false,
+                        payload.callback ? this._wrapCallback(payload.callback) : Function
+                    );
+                }
+                break;
+
+            case 'endpoints':
+                setEndpointList(this.remoteEndpoints, payload.data[0]);
+                break;
+
+            default:
+                utils.warn(DEBUG_PREFIX + 'Unknown message type `' + payload.type + '` for `' + this.name + '`', payload);
+        }
+    },
+
+    _wrapCallback: function(callback) {
+        return function() {
+            this.send({
+                type: 'callback',
+                callback: callback,
+                data: Array.prototype.slice.call(arguments)
+            });
+        }.bind(this);
+    },
+    _send: function(channelId, payload) {
+        if (DEBUG) {
+            utils.log(DEBUG_PREFIX + 'emit event', channelId, payload);
+        }
+
+        if (typeof this.window.postMessage === 'function') {
+            this.window.postMessage({
+                channel: channelId,
+                payload: payload
+            }, '*');
+        }
+    },
+
+    subscribeToEndpoint: function(endpoint, fn) {
+        return utils.subscribe(this.dataCallbacks, {
+            endpoint: endpoint,
+            fn: fn
+        });
+    },
+    sendToEndpoint: function(endpoint, type) {
+        if (!this.inited) {
+            utils.warn(DEBUG_PREFIX + 'send() call on init is prohibited');
+            return;
+        }
+
+        // if (endpoint !== this.remoteName && this.remoteEndpoints.value.indexOf(endpoint) === -1) {
+        //     // console.warn(this.name, endpoint, this.remoteName, this.remoteEndpoints.value);
+        //     if (1||DEBUG) {
+        //         utils.warn(DEBUG_PREFIX + '' + this.name + ' send({ type: `' + type + '` }) to endpoint is cancelled since no `' + endpoint + '` in remote endpoint list [' + this.remoteEndpoints.value.join(', ') + ']', arguments[2]);
+        //     }
+        //     return;
+        // }
+
+        var args = Array.prototype.slice.call(arguments, 2);
+        var callback = false;
+
+        if (args.length && typeof args[args.length - 1] === 'function') {
+            callback = utils.genUID();
+            this.sendCallbacks[callback] = args.pop();
+        }
+
+        this.send({
+            type: type,
+            endpoint: endpoint,
+            data: args,
+            callback: callback
+        });
+    },
+    send: function(payload) {
+        this._send(this.outputChannelId, payload);
+    },
+
     onInit: function(endpoint, callback) {
         var id = endpoint.id || null;
 
@@ -247,9 +259,9 @@ EventTransport.prototype = {
         if (this.inited) {
             callback({
                 connected: this.connected,
-                getRemoteUI: send.bind(this, id, 'getRemoteUI'),
-                subscribe: subscribe.bind(this, id),
-                send: send.bind(this, id, 'data')
+                getRemoteUI: this.sendToEndpoint.bind(this, id, 'getRemoteUI'),
+                subscribe: this.subscribeToEndpoint.bind(this, id),
+                send: this.sendToEndpoint.bind(this, id, 'data')
             });
         } else {
             this.initCallbacks.push(arguments);
@@ -257,28 +269,15 @@ EventTransport.prototype = {
 
         return this;
     },
-
     sync: function(endpoint) {
-        var channel = this.connectTo;
+        var channel = utils.genUID(8) + ':' + this.connectTo;
         this.onInit(endpoint, function(api) {
             api.subscribe(endpoint.processInput);
             api.connected.link(function(connected) {
                 endpoint.setupChannel(channel, api.send, connected);
             });
         });
-    },
-
-    send: function(channelId, payload) {
-        if (DEBUG) {
-            utils.log(DEBUG_PREFIX + 'emit event', channelId, payload);
-        }
-
-        if (typeof this.window.postMessage === 'function') {
-            this.window.postMessage({
-                channel: channelId,
-                payload: payload
-            }, '*');
-        }
+        return this;
     }
 };
 
