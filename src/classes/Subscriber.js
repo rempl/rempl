@@ -1,7 +1,6 @@
 var Namespace = require('../classes/Namespace.js');
 var Endpoint = require('../classes/Endpoint.js');
 var Token = require('../classes/Token.js');
-var setOverlayVisible = require('../subscriber/browser/disconnected-overlay.js');
 var utils = require('../utils/index.js');
 
 var SubscriberNamespace = function(name, owner) {
@@ -21,30 +20,6 @@ var Subscriber = function(id) {
     Endpoint.call(this, id);
 
     this.connected = new Token(false);
-    this.connected.defaultOverlay = true;
-    this.connected.link(function(connected) {
-        if (connected) {
-            setOverlayVisible(false);
-        } else if (this.connected.defaultOverlay) {
-            setOverlayVisible(true);
-        }
-
-        if (connected) {
-            this.requestRemoteApi();
-            for (var name in this.namespaces) {
-                var ns = this.namespaces[name];
-                if (ns.subscribers.length) {
-                    ns.callRemote('init', function(data) {
-                        this.subscribers.forEach(function(callback) {
-                            callback(data);
-                        });
-                    }.bind(ns));
-                }
-            }
-        } else {
-            this.setRemoteApi();
-        }
-    }, this);
 
     this.envSubscribers = [];
     this.env = {
@@ -69,9 +44,21 @@ Subscriber.prototype.processInput = function(packet, callback) {
     switch (packet.type) {
         case 'publisher:connect':
             this.connected.set(true);
+            this.requestRemoteApi();
+            for (var name in this.namespaces) {
+                var ns = this.namespaces[name];
+                if (ns.subscribers.length) {
+                    ns.callRemote('init', function(data) {
+                        this.subscribers.forEach(function(callback) {
+                            callback(data);
+                        });
+                    }.bind(ns));
+                }
+            }
             break;
 
         case 'publisher:disconnect':
+            this.setRemoteApi();
             this.connected.set(false);
             break;
 

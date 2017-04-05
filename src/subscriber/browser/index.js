@@ -1,14 +1,33 @@
 /* eslint-env browser */
 var Subscriber = require('../../classes/Subscriber.js');
 var EventTransport = require('../../transport/event.js');
-var subscriber;
+var setOverlayVisible = require('./disconnected-overlay.js');
+var subscriber = null;
+
+function createSubscriber() {
+    subscriber = new Subscriber();
+
+    // default overlay
+    subscriber.connected.defaultOverlay = true;
+    subscriber.connected.link(function(connected) {
+        if (connected) {
+            setOverlayVisible(false);
+        } else if (this.connected.defaultOverlay) {
+            setOverlayVisible(true);
+        }
+    }, subscriber);
+
+    // link to transport
+    EventTransport
+        .create('rempl-subscriber', 'rempl-sandbox', opener || parent)
+        .sync(subscriber);
+
+    return subscriber;
+}
 
 module.exports = function(fn) {
-    if (!subscriber) {
-        subscriber = new Subscriber();
-        EventTransport
-            .create('rempl-subscriber', 'rempl-sandbox', opener || parent)
-            .sync(subscriber);
+    if (subscriber === null) {
+        subscriber = createSubscriber();
     }
 
     if (typeof fn === 'function') {
