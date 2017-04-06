@@ -3,25 +3,11 @@
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 var Token = require('../classes/Token.js');
+var EndpointList = require('../classes/EndpointList.js');
 var utils = require('../utils/index.js');
 var instances = [];
 var DEBUG = false;
-var DEBUG_PREFIX = '[rempl][dom-event-transport] ';
-
-function setEndpointList(endpoints, value) {
-    var oldList = endpoints.value;
-    var newList = value.filter(function(endpoint, idx, array) { // unique values
-        return idx === 0 || array.lastIndexOf(endpoint, idx - 1) === -1;
-    });
-    var diff = newList.length !== oldList.length
-            || newList.every(function(endpoint) {
-                return oldList.indexOf(endpoint) !== -1;
-            });
-
-    if (diff) {
-        endpoints.set(newList);
-    }
-}
+var DEBUG_PREFIX = '[rempl][event-transport] ';
 
 function EventTransport(name, connectTo, win) {
     this.name = name;
@@ -32,8 +18,8 @@ function EventTransport(name, connectTo, win) {
 
     this.connected = new Token(false);
     this.endpointGetUI = {};
-    this.ownEndpoints = new Token([]);
-    this.remoteEndpoints = new Token([]);
+    this.ownEndpoints = new EndpointList();
+    this.remoteEndpoints = new EndpointList();
 
     this.ownEndpoints.on(function(endpoints) {
         if (this.connected.value) {
@@ -120,7 +106,7 @@ EventTransport.prototype = {
         }
 
         if (!this.inited) {
-            setEndpointList(this.remoteEndpoints, payload.endpoints || []);
+            this.remoteEndpoints.set(payload.endpoints);
 
             // invoke onInit callbacks
             this.inited = true;
@@ -137,7 +123,7 @@ EventTransport.prototype = {
 
         switch (payload.type) {
             case 'connect':
-                setEndpointList(this.remoteEndpoints, payload.data[0] || []);
+                this.remoteEndpoints.set(payload.data && payload.data[0]);
                 this.connected.set(true);
                 this.initCallbacks.splice(0).forEach(function(args) {
                     this.onInit.apply(this, args);
@@ -145,7 +131,7 @@ EventTransport.prototype = {
                 break;
 
             case 'disconnect':
-                setEndpointList(this.remoteEndpoints, []);
+                this.remoteEndpoints.set([]);
                 this.connected.set(false);
                 break;
 
@@ -184,7 +170,7 @@ EventTransport.prototype = {
                 break;
 
             case 'endpoints':
-                setEndpointList(this.remoteEndpoints, payload.data[0]);
+                this.remoteEndpoints.set(payload.data[0]);
                 break;
 
             default:
@@ -257,7 +243,7 @@ EventTransport.prototype = {
         var id = endpoint.id || null;
 
         if (id) {
-            setEndpointList(this.ownEndpoints, this.ownEndpoints.value.concat(id));
+            this.ownEndpoints.set(this.ownEndpoints.value.concat(id));
             if (typeof endpoint.getRemoteUI === 'function') {
                 this.endpointGetUI[id] = endpoint.getRemoteUI;
             }
