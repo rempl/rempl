@@ -163,7 +163,9 @@ function injectElement(container, element) {
 function showView() {
     var element = getView().element;
     element.style.display = '';
-    injectElement(document.body, element);
+    if (!document.contains(element)) {
+        injectElement(document.body || document.documentElement, element);
+    }
 }
 
 function softHideView() {
@@ -226,9 +228,6 @@ module.exports = function getHost() {
         publishers = endpoints;
         updatePublisherList();
     });
-    // transport._debug = function() {
-    //     console.info(arguments[0]);
-    // };
 
     return host = {
         activate: function(publisher) {
