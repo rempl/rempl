@@ -131,7 +131,7 @@ function WSTransport(uri) {
         .on('rempl:to publisher', onData.bind(this));
 }
 
-WSTransport.create = function(endpoint) {
+WSTransport.get = function(endpoint) {
     if (endpoint in endpoints) {
         return endpoints[endpoint];
     }

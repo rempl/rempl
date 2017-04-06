@@ -54,7 +54,7 @@ function EventTransport(name, connectTo, win) {
     this._handshake();
 }
 
-EventTransport.create = function(name, connectTo, win) {
+EventTransport.get = function(name, connectTo, win) {
     if (!win) {
         win = global;
     }

@@ -19,7 +19,7 @@ function createSubscriber() {
 
     // link to transport
     EventTransport
-        .create('rempl-subscriber', 'rempl-sandbox', opener || parent)
+        .get('rempl-subscriber', 'rempl-sandbox', opener || parent)
         .sync(subscriber);
 
     return subscriber;

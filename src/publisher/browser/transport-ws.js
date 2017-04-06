@@ -18,7 +18,7 @@ function BrowserWsTransport(uri) {
         .on('disconnect', identify.stop);
 }
 
-BrowserWsTransport.create = WsTransport.create;
+BrowserWsTransport.get = WsTransport.get;
 BrowserWsTransport.prototype = Object.create(WsTransport.prototype);
 
 BrowserWsTransport.prototype.setClientId = function(id) {

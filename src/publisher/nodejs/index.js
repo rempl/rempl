@@ -4,7 +4,7 @@ var WSTransport = require('./transport-ws.js');
 function makeSync(publisher) {
     // ws server
     WSTransport
-        .create(publisher.wsendpoint)
+        .get(publisher.wsendpoint)
         .sync(publisher);
 }
 

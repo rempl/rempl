@@ -13,7 +13,7 @@ function NodeWsTransport(uri) {
     }
 }
 
-NodeWsTransport.create = WsTransport.create;
+NodeWsTransport.get = WsTransport.get;
 NodeWsTransport.prototype = Object.create(WsTransport.prototype);
 
 NodeWsTransport.prototype.setClientId = function(id) {
