@@ -31,9 +31,18 @@ function EventTransport(name, connectTo, win) {
     this.outputChannelId = null;
 
     this.connected = new Token(false);
+    this.endpointGetUI = {};
     this.ownEndpoints = new Token([]);
     this.remoteEndpoints = new Token([]);
-    this.endpointGetUI = {};
+
+    this.ownEndpoints.on(function(endpoints) {
+        if (this.connected.value) {
+            this.send({
+                type: 'endpoints',
+                data: [endpoints]
+            });
+        }
+    }, this);
 
     // this.ownEndpoints.on(function(value) {
     //     console.log('>>>', this.name, this.connectTo, value, window.location.href);
@@ -49,7 +58,8 @@ function EventTransport(name, connectTo, win) {
     this.onInit = this.onInit.bind(this);
     this.window = win || global;
 
-    if (typeof this.window.postMessage !== 'function') {
+    if (typeof this.window.postMessage !== 'function' ||
+        typeof addEventListener !== 'function') {
         utils.warn(DEBUG_PREFIX + 'Event (postMessage) transport isn\'t supported');
         return;
     }
@@ -109,20 +119,16 @@ EventTransport.prototype = {
             this._handshake();
         }
 
-        setEndpointList(this.remoteEndpoints, payload.endpoints || []);
-        this.ownEndpoints.on(function(endpoints) {
-            this.send({
-                type: 'endpoints',
-                data: [endpoints]
-            });
-        }, this);
+        if (!this.inited) {
+            setEndpointList(this.remoteEndpoints, payload.endpoints || []);
 
-        // invoke onInit callbacks
-        this.inited = true;
-        this.send({
-            type: 'connect',
-            data: [this.ownEndpoints.value]
-        });
+            // invoke onInit callbacks
+            this.inited = true;
+            this.send({
+                type: 'connect',
+                data: [this.ownEndpoints.value]
+            });
+        }
     },
     _onData: function(payload) {
         if (DEBUG) {
@@ -131,6 +137,7 @@ EventTransport.prototype = {
 
         switch (payload.type) {
             case 'connect':
+                setEndpointList(this.remoteEndpoints, payload.data[0] || []);
                 this.connected.set(true);
                 this.initCallbacks.splice(0).forEach(function(args) {
                     this.onInit.apply(this, args);

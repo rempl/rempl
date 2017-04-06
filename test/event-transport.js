@@ -35,9 +35,7 @@ describe('EventTransport', function() {
                 { channel: 'bar:connect', payload: { connectTo: 'foo', input: 'bar:...', output: 'foo:...', endpoints: [] } },
                 { channel: 'foo:...',     payload: { type: 'connect',  data: [[]] } },
                 { channel: 'foo:connect', payload: { connectTo: 'bar', input: 'foo:...', output: 'bar:...', endpoints: [] } },
-                { channel: 'bar:...',     payload: { type: 'connect',  data: [[]] } },
-                { channel: 'bar:...',     payload: { type: 'connect',  data: [[]] } },
-                { channel: 'foo:...',     payload: { type: 'connect',  data: [[]] } }
+                { channel: 'bar:...',     payload: { type: 'connect',  data: [[]] } }
             ]);
             done();
         });
