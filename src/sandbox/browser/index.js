@@ -14,44 +14,26 @@ module.exports = function createSandbox(settings, callback) {
         }
 
         if (parent !== self && sandboxWindow !== self) {
-            var toSandbox = null;
-            var toEnv = null;
+            var toSandbox = NaN;
+            var toEnv = NaN;
 
             if (onEnvMessage) {
                 removeEventListener('message', onEnvMessage, true);
             }
+
             addEventListener('message', onEnvMessage = function(event) {
                 var data = event.data || {};
 
                 switch (data.to) {
                     case 'rempl-env-subscriber:connect':
+                    case toSandbox:
                         toEnv = data.from;
                         sandboxWindow.postMessage(data, '*');
                         break;
 
-                    case toSandbox:
-                        sandboxWindow.postMessage(data, '*');
-                        if (data.payload && data.payload.type === 'connect') {
-                            sandboxWindow.postMessage({
-                                from: data.from,
-                                to: data.to,
-                                payload: {
-                                    type: 'data',
-                                    endpoint: 'editor',
-                                    data: [{
-                                        type: 'publisher:connect'
-                                    }]
-                                }
-                            }, '*');
-                        }
-                        break;
-
                     case 'rempl-env-publisher:connect':
-                        toSandbox = data.from;
-                        parent.postMessage(data, '*');
-                        break;
-
                     case toEnv:
+                        toSandbox = data.from;
                         parent.postMessage(data, '*');
                         break;
                 }
@@ -60,15 +42,22 @@ module.exports = function createSandbox(settings, callback) {
 
         // sandbox <-> subscriber transport
         // TODO: teardown transport
-        new EventTransport('rempl-sandbox', 'rempl-subscriber', sandboxWindow)
-        .onInit({}, function(api) {
-            callback(api);
-        });
+        transport = EventTransport
+            .get('rempl-sandbox', 'rempl-subscriber', sandboxWindow)
+            .onInit({}, function(api) {
+                callback(api);
+            });
+
+        if (connected) {
+            transport.ownEndpoints.set(['*']);
+        }
     }
 
     var envUnsubscribe = null;
     var iframe = null;
     var onEnvMessage = null;
+    var transport = null;
+    var connected = false;
 
     settings = settings || {};
 
@@ -91,8 +80,18 @@ module.exports = function createSandbox(settings, callback) {
     }
 
     return {
+        setConnected: function(state) {
+            connected = Boolean(state);
+            if (transport) {
+                transport.ownEndpoints.set(connected ? ['*'] : []);
+            }
+        },
         destroy: function() {
             removeEventListener('message', onEnvMessage, true);
+
+            if (transport) {
+                transport.ownEndpoints.set([]);
+            }
 
             if (envUnsubscribe !== null) {
                 envUnsubscribe();

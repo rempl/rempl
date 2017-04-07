@@ -53,20 +53,17 @@ function createSandbox(endpoint, options) {
     });
 
     var sandbox = createRemplSandbox(options, function(api) {
+        subscribers.data.push(api.send);
         api.subscribe(function() {
             socket.emit.apply(socket, ['rempl:to publisher'].concat(basis.array(arguments)));
         });
-        subscribers.data.push(api.send);
-        publisherConnected.link(null, function(connected) {
-            api.send({
-                type: connected ? 'publisher:connect' : 'publisher:disconnect'
-            });
-        });
     });
+    publisherConnected.link(sandbox, sandbox.setConnected);
 
     // return destroy function
     return function destroySandboxApi() {
         clearTimeout(retryTimer);
+        sessionOpenned.destroy();
         sessionId.unlink(subscribers);
         online.unlink(subscribers);
         sandbox.destroy();

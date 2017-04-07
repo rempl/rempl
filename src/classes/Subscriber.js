@@ -1,6 +1,5 @@
 var Namespace = require('../classes/Namespace.js');
 var Endpoint = require('../classes/Endpoint.js');
-var Token = require('../classes/Token.js');
 var utils = require('../utils/index.js');
 
 var SubscriberNamespace = function(name, owner) {
@@ -19,7 +18,23 @@ SubscriberNamespace.prototype.subscribe = function(fn) {
 var Subscriber = function(id) {
     Endpoint.call(this, id);
 
-    this.connected = new Token(false);
+    this.connected.on(function(connected) {
+        if (connected) {
+            this.requestRemoteApi();
+            for (var name in this.namespaces) {
+                var ns = this.namespaces[name];
+                if (ns.subscribers.length) {
+                    ns.callRemote('init', function(data) {
+                        this.subscribers.forEach(function(callback) {
+                            callback(data);
+                        });
+                    }.bind(ns));
+                }
+            }
+        } else {
+            this.setRemoteApi();
+        }
+    }, this);
 
     this.envSubscribers = [];
     this.env = {
@@ -42,26 +57,6 @@ Subscriber.prototype.getName = function() {
 };
 Subscriber.prototype.processInput = function(packet, callback) {
     switch (packet.type) {
-        case 'publisher:connect':
-            this.connected.set(true);
-            this.requestRemoteApi();
-            for (var name in this.namespaces) {
-                var ns = this.namespaces[name];
-                if (ns.subscribers.length) {
-                    ns.callRemote('init', function(data) {
-                        this.subscribers.forEach(function(callback) {
-                            callback(data);
-                        });
-                    }.bind(ns));
-                }
-            }
-            break;
-
-        case 'publisher:disconnect':
-            this.setRemoteApi();
-            this.connected.set(false);
-            break;
-
         case 'env:data':
             this.envSubscribers.slice().forEach(function(callback) {
                 callback(packet.payload);

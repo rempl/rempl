@@ -200,10 +200,8 @@ function selectPublisher(publisher) {
                     }, function(api) {
                         papi.subscribe(api.send);
                         api.subscribe(papi.send);
-                        api.send({
-                            type: 'publisher:connect'
-                        });
                     });
+                    sandbox.setConnected(true);
                 });
             });
         } else {
