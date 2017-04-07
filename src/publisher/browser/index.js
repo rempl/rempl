@@ -1,10 +1,12 @@
-var Publisher = require('../../classes/Publisher.js');
 var EventTransport = require('../../transport/event.js');
 var WSTransport = require('./transport-ws.js');
+var createFactory = require('../factory.js');
+var addGetRemoteUI = require('../getRemoteUI.js');
+var updatePublisherList = require('./identify.js').updatePublisherList;
 
-Publisher.onPublishersChange = require('./identify.js').updatePublisherList;
+module.exports = createFactory(function setupPublisher(publisher, getRemoteUI) {
+    addGetRemoteUI(publisher, getRemoteUI);
 
-module.exports = Publisher.factory(function makeSync(publisher) {
     // browser extension
     EventTransport
         .get('rempl-browser-extension-publisher', 'rempl-browser-extension-host')
@@ -19,4 +21,4 @@ module.exports = Publisher.factory(function makeSync(publisher) {
     WSTransport
         .get(publisher.wsendpoint)
         .sync(publisher);
-});
+}, updatePublisherList);

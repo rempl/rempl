@@ -1,19 +1,22 @@
-var Publisher = require('../../classes/Publisher.js');
 var WSTransport = require('./transport-ws.js');
+var createFactory = require('../factory.js');
+var addGetRemoteUI = require('../getRemoteUI.js');
 
-function makeSync(publisher) {
+function attachWsTransport(publisher) {
     // ws server
     WSTransport
         .get(publisher.wsendpoint)
         .sync(publisher);
 }
 
-module.exports = Publisher.factory(function(publisher, options) {
+module.exports = createFactory(function setupPublisher(publisher, getRemoteUI, options) {
+    addGetRemoteUI(publisher, getRemoteUI);
+
     if (options && options.manualSync) {
         publisher.sync = function() {
-            makeSync(publisher);
+            attachWsTransport(publisher);
         };
     } else {
-        makeSync(publisher);
+        attachWsTransport(publisher);
     }
 });
