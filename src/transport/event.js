@@ -4,6 +4,7 @@
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 var Token = require('../classes/Token.js');
 var EndpointList = require('../classes/EndpointList.js');
+var EndpointListSet = require('../classes/EndpointListSet.js');
 var utils = require('../utils/index.js');
 var instances = [];
 var DEBUG = false;
@@ -21,7 +22,7 @@ function EventTransport(name, connectTo, win) {
     this.connected = new Token(false);
     this.endpointGetUI = {};
     this.ownEndpoints = new EndpointList();
-    this.remoteEndpoints = new EndpointList();
+    this.remoteEndpoints = new EndpointListSet();
 
     this.ownEndpoints.on(function(endpoints) {
         if (this.connected.value) {
@@ -103,7 +104,7 @@ EventTransport.prototype = {
 
             case this.inputChannelId:
                 if (data.from in this.connections) {
-                    this._onData(payload);
+                    this._onData(data.from, payload);
                 } else {
                     utils.warn(DEBUG_PREFIX + 'unknown incoming connection', data.from);
                 }
@@ -111,15 +112,17 @@ EventTransport.prototype = {
         }
     },
     _onConnect: function(from, payload) {
-        this.connections[from] = {
-            ttl: Date.now(),
-            endpoints: []
-        };
-
-        this.remoteEndpoints.set(payload.endpoints);
-
         if (!payload.inited) {
             this._handshake(true);
+        }
+
+        if (from in this.connections === false) {
+            var endpoints = new EndpointList(payload.endpoints);
+            this.remoteEndpoints.add(endpoints);
+            this.connections[from] = {
+                ttl: Date.now(),
+                endpoints: endpoints
+            };
         }
 
         this.inited = true;
@@ -128,22 +131,26 @@ EventTransport.prototype = {
             endpoints: this.ownEndpoints.value
         });
     },
-    _onData: function(payload) {
+    _onData: function(from, payload) {
         if (DEBUG) {
             utils.log(DEBUG_PREFIX + 'receive from ' + this.connectTo, payload.type, payload);
         }
 
         switch (payload.type) {
             case 'connect':
-                this.remoteEndpoints.set(payload.endpoints);
+                this.connections[from].endpoints.set(payload.endpoints);
                 this.connected.set(true);
                 this.initCallbacks.splice(0).forEach(function(args) {
                     this.onInit.apply(this, args);
                 }, this);
                 break;
 
+            case 'endpoints':
+                this.connections[from].endpoints.set(payload.data[0]);
+                break;
+
             case 'disconnect':
-                this.remoteEndpoints.set([]);
+                this.connections[from].endpoints.set([]);
                 this.connected.set(false);
                 break;
 
@@ -179,10 +186,6 @@ EventTransport.prototype = {
                         payload.callback ? this._wrapCallback(payload.callback) : Function
                     );
                 }
-                break;
-
-            case 'endpoints':
-                this.remoteEndpoints.set(payload.data[0]);
                 break;
 
             default:
