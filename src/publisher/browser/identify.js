@@ -16,13 +16,15 @@ function createOverlay() {
     return temp.firstChild;
 }
 
-function createButton(name, callback) {
+function createButton(name) {
     var temp = document.createElement('div');
     temp.innerHTML =
-    '<div style="margin-bottom: 5px;"><button style="font-size:18px;line-height:1;padding:12px 24px;background:#3BAFDA;color:white;border:none;border-radius:3px;cursor:pointer;">' +
-        name +
-    '</button></div>';
-    temp.firstChild.firstChild.onclick = callback;
+        '<div style="margin-bottom: 5px;"><button style="font-size:18px;line-height:1;padding:12px 24px;background:#3BAFDA;color:white;border:none;border-radius:3px;cursor:pointer;">' +
+            name +
+        '</button></div>';
+    temp.firstChild.firstChild.onclick = function() {
+        pickPublisherCallback(name);
+    };
     return temp.firstChild;
 }
 
@@ -30,7 +32,7 @@ function updatePublisherList() {
     if (publishers.length && pickPublisherCallback) {
         publishersEl.innerHTML = '<div style="margin-bottom: 10px">Pick a publisher:</div>';
         for (var i = 0; i < publishers.length; i++) {
-            publishersEl.appendChild(createButton(publishers[i], pickPublisherCallback.bind(null, publishers[i])));
+            publishersEl.appendChild(createButton(publishers[i]));
         }
     } else {
         publishersEl.innerHTML = '<div style="color:#AA0000">No rempl publishers inited</div>';
