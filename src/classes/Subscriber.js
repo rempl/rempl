@@ -35,19 +35,6 @@ var Subscriber = function(id) {
             this.setRemoteApi();
         }
     }, this);
-
-    this.envSubscribers = [];
-    this.env = {
-        subscribe: function(fn) {
-            return utils.subscribe(this.envSubscribers, fn);
-        }.bind(this),
-        send: function(payload, callback) {
-            Namespace.send(this, [{
-                type: 'to-env',
-                payload: payload
-            }, callback]);
-        }.bind(this)
-    };
 };
 
 Subscriber.prototype = Object.create(Endpoint.prototype);
@@ -57,12 +44,6 @@ Subscriber.prototype.getName = function() {
 };
 Subscriber.prototype.processInput = function(packet, callback) {
     switch (packet.type) {
-        case 'env:data':
-            this.envSubscribers.slice().forEach(function(callback) {
-                callback(packet.payload);
-            });
-            break;
-
         case 'data':
             this.ns(packet.ns || '*').subscribers.slice().forEach(function(callback) {
                 callback(packet.payload);

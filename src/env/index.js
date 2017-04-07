@@ -2,7 +2,6 @@ var utils = require('../utils/index.js');
 var createEnv = require('./publisher.js');
 var getEnv = require('./subscriber.js');
 
-console.log(utils.isNode);
 if (utils.isNode) {
     module.exports = {
         createEnv: function() {
