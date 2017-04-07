@@ -1,3 +1,48 @@
+## 1.0.0-alpha14 (April 7, 2017)
+
+### Core
+
+- Fixed false positive `utils.isNode` for `Electron` apps
+
+#### Endpoint
+
+- Implemented `EndpointList` and `EndpointListSet` helper classes
+- Implemented `Endpoint#id`
+- Implemented `Endpoint#remoteEndpoints` property which contains all remote endpoint ids connected via any transport
+- Implemented `Endpoint#connected` which is `true` when `Endpoint#remoteEndpoints` list contains a `Endpoint#id` value
+- Improved `Endpoint#getName()` to return endpoint name with id if any
+
+#### Publisher
+
+- Reworked `Publisher` to be abstract, move all client specifics (like `getRemoteUI` method) to publisher factory
+
+#### Subscriber
+
+- Changed `rempl.getSubscriber()` to return a subscriber, using a callback is deprecated now 
+- Reworked `Subscriber` to be abstract, move all client specifics (like disconnection overlay) to subscriber factory
+- Removed `publisher:connect` and `publisher:disconnect` event handling by `Subscriber`, it became redundant due to `Enpoint#connected`
+
+#### Env
+
+- `Env` is now based on pub/sub model, `Publisher` and `Subscriber` are used under the hood
+- Implemented `rempl.createEnv(name)` to create an env publisher
+- Implemented `rempl.getEnv(name)` to get an env subscriber
+- Removed `Subscriber#env` and related
+
+#### EventTransport
+
+- Improved protocol to work in case when several transport with the same name is connecting to each other
+- Implemented `Transport.get()` to re-use transports
+- Various internal improvements
+
+#### Host
+
+- Fixed re-inserting for in-page host view on publisher changing
+
+### WS Server Client
+
+- Show publisher name as page title in exclusive mode
+
 ## 1.0.0-alpha13 (March 30, 2017)
 
 - Implemented `rempl.source` that contains source or rempl itself (like a [quine](https://en.wikipedia.org/wiki/Quine_(computing)))
