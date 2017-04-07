@@ -9,7 +9,6 @@ var SubscriberNamespace = function(name, owner) {
 };
 
 SubscriberNamespace.prototype = Object.create(Namespace.prototype);
-SubscriberNamespace.prototype._lastData = null;
 SubscriberNamespace.prototype.subscribe = function(fn) {
     this.callRemote('init', fn);
     return utils.subscribe(this.subscribers, fn);
@@ -39,9 +38,7 @@ var Subscriber = function(id) {
 
 Subscriber.prototype = Object.create(Endpoint.prototype);
 Subscriber.prototype.namespaceClass = SubscriberNamespace;
-Subscriber.prototype.getName = function() {
-    return 'Subscriber';
-};
+Subscriber.prototype.type = 'Subscriber';
 Subscriber.prototype.processInput = function(packet, callback) {
     switch (packet.type) {
         case 'data':

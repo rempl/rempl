@@ -27,8 +27,9 @@ var Endpoint = function(id) {
 
 Endpoint.prototype = {
     namespaceClass: Namespace,
+    type: 'Endpoint',
     getName: function() {
-        return 'Endpoint';
+        return this.type + (this.id ? '#' + this.id : '');
     },
     ns: function getNamespace(name) {
         if (!this.namespaces[name]) {
@@ -123,7 +124,7 @@ Endpoint.prototype = {
                 break;
 
             default:
-                utils.warn('[rempl][sync] Unknown packet type:', packet.type);
+                utils.warn('[rempl][sync] ' + this.getName() + 'Unknown packet type:', packet.type);
         }
     },
     setupChannel: function(type, send, remoteEndpoints, available) {

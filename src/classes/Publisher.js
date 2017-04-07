@@ -26,8 +26,6 @@ var Publisher = function(id) {
 
 Publisher.prototype = Object.create(Endpoint.prototype);
 Publisher.prototype.namespaceClass = PublisherNamespace;
-Publisher.prototype.getName = function() {
-    return 'Publisher `' + this.id + '`';
-};
+Publisher.prototype.type = 'Publisher';
 
 module.exports = Publisher;
