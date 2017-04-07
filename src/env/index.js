@@ -1,17 +1,20 @@
 var utils = require('../utils/index.js');
-var createEnv = require('./createEnv.js');
-var env = null;
+var createEnv = require('./publisher.js');
+var getEnv = require('./subscriber.js');
 
-module.exports = function getEnv() {
-    if (env === null) {
-        env = createEnv();
-    }
-
-    return env;
-};
-
+console.log(utils.isNode);
 if (utils.isNode) {
-    module.exports = function() {
-        throw new Error('[rempl] getEnv() doesn\'t supported on node.js');
+    module.exports = {
+        createEnv: function() {
+            throw new Error('[rempl] createEnv() doesn\'t supported for node.js');
+        },
+        getEnv: function() {
+            throw new Error('[rempl] getEnv() doesn\'t supported for node.js');
+        }
     };
-};
+} else {
+    module.exports = {
+        createEnv: createEnv,
+        getEnv: getEnv
+    };
+}

@@ -1,7 +1,6 @@
 /* eslint-env browser */
 var EventTransport = require('../../transport/event.js');
 var utils = require('../../utils/index.js');
-var getEnv = require('../../env/index.js');
 
 module.exports = function createSandbox(settings, callback) {
     function initSandbox(sandboxWindow) {
@@ -14,35 +13,62 @@ module.exports = function createSandbox(settings, callback) {
             }
         }
 
+        if (parent !== self && sandboxWindow !== self) {
+            var toSandbox = null;
+            var toEnv = null;
+
+            if (onEnvMessage) {
+                removeEventListener('message', onEnvMessage, true);
+            }
+            addEventListener('message', onEnvMessage = function(event) {
+                var data = event.data || {};
+
+                switch (data.to) {
+                    case 'rempl-env-subscriber:connect':
+                        toEnv = data.from;
+                        sandboxWindow.postMessage(data, '*');
+                        break;
+
+                    case toSandbox:
+                        sandboxWindow.postMessage(data, '*');
+                        if (data.payload && data.payload.type === 'connect') {
+                            sandboxWindow.postMessage({
+                                from: data.from,
+                                to: data.to,
+                                payload: {
+                                    type: 'data',
+                                    endpoint: 'editor',
+                                    data: [{
+                                        type: 'publisher:connect'
+                                    }]
+                                }
+                            }, '*');
+                        }
+                        break;
+
+                    case 'rempl-env-publisher:connect':
+                        toSandbox = data.from;
+                        parent.postMessage(data, '*');
+                        break;
+
+                    case toEnv:
+                        parent.postMessage(data, '*');
+                        break;
+                }
+            }, true);
+        }
+
         // sandbox <-> subscriber transport
         // TODO: teardown transport
         new EventTransport('rempl-sandbox', 'rempl-subscriber', sandboxWindow)
         .onInit({}, function(api) {
-            var env = getEnv();
-
-            if (env.enabled) {
-                envUnsubscribe = env.subscribe(function(data) {
-                    api.send({
-                        type: 'env:data',
-                        payload: data
-                    });
-                });
-                api.subscribe(function(data) {
-                    if (data.type === 'to-env') {
-                        env.send(data.payload);
-                    }
-                });
-                env.send({
-                    type: 'getHostInfo'
-                });
-            }
-
             callback(api);
         });
     }
 
     var envUnsubscribe = null;
     var iframe = null;
+    var onEnvMessage = null;
 
     settings = settings || {};
 
@@ -66,6 +92,8 @@ module.exports = function createSandbox(settings, callback) {
 
     return {
         destroy: function() {
+            removeEventListener('message', onEnvMessage, true);
+
             if (envUnsubscribe !== null) {
                 envUnsubscribe();
                 envUnsubscribe = null;
