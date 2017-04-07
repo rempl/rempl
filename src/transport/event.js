@@ -6,7 +6,6 @@ var Token = require('../classes/Token.js');
 var EndpointList = require('../classes/EndpointList.js');
 var EndpointListSet = require('../classes/EndpointListSet.js');
 var utils = require('../utils/index.js');
-var instances = [];
 var DEBUG = false;
 var DEBUG_PREFIX = '[rempl][event-transport] ';
 
@@ -33,13 +32,6 @@ function EventTransport(name, connectTo, win) {
         }
     }, this);
 
-    // this.ownEndpoints.on(function(value) {
-    //     console.log('>>>', this.name, this.connectTo, value, window.location.href);
-    // }, this);
-    // this.remoteEndpoints.on(function(value) {
-    //     console.log('<<<', this.name, this.connectTo, value, window.location.href);
-    // }, this);
-
     this.initCallbacks = [];
     this.dataCallbacks = [];
     this.sendCallbacks = {};
@@ -59,24 +51,22 @@ function EventTransport(name, connectTo, win) {
     this._handshake(false);
 }
 
-EventTransport.all = global.remplT = [];
+EventTransport.all = [];
 EventTransport.get = function(name, connectTo, win) {
     if (!win) {
         win = global;
     }
 
-    for (var i = 0; i < instances.length; i++) {
-        var instance = instances[i];
-        if (instance.connectTo === connectTo &&
-            instance.window === win &&
-            instance.name === name) {
-            return instance;
+    for (var i = 0; i < EventTransport.all.length; i++) {
+        var transport = EventTransport.all[i];
+        if (transport.connectTo === connectTo &&
+            transport.window === win &&
+            transport.name === name) {
+            return transport;
         }
     }
 
-    var instance = new EventTransport(name, connectTo, win);
-    instances.push(instance);
-    return instance;
+    return new EventTransport(name, connectTo, win);
 };
 
 EventTransport.prototype = {
