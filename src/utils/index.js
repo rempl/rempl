@@ -1,7 +1,7 @@
 'use strict';
 
 var isNode = typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]' &&
-            (typeof self === 'undefined' || Object.prototype.toString.call(self) !== '[object Window]');
+             Object.prototype.toString.call(global.self) !== '[object Window]';
 
 function complete(dest, source) {
     for (var key in source) {

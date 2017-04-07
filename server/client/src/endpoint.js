@@ -1,5 +1,4 @@
 /* eslint-env browser */
-/* global basis */
 
 var Value = require('basis.data').Value;
 var ObjectMerge = require('basis.data.object').Merge;
