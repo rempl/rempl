@@ -2,7 +2,6 @@
 
 var WsTransport = require('../../transport/ws-publisher.js');
 var identify = require('./identify.js');
-var global = new Function('return this')();
 var meta = document.querySelector && document.querySelector('meta[name="rempl:server"]');
 var REMPL_SERVER = (meta && meta.getAttribute('value')) || ('ws://' + (location.hostname || 'localhost') + ':8177');
 var STORAGE_KEY = 'rempl:id';
