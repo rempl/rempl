@@ -55,10 +55,4 @@ Subscriber.prototype.processInput = function(packet, callback) {
     }
 };
 
-Subscriber.factory = function createSubscriberFactory(Subscriber) {
-    return function createSubscriber(id) {
-        return new Subscriber(id);
-    };
-};
-
 module.exports = Subscriber;
