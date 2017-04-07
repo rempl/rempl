@@ -282,12 +282,15 @@ EventTransport.prototype = {
     },
     sync: function(endpoint) {
         var channel = utils.genUID(8) + ':' + this.connectTo;
+        var remoteEndpoints = this.remoteEndpoints;
+
         this.onInit(endpoint, function(api) {
             api.subscribe(endpoint.processInput);
             api.connected.link(function(connected) {
-                endpoint.setupChannel(channel, api.send, connected);
+                endpoint.setupChannel(channel, api.send, remoteEndpoints, connected);
             });
         });
+
         return this;
     }
 };

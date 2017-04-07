@@ -1,11 +1,21 @@
 var Namespace = require('./Namespace.js');
+var Token = require('./Token.js');
+var EndpointListSet = require('./EndpointListSet.js');
 var utils = require('../utils/index.js');
 
 var Endpoint = function(id) {
     this.id = id || null;
     this.namespaces = Object.create(null);
-    this.channels = [];
+
     this.processInput = this.processInput.bind(this);
+    this.channels = [];
+    this.connected = new Token(false);
+    this.remoteEndpoints = new EndpointListSet();
+    this.remoteEndpoints.on(function(endpoints) {
+        // Star is used as a hack for subscriber<->sandbox communication
+        // TODO: find a better solution
+        this.connected.set(endpoints.indexOf(this.id || '*') !== -1);
+    }, this);
 
     var defaultNS = this.ns('*');
     for (var method in defaultNS) {
@@ -116,16 +126,21 @@ Endpoint.prototype = {
                 utils.warn('[rempl][sync] Unknown packet type:', packet.type);
         }
     },
-    setupChannel: function(type, send, available) {
+    setupChannel: function(type, send, remoteEndpoints, available) {
         if (available) {
             this.channels.push({
                 type: type,
                 send: send
             });
+            // Note that endpoints should be changed after channels is changed,
+            // since it may change this.connected that can send something to remote side
+            // when connection is established
+            this.remoteEndpoints.add(remoteEndpoints);
         } else {
             for (var i = 0; i < this.channels.length; i++) {
                 if (this.channels[i].type === type &&
                     this.channels[i].send === send) {
+                    this.remoteEndpoints.remove(remoteEndpoints);
                     this.channels.splice(i, 1);
                     break;
                 }

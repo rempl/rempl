@@ -1,4 +1,5 @@
 var Token = require('../classes/Token.js');
+var EndpointList = require('../classes/EndpointList.js');
 var utils = require('../utils');
 var socketIO = require('socket.io-client');
 var endpoints = Object.create(null);
@@ -119,6 +120,8 @@ function WSTransport(uri) {
     this.dataCallbacks = [];
 
     this.connected = new Token(false);
+    this.ownEndpoints = new EndpointList();
+    this.remoteEndpoints = new EndpointList();
 
     if (DEBUG) {
         console.log(DEBUG_PREFIX + 'connecting to ' + normalizeUri(uri));
@@ -211,8 +214,8 @@ WSTransport.prototype.sync = function(endpoint) {
     var api = this.createApi(endpoint);
     api.subscribe(endpoint.processInput);
     api.connected.link(function(connected) {
-        endpoint.setupChannel('ws', api.send, connected);
-    });
+        endpoint.setupChannel('ws', api.send, this.remoteEndpoints, connected);
+    }, this);
 };
 
 module.exports = WSTransport;
