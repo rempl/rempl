@@ -52,6 +52,8 @@ function createScope() {
     };
     global.postMessage = function(data, origin) {
         var message = {
+            source: global,
+            target: global,
             origin: origin,
             data: data
         };

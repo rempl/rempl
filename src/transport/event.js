@@ -10,11 +10,13 @@ var DEBUG = false;
 var DEBUG_PREFIX = '[rempl][event-transport] ';
 
 function EventTransport(name, connectTo, win) {
+    EventTransport.all.push(this);
+
     this.name = name;
     this.connectTo = connectTo;
 
     this.inputChannelId = name + ':' + utils.genUID();
-    this.outputChannelId = null;
+    this.connections = Object.create(null);
 
     this.connected = new Token(false);
     this.endpointGetUI = {};
@@ -50,10 +52,13 @@ function EventTransport(name, connectTo, win) {
         return;
     }
 
-    addEventListener('message', this._onMessage.bind(this), false);
-    this._handshake();
+    addEventListener('message', function(e) {
+        this._onMessage(e);
+    }.bind(this), false);
+    this._handshake(false);
 }
 
+EventTransport.all = global.remplT = [];
 EventTransport.get = function(name, connectTo, win) {
     if (!win) {
         win = global;
@@ -74,47 +79,54 @@ EventTransport.get = function(name, connectTo, win) {
 };
 
 EventTransport.prototype = {
-    _handshake: function() {
-        this._send(this.name + ':connect', {
-            connectTo: this.connectTo,
-            input: this.inputChannelId,
-            output: this.outputChannelId,
+    _handshake: function(inited) {
+        this._send(this.connectTo + ':connect', {
+            initiator: this.name,
+            inited: inited,
             endpoints: this.ownEndpoints.value
         });
     },
-    _onMessage: function(e) {
-        var data = e.data || {};
+    _onMessage: function(event) {
+        var data = event.data || {};
         var payload = data.payload || {};
 
-        switch (data.channel) {
-            case this.connectTo + ':connect':
-                if (payload.connectTo === this.name) {
-                    this._onConnect(payload);
+        if (event.source !== this.window || event.target !== global) {
+            return;
+        }
+
+        switch (data.to) {
+            case this.name + ':connect':
+                if (payload.initiator === this.connectTo) {
+                    this._onConnect(data.from, payload);
                 }
                 break;
 
             case this.inputChannelId:
-                this._onData(payload);
+                if (data.from in this.connections) {
+                    this._onData(payload);
+                } else {
+                    utils.warn(DEBUG_PREFIX + 'unknown incoming connection', data.from);
+                }
                 break;
         }
     },
-    _onConnect: function(payload) {
-        this.outputChannelId = payload.input;
+    _onConnect: function(from, payload) {
+        this.connections[from] = {
+            ttl: Date.now(),
+            endpoints: []
+        };
 
-        if (!payload.output) {
-            this._handshake();
+        this.remoteEndpoints.set(payload.endpoints);
+
+        if (!payload.inited) {
+            this._handshake(true);
         }
 
-        if (!this.inited) {
-            this.remoteEndpoints.set(payload.endpoints);
-
-            // invoke onInit callbacks
-            this.inited = true;
-            this.send({
-                type: 'connect',
-                data: [this.ownEndpoints.value]
-            });
-        }
+        this.inited = true;
+        this._send(from, {
+            type: 'connect',
+            endpoints: this.ownEndpoints.value
+        });
     },
     _onData: function(payload) {
         if (DEBUG) {
@@ -123,7 +135,7 @@ EventTransport.prototype = {
 
         switch (payload.type) {
             case 'connect':
-                this.remoteEndpoints.set(payload.data && payload.data[0]);
+                this.remoteEndpoints.set(payload.endpoints);
                 this.connected.set(true);
                 this.initCallbacks.splice(0).forEach(function(args) {
                     this.onInit.apply(this, args);
@@ -187,14 +199,15 @@ EventTransport.prototype = {
             });
         }.bind(this);
     },
-    _send: function(channelId, payload) {
+    _send: function(to, payload) {
         if (DEBUG) {
-            utils.log(DEBUG_PREFIX + 'emit event', channelId, payload);
+            utils.log(DEBUG_PREFIX + 'emit event', to, payload);
         }
 
         if (typeof this.window.postMessage === 'function') {
             this.window.postMessage({
-                channel: channelId,
+                from: this.inputChannelId,
+                to: to,
                 payload: payload
             }, '*');
         }
@@ -207,11 +220,6 @@ EventTransport.prototype = {
         });
     },
     sendToEndpoint: function(endpoint, type) {
-        if (!this.inited) {
-            utils.warn(DEBUG_PREFIX + 'send() call on init is prohibited');
-            return;
-        }
-
         // if (endpoint !== this.remoteName && this.remoteEndpoints.value.indexOf(endpoint) === -1) {
         //     // console.warn(this.name, endpoint, this.remoteName, this.remoteEndpoints.value);
         //     if (1||DEBUG) {
@@ -236,7 +244,14 @@ EventTransport.prototype = {
         });
     },
     send: function(payload) {
-        this._send(this.outputChannelId, payload);
+        // if (!this.inited) {
+        //     utils.warn(DEBUG_PREFIX + 'send() call on init is prohibited');
+        //     return;
+        // }
+
+        for (var channelId in this.connections) {
+            this._send(channelId, payload);
+        }
     },
 
     onInit: function(endpoint, callback) {
