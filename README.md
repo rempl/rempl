@@ -24,7 +24,9 @@ npm install rempl
 ```html
 <script src="node_modules/rempl/dist/rempl.js"></script>
 <script>
-    var myTool = rempl.createPublisher('myTool', function() { /* ... */ });
+    var myTool = rempl.createPublisher('myTool', function(settings, callback) {
+        /* return a UI bundle or url */
+    });
 
     // ...
 </script>
@@ -34,7 +36,9 @@ npm install rempl
 
 ```js
 var rempl = require('rempl');
-var myTool = rempl.createPublisher('myTool', function() { /* ... */ });
+var myTool = rempl.createPublisher('myTool', function(settings, callback) {
+    /* return a UI bundle or url */
+});
 
 // ...
 ```
@@ -88,8 +92,8 @@ Planned (not tested yet):
 
 For tools based on `rempl`, a publisher is a source of UI. When new sandbox for subscriber is created, it sends a request to publisher to provide an UI. Publisher should provide UI in some way:
 
-- `script` – JavaScript bundle that includes everything is needed to build an UI (i.e. JavaScript, CSS, templates etc.)
-- `url` – url of page that contains publishers UI
+- `script` – JavaScript bundle that includes everything is needed to build an UI (i.e. JavaScript, CSS, templates etc.). When `script` type is using, `rempl` injects itself before script evaluation. Therefore no need to include rempl source to subscriber.
+- `url` – url of page subscriber. In this case `rempl` should be included to page by author.
 
 ## API
 
@@ -102,8 +106,8 @@ var myTool = rempl.createPublisher('myTool', function(settings, callback) {
 });
 
 setInterval(function() {
-    myTool.publish('ping');
-});
+    myTool.publish(Date.now());
+}, 1000);
 
 myTool.provide({
     pong: function() {
@@ -112,33 +116,54 @@ myTool.provide({
 });
 ```
 
-- publish(data)
-- provide(methodName, fn) or provide(methods)
-- revoke(methodName) or provide(methodNamesArray)
-- isMethodProvided(method)
-- callRemote(method, ...args, callback)
-- ns(namespace)
-  - publish/provide/isMethodProvided/callRemote
+- `publish(data)`
+- `provide(methodName, fn)` or `provide(methods)`
+- `isMethodProvided(method)`
+- `revoke(methodName)` or `revoke(methodNamesArray)`
+- `callRemote(method, ...args, callback)`
+- `ns(namespace)`
+  - publish/provide/revoke/isMethodProvided/callRemote
 
 ### Subscriber
 
 ```js
-rempl.getSubscriber(function(myTool) {
-    myTool.subscribe(function(data) {
-        console.log('Receive data from publisher:', data);
+var myTool = rempl.getSubscriber();
 
-        myTool.callRemote('pong');
-    });
+myTool.subscribe(function(data) {
+    console.log('Receive data from publisher:', data);
+
+    myTool.callRemote('pong');
 });
 ```
 
-- subscribe(callback)
-- provide(methodName, fn) or provide(methods)
-- revoke(methodName) or provide(methodNamesArray)
-- isMethodProvided(method)
-- callRemote(method, ...args, callback)
-- ns(namespace)
-  - subscribe/provide/isMethodProvided/callRemote
+- `subscribe(callback)`
+- `provide(methodName, fn)` or `provide(methods)`
+- `isMethodProvided(methodName)`
+- `revoke(methodName)` or `revoke(methodNamesArray)`
+- `callRemote(methodName, ...args, callback)`
+- `isRemoteMethodExists(methodName)`
+- `onRemoteMethodsChanged(callback)`
+- `ns(namespace)`
+  - subscribe/provide/revoke/isMethodProvided/callRemote
+
+### Host
+
+Rempl provides a host that can be injected right in the inspecting page, so called `in-page` host. To get that host use `rempl.getHost()` method.
+
+```js
+var inpageHost = rempl.getHost();
+
+inpageHost.activate();
+inpageHost.activate(publisherName);
+
+inpageHost.deactivate();
+inpageHost.deactivate(publisherName);
+```
+
+Host has two methods `activate()` and `deactivate()`.
+
+- `activate([publisherName])` - uses to add host's view to page. When used with no argument method show UI and selects a first publisher. When argument is passed, it selects publisher with specified name.
+- `deactivate([publisherName])` - hide host's view if it showed. When `publisherName` is passed, method deactivates view only if publisher with passed name is selected.
 
 ### RPC
 
@@ -146,9 +171,9 @@ Publishers and Subcribers can provide methods for remote side invocation and inv
 
 > NOTE: Examples are given for a Publisher, but the same API is available for any Subscriber since API is symetric.
 
-#### provide()
+#### provide(methodName, fn)
 
-Method to provide a method(s) for remote side. It has two semantic: to provide a single method or batch of methods.
+Method to provide a method(s) for remote side. It allows to provide a single method or batch of methods.
 
 ```js
 publisher.provide('foo', function() {
@@ -160,28 +185,16 @@ publisher.ns('something').provide({
 });
 ```
 
-#### revoke()
+#### revoke(methodName)
 
 Method to revoke a method(s) that was provided before. It allows to revoke a single method or several methods at once.
 
 ```js
-publisher.remove('foo');
+publisher.revoke('foo');
 publisher.ns('something').revoke(['method1', 'method2']);
 ```
 
-#### isMethodProvided()
-
-Returns `true` when method is provided for remote side by `provide()` method.
-
-```js
-publisher.isMethodProvided('test'); // false
-publisher.provide('test', function() {});
-publisher.isMethodProvided('test'); // true
-publisher.revoke('test');
-publisher.isMethodProvided('test'); // false
-```
-
-#### callRemote()
+#### callRemote(methodName[, ...args][, callback])
 
 Invoke remote side method with given arguments. All arguments should be a transferable through JSON data types, i.e. `number`, `string`, `boolean`, `Array`, plain object or null. The last argument can be a function that remote side can use to send data back.
 
@@ -191,8 +204,41 @@ publisher.callRemote('methodName', 1, 2, function(res) {
 });
 ```
 
----
+#### isMethodProvided(methodName)
 
-- `session` - remote inspector for ui connections
-- `connected` - flag to represent a state of a connection to the remote end point (dev-server or Developer Tools in a browser)
-- `features` - list of available feature hosts
+Returns `true` when own method is provided for remote side by `provide()` method.
+
+```js
+publisher.isMethodProvided('test'); // false
+publisher.provide('test', function() {});
+publisher.isMethodProvided('test'); // true
+publisher.revoke('test');
+publisher.isMethodProvided('test'); // false
+```
+
+#### isRemoteMethodExists(methodName)
+
+Returns `true` when remote method is available to be invoked.
+
+> Currently method doesn't work for publisher side since there can be several subscribers with different method set provided.
+
+```js
+if (subscriber.isRemoteMethodExists('test')) {
+    subscriber.callRemote('test');
+}
+```
+
+#### onRemoteMethodsChanged(callback)
+
+Allows to subscribe to remote side API state of namespace. Method invoke passed callback on subscription and return a function to unsubscribe.
+
+> Currently method doesn't work for publisher side since there can be several subscribers with different method set provided.
+
+```js
+var unsubscribeDefaultNsMethodsLogging = subscriber.onRemoteMethodsChanged(function(methods) {
+    console.log(methods);
+});
+
+// call returned function when need to stop listen for API changes
+unsubscribeDefaultNsMethodsLogging();
+```
