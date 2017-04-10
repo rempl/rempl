@@ -1,10 +1,11 @@
 var EventTransport = require('../../transport/event.js');
-var WSTransport = require('./transport-ws.js');
+var WsTransport = require('./transport-ws.js');
+var attachWsTransport = require('../ws.js');
 var createFactory = require('../factory.js');
 var addGetRemoteUI = require('../getRemoteUI.js');
 var updatePublisherList = require('./identify.js').updatePublisherList;
 
-module.exports = createFactory(function setupPublisher(publisher, getRemoteUI) {
+module.exports = createFactory(function setupPublisher(publisher, getRemoteUI, options) {
     addGetRemoteUI(publisher, getRemoteUI);
 
     // browser extension
@@ -17,8 +18,5 @@ module.exports = createFactory(function setupPublisher(publisher, getRemoteUI) {
         .get('rempl-inpage-publisher', 'rempl-inpage-host')
         .sync(publisher);
 
-    // ws server
-    WSTransport
-        .get(publisher.wsendpoint)
-        .sync(publisher);
+    attachWsTransport(publisher, WsTransport, options);
 }, updatePublisherList);

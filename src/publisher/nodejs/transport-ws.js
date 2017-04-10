@@ -1,11 +1,14 @@
 var fs = require('fs');
 var path = require('path');
 var WsTransport = require('../../transport/ws-publisher.js');
-var REMPL_SERVER = process.env.REMPL_SERVER || 'ws://localhost:8177';
 var CLIENT_ID_FILENAME = '.rempl_endpoint_id'; // FIXME: dirty solution
+var envUri = process.env.REMPL_SERVER;
+var defaultUri = envUri
+    ? (String(envUri).toLowerCase() !== 'none' ? envUri : false)
+    : 'ws://localhost:8177';
 
 function NodeWsTransport(uri) {
-    WsTransport.call(this, uri || REMPL_SERVER);
+    WsTransport.call(this, uri);
 
     // TODO make it through temp file
     if (fs.existsSync(path.resolve(CLIENT_ID_FILENAME))) {
@@ -13,6 +16,7 @@ function NodeWsTransport(uri) {
     }
 }
 
+NodeWsTransport.defaultUri = defaultUri;
 NodeWsTransport.get = WsTransport.get;
 NodeWsTransport.prototype = Object.create(WsTransport.prototype);
 

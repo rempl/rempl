@@ -2,13 +2,16 @@
 
 var WsTransport = require('../../transport/ws-publisher.js');
 var identify = require('./identify.js');
-var meta = document.querySelector && document.querySelector('meta[name="rempl:server"]');
-var REMPL_SERVER = (meta && meta.getAttribute('value')) || ('ws://' + (location.hostname || 'localhost') + ':8177');
 var STORAGE_KEY = 'rempl:id';
 var sessionStorage = global.sessionStorage || {};
+var meta = document.querySelector && document.querySelector('meta[name="rempl:server"]');
+var metaValue = meta && meta.getAttribute('value');
+var defaultUri = metaValue
+    ? (metaValue.toLowerCase() !== 'none' ? metaValue : false)
+    : ('ws://' + (location.hostname || 'localhost') + ':8177');
 
 function BrowserWsTransport(uri) {
-    WsTransport.call(this, uri || REMPL_SERVER);
+    WsTransport.call(this, uri);
 
     this.id = sessionStorage[STORAGE_KEY];
     this.transport
@@ -17,6 +20,7 @@ function BrowserWsTransport(uri) {
         .on('disconnect', identify.stop);
 }
 
+BrowserWsTransport.defaultUri = defaultUri;
 BrowserWsTransport.get = WsTransport.get;
 BrowserWsTransport.prototype = Object.create(WsTransport.prototype);
 
