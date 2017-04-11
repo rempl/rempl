@@ -8,8 +8,6 @@ Install dependencies and build app
 npm install && npm run-script build
 ```
 
-Uncomment string with meta tag in index.html
-
 Host `index.html` from the project root directory with any server and open it in your browser.
 
 Open rempl-server page in you browser ([http://localhost:8177/](http://localhost:8177/) by default) and choose `web-input`-publisher.
