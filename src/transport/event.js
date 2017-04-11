@@ -113,13 +113,13 @@ EventTransport.prototype = {
                 ttl: Date.now(),
                 endpoints: endpoints
             };
+            this._send(from, {
+                type: 'connect',
+                endpoints: this.ownEndpoints.value
+            });
         }
 
         this.inited = true;
-        this._send(from, {
-            type: 'connect',
-            endpoints: this.ownEndpoints.value
-        });
     },
     _onData: function(from, payload) {
         if (DEBUG) {

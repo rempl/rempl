@@ -18,7 +18,7 @@ describe('EventTransport', function() {
 
         scope.await(function(messages) {
             assert.deepEqual(messages, [
-                { from: 'foo:...', to: 'bar:connect', payload: { initiator: 'foo', inited: false, endpoints: [] } }
+                { from: 'foo:1', to: 'bar:connect', payload: { initiator: 'foo', inited: false, endpoints: [] } }
             ]);
             done();
         });
@@ -30,14 +30,12 @@ describe('EventTransport', function() {
 
         scope.await(function(messages) {
             assert.deepEqual(messages, [
-                { from: 'foo:...', to: 'bar:connect', payload: { initiator: 'foo', inited: false, endpoints: [] } },
-                { from: 'bar:...', to: 'foo:connect', payload: { initiator: 'bar', inited: false, endpoints: [] } },
-                { from: 'bar:...', to: 'foo:connect', payload: { initiator: 'bar', inited: true, endpoints: [] } },
-                { from: 'bar:...', to: 'foo:...',     payload: { type: 'connect',  endpoints: [] } },
-                { from: 'foo:...', to: 'bar:connect', payload: { initiator: 'foo', inited: true, endpoints: [] } },
-                { from: 'foo:...', to: 'bar:...',     payload: { type: 'connect',  endpoints: [] } },
-                { from: 'foo:...', to: 'bar:...',     payload: { type: 'connect',  endpoints: [] } },
-                { from: 'bar:...', to: 'foo:...',     payload: { type: 'connect',  endpoints: [] } }
+                { from: 'foo:1', to: 'bar:connect', payload: { initiator: 'foo', inited: false, endpoints: [] } },
+                { from: 'bar:1', to: 'foo:connect', payload: { initiator: 'bar', inited: false, endpoints: [] } },
+                { from: 'bar:1', to: 'foo:connect', payload: { initiator: 'bar', inited: true, endpoints: [] } },
+                { from: 'bar:1', to: 'foo:1',       payload: { type: 'connect',  endpoints: [] } },
+                { from: 'foo:1', to: 'bar:connect', payload: { initiator: 'foo', inited: true, endpoints: [] } },
+                { from: 'foo:1', to: 'bar:1',       payload: { type: 'connect',  endpoints: [] } }
             ]);
             done();
         });
@@ -48,17 +46,17 @@ describe('EventTransport', function() {
 
         scope.await(function(messages) {
             assert.deepEqual(messages, [
-                { from: 'foo:...', to: 'bar:connect', payload: { initiator: 'foo', inited: false, endpoints: [] } }
+                { from: 'foo:1', to: 'bar:connect', payload: { initiator: 'foo', inited: false, endpoints: [] } }
             ]);
 
             new EventTransport('bar', 'foo');
 
             scope.await(function(messages) {
                 assert.deepEqual(messages, [
-                    { from: 'bar:...', to: 'foo:connect', payload: { initiator: 'bar', inited: false, endpoints: [] } },
-                    { from: 'foo:...', to: 'bar:connect', payload: { initiator: 'foo', inited: true, endpoints: [] } },
-                    { from: 'foo:...', to: 'bar:...', payload: { type: 'connect', endpoints: [] } },
-                    { from: 'bar:...', to: 'foo:...', payload: { type: 'connect', endpoints: [] } }
+                    { from: 'bar:1', to: 'foo:connect', payload: { initiator: 'bar', inited: false, endpoints: [] } },
+                    { from: 'foo:1', to: 'bar:connect', payload: { initiator: 'foo', inited: true, endpoints: [] } },
+                    { from: 'foo:1', to: 'bar:1',       payload: { type: 'connect', endpoints: [] } },
+                    { from: 'bar:1', to: 'foo:1',       payload: { type: 'connect', endpoints: [] } }
                 ]);
                 done();
             });
@@ -71,8 +69,8 @@ describe('EventTransport', function() {
 
         scope.await(function(messages) {
             assert.deepEqual(messages, [
-                { from: 'foo:...', to: 'bar:connect', payload: { initiator: 'foo', inited: false, endpoints: [] } },
-                { from: 'bar:...', to: 'baz:connect', payload: { initiator: 'bar', inited: false, endpoints: [] } }
+                { from: 'foo:1', to: 'bar:connect', payload: { initiator: 'foo', inited: false, endpoints: [] } },
+                { from: 'bar:1', to: 'baz:connect', payload: { initiator: 'bar', inited: false, endpoints: [] } }
             ]);
 
             done();
@@ -84,13 +82,13 @@ describe('EventTransport', function() {
 
         scope.await(function(messages) {
             assert.deepEqual(messages, [
-                { from: 'foo:...', to: 'bar:connect', payload: { initiator: 'foo', inited: false, endpoints: [] } }
+                { from: 'foo:1', to: 'bar:connect', payload: { initiator: 'foo', inited: false, endpoints: [] } }
             ]);
 
             new EventTransport('bar', 'baz');
             scope.await(function(messages) {
                 assert.deepEqual(messages, [
-                    { from: 'bar:...', to: 'baz:connect', payload: { initiator: 'bar', inited: false, endpoints: [] } }
+                    { from: 'bar:1', to: 'baz:connect', payload: { initiator: 'bar', inited: false, endpoints: [] } }
                 ]);
                 done();
             });
@@ -103,8 +101,8 @@ describe('EventTransport', function() {
 
         scope.await(function(messages) {
             assert.deepEqual(messages, [
-                { from: 'foo:...', to: 'bar:connect', payload: { initiator: 'foo', inited: false, endpoints: [] } },
-                { from: 'baz:...', to: 'foo:connect', payload: { initiator: 'baz', inited: false, endpoints: [] } }
+                { from: 'foo:1', to: 'bar:connect', payload: { initiator: 'foo', inited: false, endpoints: [] } },
+                { from: 'baz:1', to: 'foo:connect', payload: { initiator: 'baz', inited: false, endpoints: [] } }
             ]);
 
             done();
@@ -116,13 +114,13 @@ describe('EventTransport', function() {
 
         scope.await(function(messages) {
             assert.deepEqual(messages, [
-                { from: 'foo:...', to: 'bar:connect', payload: { initiator: 'foo', inited: false, endpoints: [] } }
+                { from: 'foo:1', to: 'bar:connect', payload: { initiator: 'foo', inited: false, endpoints: [] } }
             ]);
 
             new EventTransport('baz', 'foo');
             scope.await(function(messages) {
                 assert.deepEqual(messages, [
-                    { from: 'baz:...', to: 'foo:connect', payload: { initiator: 'baz', inited: false, endpoints: [] } }
+                    { from: 'baz:1', to: 'foo:connect', payload: { initiator: 'baz', inited: false, endpoints: [] } }
                 ]);
                 done();
             });

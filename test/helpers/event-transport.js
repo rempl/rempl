@@ -2,7 +2,12 @@ var OriginalEventTransport = require('../../src/transport/event.js');
 var transports;
 
 function EventTransport(from, to, win) {
-    transports.push(new OriginalEventTransport(from, to, win));
+    var transport = new OriginalEventTransport(from, to, win);
+    transports.push(transport);
+    transport.replaceId = transports.filter(function(t) {
+        return t.name === from;
+    }).length;
+    return transport;
 }
 
 function createScope() {
@@ -11,10 +16,7 @@ function createScope() {
             return JSON.parse(transports.reduce(function(res, transport) {
                 return res
                     .replace(new RegExp('"' + transport.inputChannelId + '"', 'g'), function(m) {
-                        return m.replace(/:[^"]+/, ':...');
-                    })
-                    .replace(new RegExp('"' + transport.outputChannelId + '"', 'g'), function(m) {
-                        return m.replace(/:[^"]+/, ':...');
+                        return m.replace(/:[^"]+/, ':' + transport.replaceId);
                     });
             }, JSON.stringify(message.data)));
         });
