@@ -11,8 +11,8 @@ function normalize(oldList, newList) {
         return idx === 0 || array.lastIndexOf(endpoint, idx - 1) === -1;
     });
     diff = newList.length !== oldList.length
-        || newList.every(function(endpoint) {
-            return oldList.indexOf(endpoint) !== -1;
+        || newList.some(function(endpoint) {
+            return oldList.indexOf(endpoint) === -1;
         });
 
     return diff ? newList : oldList;
