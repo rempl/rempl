@@ -6,6 +6,7 @@ var createElement = require('./createElement.js');
 var uid = require('../../utils/index.js').genUID();
 var publishers = [];
 var selectedPublisher = null;
+var autoSelectPublisher = false;
 var teardownTimer;
 var transport = null;
 // var externalWindow = null;
@@ -131,7 +132,7 @@ function getView() {
                                     class: isolateName('close-button'),
                                     events: {
                                         click: function() {
-                                            selectPublisher();
+                                            host.deactivate();
                                         }
                                     }
                                 }
@@ -184,7 +185,12 @@ function cleanupSandbox() {
 }
 
 function selectPublisher(publisher) {
+    if (!publisher) {
+        publisher = null;
+    }
+
     if (publisher !== selectedPublisher) {
+        autoSelectPublisher = false;
         selectedPublisher = publisher;
         Array.prototype.forEach.call(getView().tabs.children, updateTabSelectedState);
 
@@ -225,17 +231,32 @@ module.exports = function getHost() {
     transport.remoteEndpoints.on(function(endpoints) {
         publishers = endpoints;
         updatePublisherList();
+        console.log(autoSelectPublisher, selectedPublisher, publishers.length);
+        if (autoSelectPublisher && !selectedPublisher && publishers.length) {
+            selectPublisher(publishers[0]);
+        }
     });
 
     return host = {
         activate: function(publisher) {
-            var publisherId = (publisher && publisher.id) || publisher;
+            var publisherId = (publisher && publisher.id) ||
+                               publisher ||
+                               selectedPublisher ||
+                               publishers[0] ||
+                               null;
+
             clearTimeout(teardownTimer);
             selectPublisher(publisherId);
             showView();
+
+            if (!selectedPublisher) {
+                autoSelectPublisher = true;
+            }
         },
         deactivate: function(publisher) {
             var publisherId = (publisher && publisher.id) || publisher;
+            autoSelectPublisher = false;
+
             if (!publisherId || publisherId === selectedPublisher) {
                 softHideView();
                 // tear down subscriber in 15 sec
