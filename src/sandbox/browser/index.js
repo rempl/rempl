@@ -1,6 +1,16 @@
 /* eslint-env browser */
 var EventTransport = require('../../transport/event.js');
 var utils = require('../../utils/index.js');
+var initEnvSubscriberMessage = new WeakMap();
+
+if (parent !== self) {
+    addEventListener('message', function(event) {
+        var data = event.data || {};
+        if (data.to === 'rempl-env-publisher:connect') {
+            initEnvSubscriberMessage.set(event.source, data);
+        }
+    });
+}
 
 module.exports = function createSandbox(settings, callback) {
     function initSandbox(sandboxWindow) {
@@ -38,6 +48,14 @@ module.exports = function createSandbox(settings, callback) {
                         break;
                 }
             }, true);
+
+            if (settings.type !== 'script') {
+                var initMessage = initEnvSubscriberMessage.get(sandboxWindow);
+                if (initMessage) {
+                    toSandbox = initMessage.from;
+                    parent.postMessage(initMessage, '*');
+                }
+            }
         }
 
         // sandbox <-> subscriber transport
