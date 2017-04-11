@@ -8,7 +8,7 @@ var meta = document.querySelector && document.querySelector('meta[name="rempl:se
 var metaValue = meta && meta.getAttribute('value');
 var defaultUri = metaValue
     ? (metaValue.toLowerCase() !== 'none' ? metaValue : false)
-    : ('ws://' + (location.hostname || 'localhost') + ':8177');
+    : (location.protocol + '//' + (location.hostname || 'localhost') + ':8177');
 
 function BrowserWsTransport(uri) {
     WsTransport.call(this, uri);

@@ -33,7 +33,13 @@ function normalizeUri(uri) {
         return 'ws://localhost:' + uri;
     }
 
-    return uri.replace(/^([a-z]+:)\/\/|^/i, 'ws://');
+    return uri
+        .replace(/^http:\/\//i, 'ws://')
+        .replace(/^https:\/\//i, 'wss://')
+        .replace(/^([a-z]+:\/\/)|^/i, function(m, protocol) {
+            protocol = protocol ? protocol.toLowerCase() : '';
+            return protocol === 'ws://' || protocol === 'wss://' ? protocol : 'ws://';
+        });
 }
 
 function subscribe(endpoint, fn) {
