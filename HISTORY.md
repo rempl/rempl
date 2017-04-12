@@ -1,3 +1,16 @@
+## 1.0.0-alpha15 (April 11, 2017)
+
+- Improve WS transport setup
+    - Don't use WS transport for publisher when default URI is `none` and `options.ws` is not specified
+    - Don't use WS transport for publisher when `options.ws` is not a string or falsy
+    - Implemented `Publisher#connectWs()` method to connect publisher to specific WS origin
+    - Improved WS origin resolving to work better for https/wss
+- Reduced `connect` packets count on event transports connection
+- Implemented publisher auto-selection when in-page host activated with no specified publisher and no available publishers, first publisher will be selected when available
+- Fixed callback broadcasting for event transport, response is now sending to `callRemote` initiator only
+- Fixed `EndpointList` check for new/old list difference
+- Fixed connection with env for `url` subscribers
+
 ## 1.0.0-alpha14 (April 7, 2017)
 
 ### Core

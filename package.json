@@ -1,6 +1,6 @@
 {
   "name": "rempl",
-  "version": "1.0.0-alpha14",
+  "version": "1.0.0-alpha15",
   "description": "Рlatform for moderated remote access to JavaScript runtime via custom UI",
   "main": "src/index.js",
   "author": "Roman Dvornov",
