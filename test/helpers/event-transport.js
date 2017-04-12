@@ -1,5 +1,6 @@
-var OriginalEventTransport = require('../../src/transport/event.js');
+var OriginalEventTransport = require('../../src/transport/event');
 var transports;
+var callbacks;
 
 function EventTransport(from, to, win) {
     var transport = new OriginalEventTransport(from, to, win);
@@ -17,6 +18,13 @@ function createScope() {
                 return res
                     .replace(new RegExp('"' + transport.inputChannelId + '"', 'g'), function(m) {
                         return m.replace(/:[^"]+/, ':' + transport.replaceId);
+                    })
+                    .replace(/"callback":\s*"([^"]+)"/g, function(m, id) {
+                        var idx = callbacks.indexOf(id);
+                        if (idx === -1) {
+                            idx = callbacks.push(id) - 1;
+                        }
+                        return '"callback":' + (idx + 1);
                     });
             }, JSON.stringify(message.data)));
         });
@@ -34,7 +42,7 @@ function createScope() {
                 listener(message);
             });
 
-            timer = setImmediate(tick);
+            timer = setTimeout(tick, 0);
         }
     }
 
@@ -64,27 +72,29 @@ function createScope() {
     };
 
     transports = [];
-    timer = setImmediate(tick);
+    callbacks = [];
+    timer = setTimeout(tick, 0);
 
     return {
         messages: messages,
         await: function(fn) {
             done = fn;
             if (!timer) {
-                timer = setImmediate(tick);
+                timer = setTimeout(tick, 0);
             }
         },
         dump: function(array) {
             console.log((array || messages).map(x =>
                 JSON.stringify(x)
-                    .replace(/"([^"]+)":/g, '$1: ')
+                    .replace(/"([^"*]+)":/g, '$1: ')
+                    .replace(/("\*"):/g, '$1: ')
                     .replace(/"/g, '\'')
                     .replace(/([,{])/g, '$1 ')
                     .replace(/}/g, ' }')
             ).join(',\n'));
         },
         destroy: function() {
-            clearImmediate(timer);
+            clearTimeout(timer);
             listeners = null;
             queue = null;
             messages = null;

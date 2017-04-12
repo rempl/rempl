@@ -156,7 +156,7 @@ EventTransport.prototype = {
                 var callback = payload.callback;
 
                 if (callback) {
-                    args = args.concat(this._wrapCallback(callback));
+                    args = args.concat(this._wrapCallback(from, callback));
                 }
 
                 this.dataCallbacks.forEach(function(callback) {
@@ -169,11 +169,11 @@ EventTransport.prototype = {
             case 'getRemoteUI':
                 if (!hasOwnProperty.call(this.endpointGetUI, payload.endpoint)) {
                     utils.warn(DEBUG_PREFIX + 'receive unknown endpoint for getRemoteUI(): ' + payload.endpoint);
-                    this._wrapCallback(payload.callback)('Wrong endpoint – ' + payload.endpoint);
+                    this._wrapCallback(from, payload.callback)('Wrong endpoint – ' + payload.endpoint);
                 } else {
                     this.endpointGetUI[payload.endpoint](
                         payload.data[0] || false,
-                        payload.callback ? this._wrapCallback(payload.callback) : Function
+                        payload.callback ? this._wrapCallback(from, payload.callback) : Function
                     );
                 }
                 break;
@@ -183,9 +183,9 @@ EventTransport.prototype = {
         }
     },
 
-    _wrapCallback: function(callback) {
+    _wrapCallback: function(to, callback) {
         return function() {
-            this.send({
+            this._send(to, {
                 type: 'callback',
                 callback: callback,
                 data: Array.prototype.slice.call(arguments)

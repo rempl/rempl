@@ -1,6 +1,7 @@
 var assert = require('assert');
-var EventTransport = require('./helpers/event-transport.js').EventTransport;
-var createScope = require('./helpers/event-transport.js').createScope;
+var Endpoint = require('../src/classes/Endpoint');
+var EventTransport = require('./helpers/event-transport').EventTransport;
+var createScope = require('./helpers/event-transport').createScope;
 
 describe('EventTransport', function() {
     var scope;
@@ -122,6 +123,74 @@ describe('EventTransport', function() {
                 assert.deepEqual(messages, [
                     { from: 'baz:1', to: 'foo:connect', payload: { initiator: 'baz', inited: false, endpoints: [] } }
                 ]);
+                done();
+            });
+        });
+    });
+
+    it('connection with endpoints', function(done) {
+        var foo = new Endpoint('foo');
+        var bar1 = new Endpoint('bar1');
+        var bar2 = new Endpoint('bar2');
+
+        bar1.ret = [];
+        bar2.ret = [];
+
+        new EventTransport('foo', 'bar').sync(foo);
+        new EventTransport('bar', 'foo').sync(bar1);
+        new EventTransport('bar', 'foo').sync(bar2);
+
+        scope.await(function(messages) {
+            assert.deepEqual(messages, [
+                { from: 'foo:1', to: 'bar:connect', payload: { initiator: 'foo', inited: false, endpoints: [] } },
+                { from: 'bar:1', to: 'foo:connect', payload: { initiator: 'bar', inited: false, endpoints: [] } },
+                { from: 'bar:2', to: 'foo:connect', payload: { initiator: 'bar', inited: false, endpoints: [] } },
+                { from: 'bar:1', to: 'foo:connect', payload: { initiator: 'bar', inited: true, endpoints: ['bar1'] } },
+                { from: 'bar:1', to: 'foo:1', payload: { type: 'connect', endpoints: ['bar1'] } },
+                { from: 'bar:2', to: 'foo:connect', payload: { initiator: 'bar', inited: true, endpoints: ['bar2'] } },
+                { from: 'bar:2', to: 'foo:1', payload: { type: 'connect', endpoints: ['bar2'] } },
+                { from: 'foo:1', to: 'bar:connect', payload: { initiator: 'foo', inited: true, endpoints: ['foo'] } },
+                { from: 'foo:1', to: 'bar:1', payload: { type: 'connect', endpoints: ['foo'] } },
+                { from: 'foo:1', to: 'bar:connect', payload: { initiator: 'foo', inited: true, endpoints: ['foo'] } },
+                { from: 'foo:1', to: 'bar:2', payload: { type: 'connect', endpoints: ['foo'] } }
+            ]);
+            done();
+        });
+    });
+
+    it('should send response for callRemote only to initiator', function(done) {
+        var foo = new Endpoint('foo');
+        var bar1 = new Endpoint('foo');
+        var bar2 = new Endpoint('foo');
+
+        bar1.ret = [];
+        bar2.ret = [];
+
+        new EventTransport('foo', 'bar').sync(foo);
+        new EventTransport('bar', 'foo').sync(bar1);
+        new EventTransport('bar', 'foo').sync(bar2);
+
+        foo.provide('test', function(data, callback) {
+            callback(data);
+        });
+
+        scope.await(function() {
+            bar1.callRemote('test', 'bar1-test', function(ret) {
+                bar1.ret.push(ret);
+            });
+            bar2.callRemote('test', 'bar2-test', function(ret) {
+                bar2.ret.push(ret);
+            });
+
+            scope.await(function(messages) {
+                assert.deepEqual(messages, [
+                    { from: 'bar:1', to: 'foo:1', payload: { type: 'data', endpoint: 'foo', data: [{ type: 'call', ns: '*', method: 'test', args: ['bar1-test'] }], callback: 1 } },
+                    { from: 'bar:2', to: 'foo:1', payload: { type: 'data', endpoint: 'foo', data: [{ type: 'call', ns: '*', method: 'test', args: ['bar2-test'] }], callback: 2 } },
+                    { from: 'foo:1', to: 'bar:1', payload: { type: 'callback', callback: 1, data: ['bar1-test'] } },
+                    { from: 'foo:1', to: 'bar:2', payload: { type: 'callback', callback: 2, data: ['bar2-test'] } }
+                ]);
+                assert.deepEqual(bar1.ret, ['bar1-test']);
+                assert.deepEqual(bar2.ret, ['bar2-test']);
                 done();
             });
         });
