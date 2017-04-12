@@ -141,6 +141,7 @@ myTool.subscribe(function(data) {
 - `isMethodProvided(methodName)`
 - `revoke(methodName)` or `revoke(methodNamesArray)`
 - `callRemote(methodName, ...args, callback)`
+- `getRemoteMethod(methodName)`
 - `isRemoteMethodExists(methodName)`
 - `onRemoteMethodsChanged(callback)`
 - `ns(namespace)`
@@ -220,7 +221,7 @@ publisher.isMethodProvided('test'); // false
 
 Returns `true` when remote method is available to be invoked.
 
-> Currently method doesn't work for publisher side since there can be several subscribers with different method set provided.
+> Currently method doesn't work for publisher since there can be several subscribers with different method set provided.
 
 ```js
 if (subscriber.isRemoteMethodExists('test')) {
@@ -232,7 +233,7 @@ if (subscriber.isRemoteMethodExists('test')) {
 
 Allows to subscribe to remote side API state of namespace. Method invoke passed callback on subscription and return a function to unsubscribe.
 
-> Currently method doesn't work for publisher side since there can be several subscribers with different method set provided.
+> Currently method doesn't work for publisher since there can be several subscribers with different method set provided.
 
 ```js
 var unsubscribeDefaultNsMethodsLogging = subscriber.onRemoteMethodsChanged(function(methods) {
@@ -241,4 +242,22 @@ var unsubscribeDefaultNsMethodsLogging = subscriber.onRemoteMethodsChanged(funct
 
 // call returned function when need to stop listen for API changes
 unsubscribeDefaultNsMethodsLogging();
+```
+
+#### getRemoteMethod(methodName)
+
+Returns a function that invokes `callRemote` with specified `methodName`. This function is context free (namespace is binded) and invokes `callRemote` only when remote method is available, otherwise it outputs a warning. `available` property of function can be used to check a remote method is available.
+
+> Currently method doesn't work for publisher since there can be several subscribers with different method set provided.
+
+```js
+var fooMethod = subscriber.getRemoteMethod('foo');
+var nsBarBazMethod = subscriber.ns('bar').getRemoteMethod('baz');
+
+if (fooMethod.available) {
+    fooMethod(1, 2, 3);
+}
+
+nsBarBazMethod();
+// with no check a warning message might to be outputed
 ```
