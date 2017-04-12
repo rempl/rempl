@@ -5,6 +5,7 @@ var Namespace = function(name, owner) {
     this.owner = owner;
     this.methods = Object.create(null);
     this.remoteMethods = [];
+    this.remoteMethodWrappers = Object.create(null);
     this.listeners = null;
 };
 
@@ -58,6 +59,22 @@ Namespace.prototype = {
             args: args
         }, callback]);
     },
+    getRemoteMethod: function(methodName) {
+        var methodWrapper = this.remoteMethodWrappers[methodName];
+
+        if (typeof methodWrapper !== 'function') {
+            methodWrapper = this.remoteMethodWrappers[methodName] = function() {
+                if (methodWrapper.available) {
+                    this.callRemote.apply(this, [methodName].concat(Array.prototype.slice.call(arguments)));
+                } else {
+                    console.warn('[rempl] ' + this.owner.getName() + ' ns(' + this.name + ') has no available remote method `' + methodName + '`');
+                }
+            }.bind(this);
+            methodWrapper.available = this.remoteMethods.indexOf(methodName) !== -1;
+        }
+
+        return methodWrapper;
+    },
 
     onRemoteMethodsChanged: function(callback) {
         var listener = {
@@ -98,6 +115,10 @@ Namespace.invoke = function invoke(namespace, method, args, callback) {
 
 Namespace.notifyRemoteMethodsChanged = function(namespace) {
     var cursor = namespace.listeners;
+
+    for (var method in namespace.remoteMethodWrappers) {
+        namespace.remoteMethodWrappers[method].available = namespace.remoteMethods.indexOf(method) !== -1;
+    }
 
     while (cursor !== null) {
         if (cursor.event === 'remoteMethodsChanged') {
