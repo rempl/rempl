@@ -231,7 +231,7 @@ module.exports = function getHost() {
     transport.remoteEndpoints.on(function(endpoints) {
         publishers = endpoints;
         updatePublisherList();
-        console.log(autoSelectPublisher, selectedPublisher, publishers.length);
+
         if (autoSelectPublisher && !selectedPublisher && publishers.length) {
             selectPublisher(publishers[0]);
         }
