@@ -15,9 +15,9 @@ module.exports = function(root) {
                     break;
 
                 case 'style':
-                    element.style = Object.keys(options.style).reduce(function(style, property) {
+                    element.setAttribute('style', Object.keys(options.style).reduce(function(style, property) {
                         return style + property + ':' + options.style[property] + ';';
-                    }, '');
+                    }, ''));
                     break;
 
                 case 'events':
