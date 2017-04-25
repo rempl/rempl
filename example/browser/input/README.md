@@ -2,9 +2,15 @@
 
 ### Usage
 
-Host `index.html` with any server and open it in your browser.
+Make sure dependencies are installed and rempl is built.
 
-Open rempl-server page in you browser ([http://localhost:8177/](http://localhost:8177/) by default) and choose `web-input`-publisher.
+```
+npm install && npm run build
+```
+
+Start any http-server in project's root and open `example/input/index.html` in your browser.
+
+Start [`rempl` server](https://github.com/rempl/rempl-cli), open its host in your browser([http://localhost:8177/](http://localhost:8177/) by default) and choose `web-input`-publisher.
 
 The value is receiving from web page-publisher and displays to the UI. Just change the input value in the publisher and look at the UI.
 
