@@ -2,17 +2,17 @@
 
 ### Usage
 
-Install dependencies and build app
+Make sure dependencies are installed and rempl is built.
 
 ```
-npm install && npm run-script build
+npm install && npm run build
 ```
 
-Host `index.html` from the project root directory with any server and open it in your browser.
+Start any http-server in project's root and open `example/basic/index.html` in your browser.
 
-Open rempl-server page in you browser ([http://localhost:8177/](http://localhost:8177/) by default) and choose `web-input`-publisher.
+Start [`rempl` server](https://github.com/rempl/rempl-cli), open its host in your browser([http://localhost:8177/](http://localhost:8177/) by default) and choose `example-basic`-publisher.
 
-UI display current publisher date and time.
+UI display current publisher date and time.	
 
 ### How it works
 
