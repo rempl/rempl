@@ -32,6 +32,24 @@ npm install rempl
 </script>
 ```
 
+Publisher attempts to connect to WS server with the same `location` but `8177` as port by default. There are some options to specify server host:
+
+- using `<meta name="rempl:server" value="{rempl server host}">`:
+    ```html
+        <meta name="rempl:server" value="//1.2.3.4:1234"> <!-- or value="none" to disable connection to WS server -->
+    ```
+- using `ws` option on `Publisher` create:
+    ```js
+        new Publisher('name', function() { ... }, {
+            ws: '//1.2.3.4:1234' // set false to disable connection to WS server
+        });
+    ```
+- using `connectWS()` method of `Pulisher`'s instance
+    ```js
+        var myPublisher = new Publisher('name', function() { ... });
+        myPublisher.connectTo('//1.2.3.4:1234')
+    ```
+
 ### Node.js
 
 ```js
@@ -42,6 +60,24 @@ var myTool = rempl.createPublisher('myTool', function(settings, callback) {
 
 // ...
 ```
+
+When publisher is running on Node.js, it doesn't connect to WS server until WS server is not specified (there is no `location` object available like in browser's environment). There some options to specify server host:
+
+- using environment variable `REMPL_SERVER` when start a script or before rempl is required for a first time. Example for MacOS:
+    ```
+    > REMPL_SERVER=//1.2.3.4:1234 node my-script.js
+    ```
+- using `ws` option on `Publisher` create:
+    ```js
+        new Publisher('name', function() { ... }, {
+            ws: '//1.2.3.4:1234' // set false to disable connection to WS server
+        });
+    ```
+- using `connectWS()` method of `Pulisher`'s instance
+    ```js
+        var myPublisher = new Publisher('name', function() { ... });
+        myPublisher.connectTo('//1.2.3.4:1234')
+    ```
 
 ## Overview
 
