@@ -36,18 +36,18 @@ Publisher attempts to connect to WS server with the same `location` but `8177` a
 
 - using `<meta name="rempl:server" value="{rempl server host}">`:
     ```html
-        <meta name="rempl:server" value="//1.2.3.4:1234"> <!-- or value="none" to disable connection to WS server -->
+    <meta name="rempl:server" value="//1.2.3.4:1234"> <!-- or value="none" to disable connection to WS server -->
     ```
 - using `ws` option on `Publisher` create:
     ```js
-        new Publisher('name', function() { ... }, {
-            ws: '//1.2.3.4:1234' // set false to disable connection to WS server
-        });
+    new Publisher('name', function() { ... }, {
+        ws: '//1.2.3.4:1234' // set false to disable connection to WS server
+    });
     ```
 - using `connectWS()` method of `Pulisher`'s instance
     ```js
-        var myPublisher = new Publisher('name', function() { ... });
-        myPublisher.connectTo('//1.2.3.4:1234')
+    var myPublisher = new Publisher('name', function() { ... });
+    myPublisher.connectTo('//1.2.3.4:1234')
     ```
 
 ### Node.js
@@ -69,14 +69,14 @@ When publisher is running on Node.js, it doesn't connect to WS server until WS s
     ```
 - using `ws` option on `Publisher` create:
     ```js
-        new Publisher('name', function() { ... }, {
-            ws: '//1.2.3.4:1234' // set false to disable connection to WS server
-        });
+    new Publisher('name', function() { ... }, {
+        ws: '//1.2.3.4:1234' // set false to disable connection to WS server
+    });
     ```
 - using `connectWS()` method of `Pulisher`'s instance
     ```js
-        var myPublisher = new Publisher('name', function() { ... });
-        myPublisher.connectTo('//1.2.3.4:1234')
+    var myPublisher = new Publisher('name', function() { ... });
+    myPublisher.connectTo('//1.2.3.4:1234')
     ```
 
 ## Overview
