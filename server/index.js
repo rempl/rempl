@@ -9,7 +9,7 @@ function packet(type, args) {
     return [type].concat(Array.prototype.slice.call(args));
 }
 
-module.exports = function initDevtool(wsServer, httpServer, options) {
+module.exports = function(wsServer, httpServer, options) {
     var endpoints = new EndpointList(wsServer);
     var onEndpointConnectMode = null;
     var lastNum = 0;
