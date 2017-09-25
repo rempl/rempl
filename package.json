@@ -37,8 +37,12 @@
     "lint": "jscs scripts server src && eslint scripts server src",
     "test": "mocha",
     "build": "npm run build:rempl && npm run build:server-assets",
-    "build:rempl": "browserify -t package-json-versionify --standalone rempl src/index.js | node scripts/process-rempl-bundle.js | uglifyjs --compress --mangle -o dist/rempl.js",
+    "build:rempl": "browserify -t package-json-versionify --standalone rempl src/index.js | node scripts/process-rempl-bundle.js | uglifyjs --compress keep_fargs=false --mangle --output dist/rempl.js",
     "build:rempl-dev": "browserify -t package-json-versionify --standalone rempl src/index.js | node scripts/process-rempl-bundle.js > dist/rempl.js",
+    "build:rempl-source-map": {
+      "comment": "not working for now since process-rempl-bundle breaks the source map",
+      "cmd": "browserify --debug -t package-json-versionify --standalone rempl src/index.js | node scripts/process-rempl-bundle.js | uglifyjs --compress keep_fargs=false --mangle --output dist/rempl.js --source-map \"content=inline,url=rempl.js.map\""
+    },
     "build:server-assets": "node node_modules/basisjs-tools-build/bin/build -c server/client/build.config",
     "watch": "watch \"npm run build:rempl-dev\" src --interval .2",
     "travis": "npm run lint && npm run test",
@@ -56,7 +60,7 @@
     "jscs": "~3.0.7",
     "mocha": "^3.2.0",
     "package-json-versionify": "^1.0.4",
-    "uglify-js": "^2.8.9",
+    "uglify-js": "^3.1.2",
     "watch": "^1.0.2"
   },
   "files": [
