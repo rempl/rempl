@@ -1,6 +1,5 @@
-var fs = require('fs');
-
 module.exports = function(filename) {
+    var fs = require('fs');
     var cache = null;
 
     // TODO: take in account settings.accept setting

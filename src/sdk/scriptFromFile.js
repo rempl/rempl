@@ -1,6 +1,6 @@
 var isNode = require('../utils/index.js').isNode;
 
-module.exports = isNode
-    ? require('./nodejs/scriptFromFile.js')
-    : require('./browser/scriptFromFile.js');
+module.exports = !isNode
+    ? require('./browser/scriptFromFile.js')
+    : require('./nodejs/scriptFromFile.js');
 

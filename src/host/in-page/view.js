@@ -66,7 +66,7 @@ function isolateName(name) {
 }
 
 function preprocessCSS(css) {
-    return css.replace(/\.([a-z])/gi, '.' + isolateName('') + '$1');
+    return css.replace(/\.([a-z])/gi, '.' + isolateName('$1'));
 }
 
 function getView() {
@@ -81,7 +81,7 @@ function getView() {
                         preprocessCSS(
                             typeof asset === 'function'
                                 ? asset('./style.css', true)
-                                : require('fs').readFileSync(__dirname + '/style.js', 'utf8')
+                                : require('fs').readFileSync(__dirname + '/style.css', 'utf8')
                         )
                     ]
                 },

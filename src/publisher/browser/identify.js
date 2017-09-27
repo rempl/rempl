@@ -19,7 +19,7 @@ function createOverlay() {
 function createButton(name) {
     var temp = document.createElement('div');
     temp.innerHTML =
-        '<div style="margin-bottom: 5px;"><button style="font-size:18px;line-height:1;padding:12px 24px;background:#3BAFDA;color:white;border:none;border-radius:3px;cursor:pointer;">' +
+        '<div style="margin-bottom:5px;"><button style="font-size:18px;line-height:1;padding:12px 24px;background:#3BAFDA;color:white;border:none;border-radius:3px;cursor:pointer;">' +
             name +
         '</button></div>';
     temp.firstChild.firstChild.onclick = function() {
@@ -30,7 +30,7 @@ function createButton(name) {
 
 function updatePublisherList() {
     if (publishers.length && pickPublisherCallback) {
-        publishersEl.innerHTML = '<div style="margin-bottom: 10px">Pick a publisher:</div>';
+        publishersEl.innerHTML = '<div style="margin-bottom:10px">Pick a publisher:</div>';
         for (var i = 0; i < publishers.length; i++) {
             publishersEl.appendChild(createButton(publishers[i]));
         }

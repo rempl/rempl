@@ -1,9 +1,13 @@
-var utils = require('../utils/index.js');
+var isNode = require('../utils/index.js').isNode;
 var createEnv = require('./publisher.js');
 var getEnv = require('./subscriber.js');
 
-if (utils.isNode) {
-    module.exports = {
+module.exports = !isNode
+    ? {
+        createEnv: createEnv,
+        getEnv: getEnv
+    }
+    : {
         createEnv: function() {
             throw new Error('[rempl] createEnv() doesn\'t supported for node.js');
         },
@@ -11,9 +15,3 @@ if (utils.isNode) {
             throw new Error('[rempl] getEnv() doesn\'t supported for node.js');
         }
     };
-} else {
-    module.exports = {
-        createEnv: createEnv,
-        getEnv: getEnv
-    };
-}
