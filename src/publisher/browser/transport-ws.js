@@ -1,14 +1,55 @@
 /* eslint-env browser */
+/* global REMPL_SERVER */
 
 var WsTransport = require('../../transport/ws-publisher.js');
 var identify = require('./identify.js');
 var STORAGE_KEY = 'rempl:id';
 var sessionStorage = global.sessionStorage || {};
-var meta = document.querySelector && document.querySelector('meta[name="rempl:server"]');
-var metaValue = meta && meta.getAttribute('value');
-var defaultUri = metaValue
-    ? (metaValue.toLowerCase() !== 'none' ? metaValue : false)
-    : (location.protocol + '//' + (location.hostname || 'localhost') + ':8177');
+
+function fetchWsSettings() {
+    function fetchEnvVariable() {
+        if (typeof REMPL_SERVER !== 'undefined' && REMPL_SERVER !== global.REMPL_SERVER) {
+            return REMPL_SERVER;
+        }
+    }
+
+    function fetchMeta() {
+        var meta = document.querySelector && document.querySelector('meta[name="rempl:server"]');
+
+        return (meta && meta.getAttribute('content')) || undefined;
+    }
+
+    var setup = fetchEnvVariable();
+    var implicitUri = location.protocol + '//' + (location.hostname || 'localhost') + ':8177';
+    var explicitUri = false;
+
+    if (setup === undefined) {
+        setup = fetchMeta();
+    }
+
+    switch (setup) {
+        case 'none':
+        case undefined:
+        case false:
+            // no explicit setting
+            break;
+
+        case 'implicit':
+        case true:
+            explicitUri = implicitUri;
+            break;
+
+        default:
+            if (typeof setup === 'string') {
+                explicitUri = setup;
+            }
+    }
+
+    return {
+        explicit: explicitUri,
+        implicit: implicitUri
+    };
+}
 
 function BrowserWsTransport(uri) {
     WsTransport.call(this, uri);
@@ -20,7 +61,7 @@ function BrowserWsTransport(uri) {
         .on('disconnect', identify.stop);
 }
 
-BrowserWsTransport.defaultUri = defaultUri;
+BrowserWsTransport.settings = fetchWsSettings();
 BrowserWsTransport.get = WsTransport.get;
 BrowserWsTransport.prototype = Object.create(WsTransport.prototype);
 

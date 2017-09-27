@@ -32,11 +32,11 @@ npm install rempl
 </script>
 ```
 
-Publisher attempts to connect to WS server with the same `location` but `8177` as port by default. There are some options to specify server host:
+By default publisher attempts to connect to WS server with the same `hostname` as page but `8177` as port. There are some options to specify rempl end point:
 
-- using `<meta name="rempl:server" value="{rempl server host}">`:
+- using `<meta name="rempl:server" content="{rempl server host}">`:
     ```html
-    <meta name="rempl:server" value="//1.2.3.4:1234"> <!-- or value="none" to disable connection to WS server -->
+    <meta name="rempl:server" content="//1.2.3.4:1234"> <!-- or content="none" to disable connection to WS server -->
     ```
 - using `ws` option on `Publisher` create:
     ```js
@@ -47,7 +47,7 @@ Publisher attempts to connect to WS server with the same `location` but `8177` a
 - using `connectWS()` method of `Pulisher`'s instance
     ```js
     var myPublisher = new Publisher('name', function() { ... });
-    myPublisher.connectTo('//1.2.3.4:1234')
+    myPublisher.connectWs('//1.2.3.4:1234')
     ```
 
 ### Node.js
@@ -76,7 +76,7 @@ When publisher is running on Node.js, it doesn't connect to WS server until WS s
 - using `connectWS()` method of `Pulisher`'s instance
     ```js
     var myPublisher = new Publisher('name', function() { ... });
-    myPublisher.connectTo('//1.2.3.4:1234')
+    myPublisher.connectWs('//1.2.3.4:1234')
     ```
 
 ## Overview
