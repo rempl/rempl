@@ -2,7 +2,8 @@
 
 <html>
 <head>
-    <!-- <meta name="rempl:server" value="host:1234"> -->
+    <!-- uncomment next line to connect publisher to rempl server -->
+    <!-- <meta name="rempl:server" content="localhost:1234"> -->
     <title>Rempl test</title>
 </head>
 <body>
@@ -12,7 +13,6 @@
         <input type="checkbox" id="provide-test"> Provide `test` method
     </label>
 
-
     <script src="../../../dist/rempl.js"></script>
     <script>
         /* eslint-env browser */
@@ -20,9 +20,12 @@
 
         var publisher = rempl.createPublisher('example-basic', rempl.scriptFromFile('browser-ui.js'));
 
-        setInterval(function() {
-            publisher.publish(Date.now());
-        }, 1000);
+        setInterval(publisher.pipe(() => Date.now()), 1000);
+        // Line above is equivalent to:
+        //
+        //   publisher.publish(Date.now());
+        //   setInterval(() => publisher.publish(Date.now()), 1000);
+        //
 
         document.getElementById('provide-test').addEventListener('change', function() {
             if (this.checked) {
@@ -32,7 +35,13 @@
             } else {
                 publisher.revoke('test');
             }
-        })
+        });
+
+        // NOTE: That's not a part of demo, and helps to try Rempl in action with zero setup.
+        // Although host is running inside page (btw, it calls in-page host) it load subscriber's UI
+        // into <iframe>. So actually publisher and subcriber communicate cross origin through
+        // event-based transport.
+        rempl.getHost().activate();
     </script>
 </body>
 </html>
