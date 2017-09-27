@@ -20,6 +20,19 @@ PublisherNamespace.prototype.publish = function(payload) {
     }]);
 };
 
+PublisherNamespace.prototype.pipe = function(fn, init) {
+    var publisher = this;
+    var pipe = function() {
+        publisher.publish(fn.apply(this, arguments));
+    };
+
+    if (init || init === undefined) {
+        pipe();
+    }
+
+    return pipe;
+};
+
 var Publisher = function(id) {
     Endpoint.call(this, id);
 };

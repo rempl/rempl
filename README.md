@@ -153,12 +153,13 @@ myTool.provide({
 ```
 
 - `publish(data)`
+- `pipe(fn[, init])`
 - `provide(methodName, fn)` or `provide(methods)`
 - `isMethodProvided(method)`
 - `revoke(methodName)` or `revoke(methodNamesArray)`
 - `callRemote(method, ...args, callback)`
 - `ns(namespace)`
-  - publish/provide/revoke/isMethodProvided/callRemote
+  - publish/pipe/provide/revoke/isMethodProvided/callRemote
 
 ### Subscriber
 
