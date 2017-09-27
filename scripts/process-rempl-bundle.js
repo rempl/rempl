@@ -15,8 +15,12 @@ process.stdin
             (buffer
                 // remove amd since it leads to errors when using with webpack
                 .replace(
-                    /else if\(typeof define==="function"&&define\.amd\){define\(\[\],f\)}/,
-                    ''
+                    /typeof exports==="object"&&typeof module!=="undefined"/,
+                    'typeof exports===String("object")&&typeof module!=="undefined"'
+                )
+                .replace(
+                    /typeof define==="function"&&define\.amd/,
+                    'false'
                 )
                 // replace getting a global in socket.io modules for explicit `global` reference,
                 // since this solution doesn't work in strict mode
@@ -26,7 +30,7 @@ process.stdin
                 )
                 // replace file read with its content
                 .replace(
-                    /typeof asset(.|\s)+?require\('fs'\)\.readFileSync\(__dirname \+ '\/style\.js', 'utf8'\)/,
+                    /typeof asset(.|\s)+?require\('fs'\)\.readFileSync\(__dirname \+ '\/style\.css', 'utf8'\)/,
                     JSON.stringify(require('fs').readFileSync(__dirname + '/../src/host/in-page/style.css', 'utf8'))
                 )
                 // replace file read with its content
