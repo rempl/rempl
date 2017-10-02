@@ -1,6 +1,6 @@
 {
   "name": "rempl",
-  "version": "1.0.0-alpha15",
+  "version": "1.0.0-alpha16",
   "description": "Рlatform for moderated remote access to JavaScript runtime via custom UI",
   "main": "src/index.js",
   "author": "Roman Dvornov",
@@ -39,10 +39,6 @@
     "build": "npm run build:rempl && npm run build:server-assets",
     "build:rempl": "browserify -t package-json-versionify --standalone rempl src/index.js | node scripts/process-rempl-bundle.js | uglifyjs --compress keep_fargs=false --mangle --output dist/rempl.js",
     "build:rempl-dev": "browserify -t package-json-versionify --standalone rempl src/index.js | node scripts/process-rempl-bundle.js > dist/rempl.js",
-    "build:rempl-source-map": {
-      "comment": "not working for now since process-rempl-bundle breaks the source map",
-      "cmd": "browserify --debug -t package-json-versionify --standalone rempl src/index.js | node scripts/process-rempl-bundle.js | uglifyjs --compress keep_fargs=false --mangle --output dist/rempl.js --source-map \"content=inline,url=rempl.js.map\""
-    },
     "build:server-assets": "node node_modules/basisjs-tools-build/bin/build -c server/client/build.config",
     "watch": "watch \"npm run build:rempl-dev\" src --interval .2",
     "travis": "npm run lint && npm run test",

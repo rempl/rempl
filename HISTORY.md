@@ -1,6 +1,25 @@
+## 1.0.0-alpha16 (October 1, 2017)
+
+- Added `Endpoint#getRemoteMethod()` method
+- Added `PublisherNamespace#pipe()` method
+- Rework publisher's behaviour for connection to WS server (implicit/explicit and more options)
+    - Browser's version
+        - Renamed attribute `value` to `content` in `<meta name="rempl:server">`
+        - Added `implicit` value support to `<meta name="rempl:server">`
+        - Added support for `REMPL_SERVER` non-global variable in scope (priority over `<meta>` when not an `undefined`). Can be `'none'`/`false`, `'implicit'`/`true` or any string (treat as url)
+        - no connection to ws server by default
+    - Node's version
+        - Added new values for `REMPL_SERVER`: `false` (equals to `'none'`), `'implicit'`, `true` (equals to `'implicit'`)
+    - Common
+        - Changed `ws` option on publisher creation to allow values: `'implicit'`/`true`, `'explicit'`/`undefined`, `false` or any string
+        - Changed `Publisher#connectWs()` to have a special meaning for `undefined`/`'implicit'` and `'explicit'`
+- Updated `socket.io-client` to `^2.0.2` and used its slim version (reduce dist size 115Kb -> 94Kb)
+- Fixed known issues with bundle working in various environments
+- Fixed bugs in Safari
+
 ## 1.0.0-alpha15 (April 11, 2017)
 
-- Improve WS transport setup
+- Improved WS transport setup
     - Don't use WS transport for publisher when default URI is `none` and `options.ws` is not specified
     - Don't use WS transport for publisher when `options.ws` is not a string or falsy
     - Implemented `Publisher#connectWs()` method to connect publisher to specific WS origin
