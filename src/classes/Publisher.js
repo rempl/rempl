@@ -26,6 +26,13 @@ PublisherNamespace.prototype.pipe = function(fn, init) {
         publisher.publish(fn.apply(this, arguments));
     };
 
+    if (!fn) {
+        init = false;
+        fn = function(value) {
+            return value;
+        };
+    }
+
     if (init || init === undefined) {
         pipe();
     }
