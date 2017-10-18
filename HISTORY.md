@@ -1,3 +1,7 @@
+## 1.0.0-alpha17 (October 18, 2017)
+
+- Fixed wrong dist version published
+
 ## 1.0.0-alpha16 (October 1, 2017)
 
 - Added `Endpoint#getRemoteMethod()` method
