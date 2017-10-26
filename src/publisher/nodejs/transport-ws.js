@@ -10,7 +10,7 @@ function fetchWsSettings() {
 
     var setup = fetchEnvVariable();
     var implicitUri = 'ws://localhost:8177';
-    var explicitUri = false;
+    var explicitUri = undefined;
 
     switch (setup) {
         case 'none':
@@ -20,6 +20,7 @@ function fetchWsSettings() {
             break;
 
         case 'implicit':
+        case 'auto':
         case true:
             explicitUri = implicitUri;
             break;

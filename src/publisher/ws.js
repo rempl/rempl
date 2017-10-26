@@ -11,6 +11,12 @@ module.exports = function(publisher, WsTransport, options) {
 
             case 'explicit':
                 uri = WsTransport.settings.explicit;
+
+                // when no explicit setting do nothing
+                if (uri === undefined) {
+                    return;
+                }
+
                 break;
         }
 
@@ -25,6 +31,7 @@ module.exports = function(publisher, WsTransport, options) {
 
     switch (options.ws) {
         case 'implicit':
+        case 'auto':
         case true:
             uri = 'implicit';
             break;

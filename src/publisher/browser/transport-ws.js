@@ -21,7 +21,7 @@ function fetchWsSettings() {
 
     var setup = fetchEnvVariable();
     var implicitUri = location.protocol + '//' + (location.hostname || 'localhost') + ':8177';
-    var explicitUri = false;
+    var explicitUri = undefined;
 
     if (setup === undefined) {
         setup = fetchMeta();
@@ -35,6 +35,7 @@ function fetchWsSettings() {
             break;
 
         case 'implicit':
+        case 'auto':
         case true:
             explicitUri = implicitUri;
             break;
