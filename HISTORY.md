@@ -1,3 +1,8 @@
+## 1.0.0-alpha.18 (October 25, 2017)
+
+- Fixed warning about wrong URI when default settings is used and no explicit host is set
+- Added `auto` value as alias for `implicit` for publisher connection settings
+
 ## 1.0.0-alpha17 (October 18, 2017)
 
 - Fixed wrong dist version published
