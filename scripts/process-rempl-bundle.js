@@ -31,7 +31,15 @@ process.stdin
                 // replace file read with its content
                 .replace(
                     /typeof asset(.|\s)+?require\('fs'\)\.readFileSync\(__dirname \+ '\/style\.css', 'utf8'\)/,
-                    JSON.stringify(require('fs').readFileSync(__dirname + '/../src/host/in-page/style.css', 'utf8'))
+                    JSON.stringify(
+                        require('fs')
+                            .readFileSync(__dirname + '/../src/host/in-page/style.css', 'utf8')
+                            // simple minification
+                            .replace(/([:,])\s+/g, '$1')
+                            .replace(/\r?\n\s*/g, '')
+                            .replace(/[\n\s]+{/g, '{')
+                            .replace(/;}/g, '}')
+                    )
                 )
                 // replace file read with its content
                 .replace(
