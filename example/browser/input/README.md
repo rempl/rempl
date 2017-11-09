@@ -8,7 +8,7 @@ Make sure dependencies are installed and rempl is built.
 npm install && npm run build
 ```
 
-Start any http-server in project's root and open `example/input/index.html` in your browser.
+Start any http-server in project's root and open `example/browser/input/index.html` in your browser.
 
 Start [`rempl` server](https://github.com/rempl/rempl-cli), open its host in your browser([http://localhost:8177/](http://localhost:8177/) by default) and choose `web-input`-publisher.
 
