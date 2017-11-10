@@ -1,3 +1,7 @@
+## 1.0.0-alpha.19 (November 10, 2017)
+
+- Added `browser` field to `package.json` to fix build issue with webpack (@restrry, #18)
+
 ## 1.0.0-alpha.18 (October 25, 2017)
 
 - Fixed warning about wrong URI when default settings is used and no explicit host is set
