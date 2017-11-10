@@ -3,6 +3,7 @@
   "version": "1.0.0-alpha.18",
   "description": "Рlatform for moderated remote access to JavaScript runtime via custom UI",
   "main": "src/index.js",
+  "browser": "dist/rempl.js",
   "author": "Roman Dvornov",
   "contributors": [
     "Roman Dvornov <rdvornov@gmail.com>",
