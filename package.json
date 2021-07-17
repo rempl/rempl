@@ -16,24 +16,6 @@
   "bugs": {
     "url": "https://github.com/rempl/rempl/issues"
   },
-  "eslintConfig": {
-    "env": {
-      "node": true,
-      "mocha": true,
-      "es6": true
-    },
-    "rules": {
-      "no-duplicate-case": 2,
-      "no-undef": 2,
-      "no-unused-vars": [
-        2,
-        {
-          "vars": "all",
-          "args": "after-used"
-        }
-      ]
-    }
-  },
   "scripts": {
     "lint": "jscs scripts server src && eslint scripts server src",
     "test": "mocha",
@@ -53,8 +35,7 @@
     "basisjs": "~1.11.0",
     "basisjs-tools-build": "^1.9.0",
     "browserify": "^13.0.0",
-    "eslint": "^3.11.1",
-    "jscs": "~3.0.7",
+    "eslint": "^7.30.0",
     "mocha": "^3.2.0",
     "package-json-versionify": "^1.0.4",
     "uglify-js": "^3.1.2",
