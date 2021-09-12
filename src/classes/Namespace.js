@@ -1,29 +1,48 @@
-var hasOwnProperty = Object.prototype.hasOwnProperty;
+import { AnyFn, Fn, hasOwnProperty } from "../utils";
+import Endpoint, { CallPacket, Packet } from "./Endpoint";
 
-var Namespace = function (name, owner) {
-    this.name = name;
-    this.owner = owner;
-    this.methods = Object.create(null);
-    this.remoteMethods = [];
-    this.remoteMethodWrappers = Object.create(null);
-    this.listeners = null;
+export type Method<TArgs extends unknown[]> = Fn<TArgs, unknown>;
+export type MethodsMap = Record<string, Method<unknown[]>>;
+export type Wrapper = Fn<unknown[], void, Namespace> & { available: boolean };
+export type ListenerCallback = (methods: string[]) => void;
+export type Listener = {
+    event: string;
+    callback: ListenerCallback;
+    listeners: Listener | null;
 };
 
-Namespace.prototype = {
-    isMethodProvided: function (methodName) {
+export default class Namespace {
+    name: string;
+    owner: Endpoint<Namespace>;
+    methods: MethodsMap = Object.create(null);
+    remoteMethodWrappers: Record<string, Wrapper> = Object.create(null);
+    remoteMethods: string[] = [];
+    listeners: Listener | null = null;
+
+    constructor(name: string, owner: Endpoint<Namespace>) {
+        this.name = name;
+        this.owner = owner;
+        this.methods = Object.create(null);
+    }
+
+    isMethodProvided(methodName: string): boolean {
         return methodName in this.methods;
-    },
-    provide: function (methodName, fn) {
+    }
+
+    provide<TReturn extends unknown[]>(
+        methodName: string | MethodsMap,
+        fn?: Method<TReturn>
+    ): void {
         if (typeof methodName === "string") {
             if (typeof fn === "function") {
-                this.methods[methodName] = fn;
+                this.methods[methodName] = fn as Method<unknown[]>;
                 this.owner.scheduleProvidedMethodsUpdate();
             }
         } else {
-            var methods = methodName;
+            const methods = methodName;
             for (methodName in methods) {
                 if (
-                    hasOwnProperty.call(methods, methodName) &&
+                    hasOwnProperty(methods, methodName) &&
                     typeof methods[methodName] === "function"
                 ) {
                     this.methods[methodName] = methods[methodName];
@@ -31,8 +50,9 @@ Namespace.prototype = {
                 }
             }
         }
-    },
-    revoke: function (methodName) {
+    }
+
+    revoke(methodName: string | string[]): void {
         if (Array.isArray(methodName)) {
             methodName.forEach(this.revoke, this);
         } else {
@@ -41,63 +61,59 @@ Namespace.prototype = {
                 this.owner.scheduleProvidedMethodsUpdate();
             }
         }
-    },
+    }
 
-    isRemoteMethodExists: function (methodName) {
-        return this.remoteMethods.indexOf(methodName) !== -1;
-    },
-    callRemote: function (method /*, ...args, callback*/) {
-        var args = Array.prototype.slice.call(arguments, 1);
-        var callback = null;
+    isRemoteMethodExists(methodName: string): boolean {
+        return this.remoteMethods.includes(methodName);
+    }
+
+    callRemote(method: string, ...args: unknown[]): void {
+        let callback: AnyFn | null = null;
 
         if (args.length && typeof args[args.length - 1] === "function") {
-            callback = args.pop();
+            callback = args.pop() as AnyFn;
         }
 
-        Namespace.send(this.owner, [
-            {
-                type: "call",
-                ns: this.name,
-                method: method,
-                args: args,
-            },
-            callback,
-        ]);
-    },
-    getRemoteMethod: function (methodName) {
-        var methodWrapper = this.remoteMethodWrappers[methodName];
+        const callPacket: CallPacket = {
+            type: "call",
+            ns: this.name,
+            method: method,
+            args: args,
+        };
+
+        Namespace.send(this.owner, [callPacket, callback]);
+    }
+
+    getRemoteMethod(methodName: string): Wrapper {
+        let methodWrapper = this.remoteMethodWrappers[methodName];
 
         if (typeof methodWrapper !== "function") {
-            methodWrapper = this.remoteMethodWrappers[methodName] =
-                function () {
-                    if (methodWrapper.available) {
-                        this.callRemote.apply(
-                            this,
-                            [methodName].concat(
-                                Array.prototype.slice.call(arguments)
-                            )
-                        );
-                    } else {
-                        console.warn(
-                            "[rempl] " +
-                                this.owner.getName() +
-                                " ns(" +
-                                this.name +
-                                ") has no available remote method `" +
-                                methodName +
-                                "`"
-                        );
-                    }
-                }.bind(this);
+            methodWrapper = this.remoteMethodWrappers[methodName] = ((
+                ...args: unknown[]
+            ) => {
+                if (methodWrapper.available) {
+                    this.callRemote(methodName, ...args);
+                } else {
+                    console.warn(
+                        "[rempl] " +
+                            this.owner.getName() +
+                            " ns(" +
+                            this.name +
+                            ") has no available remote method `" +
+                            methodName +
+                            "`"
+                    );
+                }
+            }) as Wrapper;
             methodWrapper.available =
                 this.remoteMethods.indexOf(methodName) !== -1;
         }
 
         return methodWrapper;
-    },
+    }
 
-    onRemoteMethodsChanged: function (callback) {
-        var listener = {
+    onRemoteMethodsChanged(callback: ListenerCallback): AnyFn {
+        const listener: Listener = {
             event: "remoteMethodsChanged",
             callback: callback,
             listeners: this.listeners,
@@ -105,11 +121,12 @@ Namespace.prototype = {
 
         this.listeners = listener;
 
-        callback(this.remoteMethods.slice());
+        callback([...this.remoteMethods]);
 
-        return function () {
-            var cursor = this.listeners;
-            var prev = this;
+        return () => {
+            let cursor = this.listeners;
+            // eslint-disable-next-line @typescript-eslint/no-this-alias
+            let prev: { listeners: Listener | null } = this;
 
             while (cursor !== null) {
                 if (cursor === listener) {
@@ -120,41 +137,47 @@ Namespace.prototype = {
                 prev = cursor;
                 cursor = cursor.listeners;
             }
-        }.bind(this);
-    },
-};
-
-Namespace.invoke = function invoke(namespace, method, args, callback) {
-    // add a callback to args even if no callback, to avoid extra checking
-    // that callback is passed by remote side
-    args = args.concat(
-        typeof callback === "function" ? callback : function () {}
-    );
-
-    // invoke the provided remote method
-    namespace.methods[method].apply(null, args);
-};
-
-Namespace.notifyRemoteMethodsChanged = function (namespace) {
-    var cursor = namespace.listeners;
-
-    for (var method in namespace.remoteMethodWrappers) {
-        namespace.remoteMethodWrappers[method].available =
-            namespace.remoteMethods.indexOf(method) !== -1;
+        };
     }
 
-    while (cursor !== null) {
-        if (cursor.event === "remoteMethodsChanged") {
-            cursor.callback.call(null, namespace.remoteMethods.slice());
+    static invoke(
+        namespace: Namespace,
+        method: string,
+        args: unknown[],
+        callback: AnyFn
+    ): void {
+        // add a callback to args even if no callback, to avoid extra checking
+        // that callback is passed by remote side
+        args = args.concat(
+            typeof callback === "function" ? callback : () => {}
+        );
+
+        // invoke the provided remote method
+        namespace.methods[method].apply(null, args);
+    }
+
+    static notifyRemoteMethodsChanged(namespace: Namespace): void {
+        let cursor = namespace.listeners;
+
+        for (const method in namespace.remoteMethodWrappers) {
+            namespace.remoteMethodWrappers[method].available =
+                namespace.remoteMethods.indexOf(method) !== -1;
         }
-        cursor = cursor.listeners;
+
+        while (cursor !== null) {
+            if (cursor.event === "remoteMethodsChanged") {
+                cursor.callback.call(null, namespace.remoteMethods.slice());
+            }
+            cursor = cursor.listeners;
+        }
     }
-};
 
-Namespace.send = function send(owner, args) {
-    owner.channels.forEach(function (channel) {
-        channel.send.apply(null, args);
-    });
-};
-
-module.exports = Namespace;
+    static send(
+        owner: Endpoint<Namespace>,
+        args: [Packet, (((...args: unknown[]) => void) | null)?]
+    ): void {
+        owner.channels.forEach((channel) => {
+            channel.send.apply(null, args);
+        });
+    }
+}

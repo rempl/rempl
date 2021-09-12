@@ -1,56 +1,51 @@
-var Namespace = require("../classes/Namespace.js");
-var Endpoint = require("../classes/Endpoint.js");
+import Namespace from "../classes/Namespace";
+import Endpoint from "../classes/Endpoint";
 
-var PublisherNamespace = function (name, owner) {
-    Namespace.call(this, name, owner);
+export type PipeFn = (...args: unknown[]) => unknown;
 
-    this.provide(
-        "init",
-        function (callback) {
+export class PublisherNamespace extends Namespace {
+    _lastData: unknown = null;
+
+    constructor(name: string, owner: Endpoint<Namespace>) {
+        super(name, owner);
+
+        this.provide("init", (callback: (data: unknown) => void) => {
             callback(this._lastData);
-        }.bind(this)
-    );
-};
+        });
+    }
 
-PublisherNamespace.prototype = Object.create(Namespace.prototype);
-PublisherNamespace.prototype._lastData = null;
-PublisherNamespace.prototype.publish = function (payload) {
-    this._lastData = payload;
-    Namespace.send(this.owner, [
-        {
-            type: "data",
-            ns: this.name,
-            payload: payload,
-        },
-    ]);
-};
+    publish(payload: unknown): void {
+        this._lastData = payload;
+        Namespace.send(this.owner, [
+            {
+                type: "data",
+                ns: this.name,
+                payload: payload,
+            },
+        ]);
+    }
 
-PublisherNamespace.prototype.pipe = function (fn, init) {
-    var publisher = this;
-    var pipe = function () {
-        publisher.publish(fn.apply(this, arguments));
-    };
-
-    if (!fn) {
-        init = false;
-        fn = function (value) {
-            return value;
+    pipe(fn: PipeFn, init?: unknown): PipeFn {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        const publisher = this;
+        const pipe = function (this: unknown, ...args: unknown[]) {
+            publisher.publish(fn.apply(this, args));
         };
+
+        if (!fn) {
+            init = false;
+            fn = (value: unknown) => value;
+        }
+
+        if (init || init === undefined) {
+            pipe();
+        }
+
+        return pipe;
     }
+}
 
-    if (init || init === undefined) {
-        pipe();
-    }
-
-    return pipe;
-};
-
-var Publisher = function (id) {
-    Endpoint.call(this, id);
-};
-
-Publisher.prototype = Object.create(Endpoint.prototype);
-Publisher.prototype.namespaceClass = PublisherNamespace;
-Publisher.prototype.type = "Publisher";
-
-module.exports = Publisher;
+export default class Publisher extends Endpoint<PublisherNamespace> {
+    namespaceClass = PublisherNamespace;
+    type = "Publisher";
+}

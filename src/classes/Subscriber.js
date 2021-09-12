@@ -1,60 +1,70 @@
-var Namespace = require("../classes/Namespace.js");
-var Endpoint = require("../classes/Endpoint.js");
-var utils = require("../utils/index.js");
+import Namespace from "../classes/Namespace";
+import Endpoint, { Packet } from "../classes/Endpoint";
+import * as utils from "../utils/";
+import { AnyFn, Unsubscribe } from "../utils/";
 
-var SubscriberNamespace = function (name, owner) {
-    Namespace.call(this, name, owner);
-
-    this.subscribers = [];
+export type DataPacket = {
+    type: string;
+    ns?: string;
+    payload: unknown;
 };
 
-SubscriberNamespace.prototype = Object.create(Namespace.prototype);
-SubscriberNamespace.prototype.subscribe = function (fn) {
-    this.callRemote("init", fn);
-    return utils.subscribe(this.subscribers, fn);
-};
+export class SubscriberNamespace extends Namespace {
+    subscribers: AnyFn[] = [];
 
-var Subscriber = function (id) {
-    Endpoint.call(this, id);
-
-    this.connected.on(function (connected) {
-        if (connected) {
-            this.requestRemoteApi();
-            for (var name in this.namespaces) {
-                var ns = this.namespaces[name];
-                if (ns.subscribers.length) {
-                    ns.callRemote(
-                        "init",
-                        function (data) {
-                            this.subscribers.forEach(function (callback) {
-                                callback(data);
-                            });
-                        }.bind(ns)
-                    );
-                }
-            }
-        } else {
-            this.setRemoteApi();
-        }
-    }, this);
-};
-
-Subscriber.prototype = Object.create(Endpoint.prototype);
-Subscriber.prototype.namespaceClass = SubscriberNamespace;
-Subscriber.prototype.type = "Subscriber";
-Subscriber.prototype.processInput = function (packet, callback) {
-    switch (packet.type) {
-        case "data":
-            this.ns(packet.ns || "*")
-                .subscribers.slice()
-                .forEach(function (callback) {
-                    callback(packet.payload);
-                });
-            break;
-
-        default:
-            Endpoint.prototype.processInput.call(this, packet, callback);
+    constructor(name: string, owner: Endpoint<Namespace>) {
+        super(name, owner);
     }
-};
 
-module.exports = Subscriber;
+    subscribe(fn: AnyFn): Unsubscribe {
+        this.callRemote("init", fn);
+        return utils.subscribe(this.subscribers, fn);
+    }
+}
+
+export default class Subscriber extends Endpoint<SubscriberNamespace> {
+    namespaceClass = SubscriberNamespace;
+    type = "Subscriber";
+
+    constructor(id?: string) {
+        super(id);
+
+        this.connected.on((connected) => {
+            if (connected) {
+                this.requestRemoteApi();
+                for (const name in this.namespaces) {
+                    const ns = this.namespaces[name] as SubscriberNamespace;
+                    if (ns.subscribers.length) {
+                        ns.callRemote(
+                            "init",
+                            function (this: typeof ns, data: unknown) {
+                                this.subscribers.forEach(function (callback) {
+                                    callback(data);
+                                });
+                            }.bind(ns)
+                        );
+                    }
+                }
+            } else {
+                this.setRemoteApi();
+            }
+        }, this);
+    }
+
+    processInput = (packet: Packet, callback: AnyFn): void => {
+        switch (packet.type) {
+            case "data": {
+                const thePacket = packet as DataPacket;
+                this.ns(thePacket.ns || "*")
+                    .subscribers.slice()
+                    .forEach(function (callback) {
+                        callback(thePacket.payload);
+                    });
+                break;
+            }
+
+            default:
+                Endpoint.prototype.processInput.call(this, packet, callback);
+        }
+    };
+}

@@ -1,66 +1,105 @@
-var Namespace = require("./Namespace.js");
-var Token = require("./Token.js");
-var EndpointListSet = require("./EndpointListSet.js");
-var utils = require("../utils/index.js");
+import Namespace from "./Namespace.js";
+import Token from "./Token.js";
+import * as utils from "../utils";
+import { AnyFn } from "../utils";
+import EndpointListSet from "./EndpointListSet";
 
-var Endpoint = function (id) {
-    this.id = id || null;
-    this.namespaces = Object.create(null);
-
-    this.processInput = this.processInput.bind(this);
-    this.channels = [];
-    this.connected = new Token(false);
-    this.remoteEndpoints = new EndpointListSet();
-    this.remoteEndpoints.on(function (endpoints) {
-        // Star is used as a hack for subscriber<->sandbox communication
-        // TODO: find a better solution
-        this.connected.set(endpoints.indexOf(this.id || "*") !== -1);
-    }, this);
-
-    var defaultNS = this.ns("*");
-    for (var method in defaultNS) {
-        if (typeof defaultNS[method] === "function") {
-            this[method] = defaultNS[method].bind(defaultNS);
-        }
-    }
+export type Channel = {
+    type: string;
+    send: AnyFn;
 };
 
-Endpoint.prototype = {
-    namespaceClass: Namespace,
-    type: "Endpoint",
-    getName: function () {
+export type API = Record<string, string[]>;
+
+export type CallPacket = {
+    type: "call";
+    ns?: string;
+    method: string;
+    args: unknown[];
+};
+export type RemoteMethodsPacket = {
+    type: "remoteMethods";
+    methods: API;
+};
+export type GetProvidedMethodsPacket = {
+    type: "getProvidedMethods";
+};
+
+export type Packet = {
+    type: string;
+    [key: string]: unknown;
+};
+export default class Endpoint<TNamespace extends Namespace> {
+    id: string | null;
+    namespaces: Record<string, TNamespace>;
+    namespaceClass = Namespace;
+    type = "Endpoint";
+    channels: Channel[] = [];
+    connected = new Token(false);
+    remoteEndpoints = new EndpointListSet();
+
+    providedMethodsUpdateTimer?: number | NodeJS.Timeout | null;
+
+    constructor(id?: string) {
+        this.id = id || null;
+        this.namespaces = Object.create(null);
+
+        this.remoteEndpoints.on((endpoints) => {
+            // Star is used as a hack for subscriber<->sandbox communication
+            // TODO: find a better solution
+            this.connected.set(endpoints.includes(this.id || "*"));
+        }, this);
+
+        const defaultNS = this.ns("*");
+        for (const method in defaultNS) {
+            // todo rework in the next version
+            // @ts-ignore
+            if (typeof defaultNS[method] === "function") {
+                // @ts-ignore
+                this[method] = defaultNS[method].bind(defaultNS);
+            }
+        }
+    }
+
+    getName(): string {
         return this.type + (this.id ? "#" + this.id : "");
-    },
-    ns: function getNamespace(name) {
+    }
+
+    ns(name: string): TNamespace {
         if (!this.namespaces[name]) {
-            this.namespaces[name] = new this.namespaceClass(name, this);
+            this.namespaces[name] = new this.namespaceClass(
+                name,
+                this
+            ) as TNamespace;
         }
 
         return this.namespaces[name];
-    },
-    requestRemoteApi: function () {
+    }
+
+    requestRemoteApi(): void {
+        const getProvidedMethodsPacket: GetProvidedMethodsPacket = {
+            type: "getProvidedMethods",
+        };
         Namespace.send(this, [
-            {
-                type: "getProvidedMethods",
-                methods: this.getProvidedApi(),
+            getProvidedMethodsPacket,
+            (methods) => {
+                this.setRemoteApi(methods as API);
             },
-            function (methods) {
-                this.setRemoteApi(methods);
-            }.bind(this),
         ]);
-    },
-    setRemoteApi: function (api) {
-        var changed = [];
+    }
+
+    setRemoteApi(api?: API): void {
+        const changed = [];
 
         if (!api) {
             api = {};
         }
 
-        for (var name in api) {
+        for (const name in api) {
             if (Array.isArray(api[name])) {
-                var ns = this.ns(name);
-                var methods = api[name].slice().sort();
-                var different =
+                const ns = this.ns(name);
+                const methods = api[name].slice().sort();
+                const different =
                     ns.remoteMethods.length !== methods.length ||
                     ns.remoteMethods.some(function (value, idx) {
                         return value !== methods[idx];
@@ -73,9 +112,9 @@ Endpoint.prototype = {
             }
         }
 
-        for (var name in this.namespaces) {
+        for (const name in this.namespaces) {
             if (Array.isArray(api[name]) === false) {
-                var ns = this.namespaces[name];
+                const ns = this.namespaces[name];
 
                 ns.remoteMethods = [];
                 changed.push(ns);
@@ -85,54 +124,62 @@ Endpoint.prototype = {
         changed.forEach(function (ns) {
             Namespace.notifyRemoteMethodsChanged(ns);
         });
-    },
-    getProvidedApi: function () {
-        var api = {};
+    }
 
-        for (var name in this.namespaces) {
+    getProvidedApi(): API {
+        const api: API = {};
+
+        for (const name in this.namespaces) {
             api[name] = Object.keys(this.namespaces[name].methods).sort();
         }
 
         return api;
-    },
-    scheduleProvidedMethodsUpdate: function () {
-        if (!this.providedMethodsUpdateTimer) {
-            this.providedMethodsUpdateTimer = setTimeout(
-                function () {
-                    this.providedMethodsUpdateTimer = null;
-                    Namespace.send(this, [
-                        {
-                            type: "remoteMethods",
-                            methods: this.getProvidedApi(),
-                        },
-                    ]);
-                }.bind(this),
-                0
-            );
-        }
-    },
-    processInput: function (packet, callback) {
-        switch (packet.type) {
-            case "call":
-                var ns = this.ns(packet.ns || "*");
+    }
 
-                if (!ns.isMethodProvided(packet.method)) {
+    scheduleProvidedMethodsUpdate(): void {
+        if (!this.providedMethodsUpdateTimer) {
+            this.providedMethodsUpdateTimer = setTimeout(() => {
+                this.providedMethodsUpdateTimer = null;
+                const remoteMethodsPacket: RemoteMethodsPacket = {
+                    type: "remoteMethods",
+                    methods: this.getProvidedApi(),
+                };
+                Namespace.send(this, [remoteMethodsPacket]);
+            }, 0);
+        }
+    }
+
+    processInput = (packet: Packet, callback: AnyFn): void => {
+        switch (packet.type) {
+            case "call": {
+                const thePacket = packet as CallPacket;
+                const ns = this.ns(thePacket.ns || "*");
+
+                if (!ns.isMethodProvided(thePacket.method)) {
                     return utils.warn(
                         "[rempl][sync] " +
                             this.getName() +
                             " (namespace: " +
-                            (packet.ns || "default") +
+                            (thePacket.ns || "default") +
                             ") has no remote method:",
-                        packet.method
+                        thePacket.method
                     );
                 }
 
-                Namespace.invoke(ns, packet.method, packet.args, callback);
+                Namespace.invoke(
+                    ns,
+                    thePacket.method,
+                    thePacket.args,
+                    callback
+                );
                 break;
+            }
 
-            case "remoteMethods":
-                this.setRemoteApi(packet.methods);
+            case "remoteMethods": {
+                const thePacket = packet as RemoteMethodsPacket;
+                this.setRemoteApi(thePacket.methods);
                 break;
+            }
 
             case "getProvidedMethods":
                 callback(this.getProvidedApi());
@@ -141,11 +188,18 @@ Endpoint.prototype = {
             default:
                 utils.warn(
                     "[rempl][sync] " + this.getName() + "Unknown packet type:",
+                    // @ts-ignore
                     packet.type
                 );
         }
-    },
-    setupChannel: function (type, send, remoteEndpoints, available) {
+    };
+
+    setupChannel(
+        type: string,
+        send: AnyFn,
+        remoteEndpoints: EndpointListSet,
+        available: boolean
+    ): void {
         if (available) {
             this.channels.push({
                 type: type,
@@ -156,7 +210,7 @@ Endpoint.prototype = {
             // when connection is established
             this.remoteEndpoints.add(remoteEndpoints);
         } else {
-            for (var i = 0; i < this.channels.length; i++) {
+            for (let i = 0; i < this.channels.length; i++) {
                 if (
                     this.channels[i].type === type &&
                     this.channels[i].send === send
@@ -167,7 +221,7 @@ Endpoint.prototype = {
                 }
             }
         }
-    },
-};
+    }
+}
 
 module.exports = Endpoint;

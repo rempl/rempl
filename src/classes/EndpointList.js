@@ -1,17 +1,15 @@
-var Token = require("./Token.js");
+import Token from "./Token.js";
 
-function normalize(oldList, newList) {
-    var diff;
-
+function normalize(oldList: string[], newList: string[]) {
     if (!Array.isArray(newList)) {
         newList = [];
     }
 
-    newList = newList.filter(function (endpoint, idx, array) {
+    newList = newList.filter((endpoint, idx, array) => {
         // unique values
         return idx === 0 || array.lastIndexOf(endpoint, idx - 1) === -1;
     });
-    diff =
+    const diff =
         newList.length !== oldList.length ||
         newList.some(function (endpoint) {
             return oldList.indexOf(endpoint) === -1;
@@ -20,13 +18,12 @@ function normalize(oldList, newList) {
     return diff ? newList : oldList;
 }
 
-function EndpointList(list) {
-    Token.call(this, normalize([], list));
+export default class EndpointList extends Token<string[]> {
+    constructor(list: string[]) {
+        super(normalize([], list));
+    }
+
+    set(newValue: string[]): void {
+        super.set(normalize(this.value, newValue));
+    }
 }
-
-EndpointList.prototype = Object.create(Token.prototype);
-EndpointList.prototype.set = function (newValue) {
-    return Token.prototype.set.call(this, normalize(this.value, newValue));
-};
-
-module.exports = EndpointList;

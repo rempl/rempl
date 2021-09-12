@@ -1,39 +1,42 @@
-/**
- * @class
- */
-var Token = function (value) {
-    this.value = value;
+import { AnyFn, Fn } from "../utils";
+
+export type Handler = {
+    fn: AnyFn;
+    context: unknown;
+    handler: Handler | null;
 };
 
-Token.prototype = {
-    handler: null,
+export default class Token<TValue> {
+    value: TValue;
+    handler: Handler | null = null;
+
+    constructor(value: TValue) {
+        this.value = value;
+    }
 
     /**
      * Set new value and call apply method if value has been changed.
-     * @param {*} value
      */
-    set: function (value) {
+    set(value: TValue): void {
         if (this.value !== value) {
             this.value = value;
             this.apply();
         }
-    },
+    }
 
     /**
      * Returns current token value.
-     * @returns {*}
      */
-    get: function () {
+    get(): TValue {
         return this.value;
-    },
+    }
 
     /**
      * Adds a callback on token value changes.
-     * @param {function(value)} fn
-     * @param {object=} context
      */
-    on: function (fn, context) {
-        var cursor = this;
+    on<TContext>(fn: Fn<[TValue], unknown, TContext>, context: TContext): void {
+        // todo rework
+        let cursor: Handler | null = this as unknown as Handler;
         while ((cursor = cursor.handler)) {
             if (cursor.fn === fn && cursor.context === context) {
                 console.warn("Token#on: duplicate fn & context pair");
@@ -41,30 +44,30 @@ Token.prototype = {
         }
 
         this.handler = {
-            fn: fn,
+            fn: fn as AnyFn,
             context: context,
             handler: this.handler,
         };
-    },
+    }
 
     /**
      * Adds a callback on token value changes and invokes callback with current value.
-     * @param {function(value)} fn
-     * @param {object=} context
      */
-    link: function (fn, context) {
+    link<TContext>(
+        fn: Fn<[TValue], unknown, TContext>,
+        context: TContext
+    ): void {
         this.on(fn, context);
         fn.call(context, this.value);
-    },
+    }
 
     /**
      * Removes a callback. Must be passed the same arguments as for Token#on() method.
-     * @param {function(value)} fn
-     * @param {object=} context
      */
-    off: function (fn, context) {
-        var cursor = this;
-        var prev;
+    off(fn: AnyFn, context: unknown): void {
+        // todo rework
+        let cursor: Handler | null = this as unknown as Handler;
+        let prev;
 
         while (((prev = cursor), (cursor = cursor.handler))) {
             if (cursor.fn === fn && cursor.context === context) {
@@ -81,18 +84,17 @@ Token.prototype = {
         console.warn(
             "Token#off: fn & context pair not found, nothing was removed"
         );
-    },
+    }
 
     /**
      * Call all callbacks with current token value.
      */
-    apply: function () {
-        var cursor = this;
+    apply(): void {
+        // todo rework
+        let cursor: Handler | null = this as unknown as Handler;
 
         while ((cursor = cursor.handler)) {
             cursor.fn.call(cursor.context, this.value);
         }
-    },
-};
-
-module.exports = Token;
+    }
+}

@@ -18,7 +18,13 @@
         "sourceType": "module"
     },
     "rules": {
-        "@typescript-eslint/rule-name": "error",
-        "prettier/prettier": "error"
+        "prettier/prettier": "error",
+        "@typescript-eslint/no-empty-function": "off",
+        "@typescript-eslint/ban-ts-comment": [
+            "error",
+            {
+                "ts-ignore": false
+            }
+        ]
     }
 }
