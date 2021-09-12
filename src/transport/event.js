@@ -2,12 +2,12 @@
 /* global CustomEvent */
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
-var Token = require('../classes/Token.js');
-var EndpointList = require('../classes/EndpointList.js');
-var EndpointListSet = require('../classes/EndpointListSet.js');
-var utils = require('../utils/index.js');
+var Token = require("../classes/Token.js");
+var EndpointList = require("../classes/EndpointList.js");
+var EndpointListSet = require("../classes/EndpointListSet.js");
+var utils = require("../utils/index.js");
 var DEBUG = false;
-var DEBUG_PREFIX = '[rempl][event-transport] ';
+var DEBUG_PREFIX = "[rempl][event-transport] ";
 
 function EventTransport(name, connectTo, win) {
     EventTransport.all.push(this);
@@ -15,7 +15,7 @@ function EventTransport(name, connectTo, win) {
     this.name = name;
     this.connectTo = connectTo;
 
-    this.inputChannelId = name + ':' + utils.genUID();
+    this.inputChannelId = name + ":" + utils.genUID();
     this.connections = Object.create(null);
 
     this.connected = new Token(false);
@@ -23,11 +23,11 @@ function EventTransport(name, connectTo, win) {
     this.ownEndpoints = new EndpointList();
     this.remoteEndpoints = new EndpointListSet();
 
-    this.ownEndpoints.on(function(endpoints) {
+    this.ownEndpoints.on(function (endpoints) {
         if (this.connected.value) {
             this.send({
-                type: 'endpoints',
-                data: [endpoints]
+                type: "endpoints",
+                data: [endpoints],
             });
         }
     }, this);
@@ -39,29 +39,39 @@ function EventTransport(name, connectTo, win) {
     this.onInit = this.onInit.bind(this);
     this.window = win || global;
 
-    if (typeof this.window.postMessage !== 'function' ||
-        typeof addEventListener !== 'function') {
-        utils.warn(DEBUG_PREFIX + 'Event (postMessage) transport isn\'t supported');
+    if (
+        typeof this.window.postMessage !== "function" ||
+        typeof addEventListener !== "function"
+    ) {
+        utils.warn(
+            DEBUG_PREFIX + "Event (postMessage) transport isn't supported"
+        );
         return;
     }
 
-    addEventListener('message', function(e) {
-        this._onMessage(e);
-    }.bind(this), false);
+    addEventListener(
+        "message",
+        function (e) {
+            this._onMessage(e);
+        }.bind(this),
+        false
+    );
     this._handshake(false);
 }
 
 EventTransport.all = [];
-EventTransport.get = function(name, connectTo, win) {
+EventTransport.get = function (name, connectTo, win) {
     if (!win) {
         win = global;
     }
 
     for (var i = 0; i < EventTransport.all.length; i++) {
         var transport = EventTransport.all[i];
-        if (transport.connectTo === connectTo &&
+        if (
+            transport.connectTo === connectTo &&
             transport.window === win &&
-            transport.name === name) {
+            transport.name === name
+        ) {
             return transport;
         }
     }
@@ -70,14 +80,14 @@ EventTransport.get = function(name, connectTo, win) {
 };
 
 EventTransport.prototype = {
-    _handshake: function(inited) {
-        this._send(this.connectTo + ':connect', {
+    _handshake: function (inited) {
+        this._send(this.connectTo + ":connect", {
             initiator: this.name,
             inited: inited,
-            endpoints: this.ownEndpoints.value
+            endpoints: this.ownEndpoints.value,
         });
     },
-    _onMessage: function(event) {
+    _onMessage: function (event) {
         var data = event.data || {};
         var payload = data.payload || {};
 
@@ -86,7 +96,7 @@ EventTransport.prototype = {
         }
 
         switch (data.to) {
-            case this.name + ':connect':
+            case this.name + ":connect":
                 if (payload.initiator === this.connectTo) {
                     this._onConnect(data.from, payload);
                 }
@@ -96,12 +106,15 @@ EventTransport.prototype = {
                 if (data.from in this.connections) {
                     this._onData(data.from, payload);
                 } else {
-                    utils.warn(DEBUG_PREFIX + 'unknown incoming connection', data.from);
+                    utils.warn(
+                        DEBUG_PREFIX + "unknown incoming connection",
+                        data.from
+                    );
                 }
                 break;
         }
     },
-    _onConnect: function(from, payload) {
+    _onConnect: function (from, payload) {
         if (!payload.inited) {
             this._handshake(true);
         }
@@ -111,47 +124,54 @@ EventTransport.prototype = {
             this.remoteEndpoints.add(endpoints);
             this.connections[from] = {
                 ttl: Date.now(),
-                endpoints: endpoints
+                endpoints: endpoints,
             };
             this._send(from, {
-                type: 'connect',
-                endpoints: this.ownEndpoints.value
+                type: "connect",
+                endpoints: this.ownEndpoints.value,
             });
         }
 
         this.inited = true;
     },
-    _onData: function(from, payload) {
+    _onData: function (from, payload) {
         if (DEBUG) {
-            utils.log(DEBUG_PREFIX + 'receive from ' + this.connectTo, payload.type, payload);
+            utils.log(
+                DEBUG_PREFIX + "receive from " + this.connectTo,
+                payload.type,
+                payload
+            );
         }
 
         switch (payload.type) {
-            case 'connect':
+            case "connect":
                 this.connections[from].endpoints.set(payload.endpoints);
                 this.connected.set(true);
-                this.initCallbacks.splice(0).forEach(function(args) {
+                this.initCallbacks.splice(0).forEach(function (args) {
                     this.onInit.apply(this, args);
                 }, this);
                 break;
 
-            case 'endpoints':
+            case "endpoints":
                 this.connections[from].endpoints.set(payload.data[0]);
                 break;
 
-            case 'disconnect':
+            case "disconnect":
                 this.connections[from].endpoints.set([]);
                 this.connected.set(false);
                 break;
 
-            case 'callback':
+            case "callback":
                 if (hasOwnProperty.call(this.sendCallbacks, payload.callback)) {
-                    this.sendCallbacks[payload.callback].apply(null, payload.data);
+                    this.sendCallbacks[payload.callback].apply(
+                        null,
+                        payload.data
+                    );
                     delete this.sendCallbacks[payload.callback];
                 }
                 break;
 
-            case 'data':
+            case "data":
                 var args = Array.prototype.slice.call(payload.data);
                 var callback = payload.callback;
 
@@ -159,60 +179,82 @@ EventTransport.prototype = {
                     args = args.concat(this._wrapCallback(from, callback));
                 }
 
-                this.dataCallbacks.forEach(function(callback) {
+                this.dataCallbacks.forEach(function (callback) {
                     if (callback.endpoint === payload.endpoint) {
                         callback.fn.apply(null, args);
                     }
                 });
                 break;
 
-            case 'getRemoteUI':
-                if (!hasOwnProperty.call(this.endpointGetUI, payload.endpoint)) {
-                    utils.warn(DEBUG_PREFIX + 'receive unknown endpoint for getRemoteUI(): ' + payload.endpoint);
-                    this._wrapCallback(from, payload.callback)('Wrong endpoint – ' + payload.endpoint);
+            case "getRemoteUI":
+                if (
+                    !hasOwnProperty.call(this.endpointGetUI, payload.endpoint)
+                ) {
+                    utils.warn(
+                        DEBUG_PREFIX +
+                            "receive unknown endpoint for getRemoteUI(): " +
+                            payload.endpoint
+                    );
+                    this._wrapCallback(
+                        from,
+                        payload.callback
+                    )("Wrong endpoint – " + payload.endpoint);
                 } else {
                     this.endpointGetUI[payload.endpoint](
                         payload.data[0] || false,
-                        payload.callback ? this._wrapCallback(from, payload.callback) : Function
+                        payload.callback
+                            ? this._wrapCallback(from, payload.callback)
+                            : Function
                     );
                 }
                 break;
 
             default:
-                utils.warn(DEBUG_PREFIX + 'Unknown message type `' + payload.type + '` for `' + this.name + '`', payload);
+                utils.warn(
+                    DEBUG_PREFIX +
+                        "Unknown message type `" +
+                        payload.type +
+                        "` for `" +
+                        this.name +
+                        "`",
+                    payload
+                );
         }
     },
 
-    _wrapCallback: function(to, callback) {
-        return function() {
+    _wrapCallback: function (to, callback) {
+        return function () {
             this._send(to, {
-                type: 'callback',
+                type: "callback",
                 callback: callback,
-                data: Array.prototype.slice.call(arguments)
+                data: Array.prototype.slice.call(arguments),
             });
         }.bind(this);
     },
-    _send: function(to, payload) {
+    _send: function (to, payload) {
         if (DEBUG) {
-            utils.log(DEBUG_PREFIX + 'emit event', to, payload);
+            utils.log(DEBUG_PREFIX + "emit event", to, payload);
         }
 
-        if (typeof this.window.postMessage === 'function') {
-            this.window.postMessage({
-                from: this.inputChannelId,
-                to: to,
-                payload: payload
-            }, '*');
+        if (typeof this.window.postMessage === "function") {
+            this.window.postMessage(
+                {
+                    from: this.inputChannelId,
+                    to: to,
+                    payload: payload,
+                },
+                "*"
+            );
         }
     },
 
-    subscribeToEndpoint: function(endpoint, fn) {
+    subscribeToEndpoint: function (endpoint, fn) {
         return utils.subscribe(this.dataCallbacks, {
             endpoint: endpoint,
-            fn: fn
+            fn: fn,
         });
     },
-    sendToEndpoint: function(endpoint, type) {
+    sendToEndpoint: function (endpoint, type) {
         // if (endpoint !== this.remoteName && this.remoteEndpoints.value.indexOf(endpoint) === -1) {
         //     // console.warn(this.name, endpoint, this.remoteName, this.remoteEndpoints.value);
         //     if (1||DEBUG) {
@@ -224,7 +266,7 @@ EventTransport.prototype = {
         var args = Array.prototype.slice.call(arguments, 2);
         var callback = false;
 
-        if (args.length && typeof args[args.length - 1] === 'function') {
+        if (args.length && typeof args[args.length - 1] === "function") {
             callback = utils.genUID();
             this.sendCallbacks[callback] = args.pop();
         }
@@ -233,10 +275,10 @@ EventTransport.prototype = {
             type: type,
             endpoint: endpoint,
             data: args,
-            callback: callback
+            callback: callback,
         });
     },
-    send: function(payload) {
+    send: function (payload) {
         // if (!this.inited) {
         //     utils.warn(DEBUG_PREFIX + 'send() call on init is prohibited');
         //     return;
@@ -247,12 +289,12 @@ EventTransport.prototype = {
         }
     },
 
-    onInit: function(endpoint, callback) {
+    onInit: function (endpoint, callback) {
         var id = endpoint.id || null;
 
         if (id) {
             this.ownEndpoints.set(this.ownEndpoints.value.concat(id));
-            if (typeof endpoint.getRemoteUI === 'function') {
+            if (typeof endpoint.getRemoteUI === "function") {
                 this.endpointGetUI[id] = endpoint.getRemoteUI;
             }
         }
@@ -260,9 +302,9 @@ EventTransport.prototype = {
         if (this.inited) {
             callback({
                 connected: this.connected,
-                getRemoteUI: this.sendToEndpoint.bind(this, id, 'getRemoteUI'),
+                getRemoteUI: this.sendToEndpoint.bind(this, id, "getRemoteUI"),
                 subscribe: this.subscribeToEndpoint.bind(this, id),
-                send: this.sendToEndpoint.bind(this, id, 'data')
+                send: this.sendToEndpoint.bind(this, id, "data"),
             });
         } else {
             this.initCallbacks.push(arguments);
@@ -270,19 +312,24 @@ EventTransport.prototype = {
 
         return this;
     },
-    sync: function(endpoint) {
-        var channel = utils.genUID(8) + ':' + this.connectTo;
+    sync: function (endpoint) {
+        var channel = utils.genUID(8) + ":" + this.connectTo;
         var remoteEndpoints = this.remoteEndpoints;
 
-        this.onInit(endpoint, function(api) {
+        this.onInit(endpoint, function (api) {
             api.subscribe(endpoint.processInput);
-            api.connected.link(function(connected) {
-                endpoint.setupChannel(channel, api.send, remoteEndpoints, connected);
+            api.connected.link(function (connected) {
+                endpoint.setupChannel(
+                    channel,
+                    api.send,
+                    remoteEndpoints,
+                    connected
+                );
             });
         });
 
         return this;
-    }
+    },
 };
 
 module.exports = EventTransport;

@@ -1,33 +1,36 @@
-var Namespace = require('../classes/Namespace.js');
-var Endpoint = require('../classes/Endpoint.js');
-var utils = require('../utils/index.js');
+var Namespace = require("../classes/Namespace.js");
+var Endpoint = require("../classes/Endpoint.js");
+var utils = require("../utils/index.js");
 
-var SubscriberNamespace = function(name, owner) {
+var SubscriberNamespace = function (name, owner) {
     Namespace.call(this, name, owner);
 
     this.subscribers = [];
 };
 
 SubscriberNamespace.prototype = Object.create(Namespace.prototype);
-SubscriberNamespace.prototype.subscribe = function(fn) {
-    this.callRemote('init', fn);
+SubscriberNamespace.prototype.subscribe = function (fn) {
+    this.callRemote("init", fn);
     return utils.subscribe(this.subscribers, fn);
 };
 
-var Subscriber = function(id) {
+var Subscriber = function (id) {
     Endpoint.call(this, id);
 
-    this.connected.on(function(connected) {
+    this.connected.on(function (connected) {
         if (connected) {
             this.requestRemoteApi();
             for (var name in this.namespaces) {
                 var ns = this.namespaces[name];
                 if (ns.subscribers.length) {
-                    ns.callRemote('init', function(data) {
-                        this.subscribers.forEach(function(callback) {
-                            callback(data);
-                        });
-                    }.bind(ns));
+                    ns.callRemote(
+                        "init",
+                        function (data) {
+                            this.subscribers.forEach(function (callback) {
+                                callback(data);
+                            });
+                        }.bind(ns)
+                    );
                 }
             }
         } else {
@@ -38,13 +41,15 @@ var Subscriber = function(id) {
 
 Subscriber.prototype = Object.create(Endpoint.prototype);
 Subscriber.prototype.namespaceClass = SubscriberNamespace;
-Subscriber.prototype.type = 'Subscriber';
-Subscriber.prototype.processInput = function(packet, callback) {
+Subscriber.prototype.type = "Subscriber";
+Subscriber.prototype.processInput = function (packet, callback) {
     switch (packet.type) {
-        case 'data':
-            this.ns(packet.ns || '*').subscribers.slice().forEach(function(callback) {
-                callback(packet.payload);
-            });
+        case "data":
+            this.ns(packet.ns || "*")
+                .subscribers.slice()
+                .forEach(function (callback) {
+                    callback(packet.payload);
+                });
             break;
 
         default:

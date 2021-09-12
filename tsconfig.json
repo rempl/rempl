@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "declaration": true,
+        "sourceMap": true,
+        "outDir": "./dist",
+        "module": "commonjs",
+        "target": "ES6",
+        "lib": [
+            "DOM",
+            "ESNext"
+        ],
+        "allowJs": true,
+    },
+    "exclude": [
+        "node_modules",
+        "dist",
+        "test",
+        "server",
+        "example"
+    ]
+}

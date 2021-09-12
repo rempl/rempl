@@ -1,7 +1,7 @@
 /* eslint-env browser */
-var EventTransport = require('../../transport/event.js');
-var createSandbox = require('../../sandbox/index.js');
-var view = require('./view.js');
+var EventTransport = require("../../transport/event.js");
+var createSandbox = require("../../sandbox/index.js");
+var view = require("./view.js");
 var publishers = [];
 var selectedPublisher = null;
 var autoSelectPublisher = false;
@@ -29,17 +29,20 @@ function selectPublisher(publisher) {
         if (selectedPublisher) {
             view.selectPublisher(selectedPublisher);
             view.show(host.deactivate);
-            transport.onInit({ id: selectedPublisher }, function(papi) {
-                papi.getRemoteUI(function(error, type, content) {
+            transport.onInit({ id: selectedPublisher }, function (papi) {
+                papi.getRemoteUI(function (error, type, content) {
                     cleanupSandbox();
-                    sandbox = createSandbox({
-                        container: view.getSandboxContainer(),
-                        type: type,
-                        content: content
-                    }, function(api) {
-                        papi.subscribe(api.send);
-                        api.subscribe(papi.send);
-                    });
+                    sandbox = createSandbox(
+                        {
+                            container: view.getSandboxContainer(),
+                            type: type,
+                            content: content,
+                        },
+                        function (api) {
+                            papi.subscribe(api.send);
+                            api.subscribe(papi.send);
+                        }
+                    );
                     sandbox.setConnected(true);
                 });
             });
@@ -55,8 +58,11 @@ module.exports = function getHost() {
         return host;
     }
 
-    transport = new EventTransport('rempl-inpage-host', 'rempl-inpage-publisher');
-    transport.remoteEndpoints.on(function(endpoints) {
+    transport = new EventTransport(
+        "rempl-inpage-host",
+        "rempl-inpage-publisher"
+    );
+    transport.remoteEndpoints.on(function (endpoints) {
         publishers = endpoints;
         view.setPublisherList(publishers, selectPublisher);
 
@@ -65,13 +71,14 @@ module.exports = function getHost() {
         }
     });
 
-    return host = {
-        activate: function(publisher) {
-            var publisherId = (publisher && publisher.id) ||
-                               publisher ||
-                               selectedPublisher ||
-                               publishers[0] ||
-                               null;
+    return (host = {
+        activate: function (publisher) {
+            var publisherId =
+                (publisher && publisher.id) ||
+                publisher ||
+                selectedPublisher ||
+                publishers[0] ||
+                null;
 
             clearTimeout(teardownTimer);
             selectPublisher(publisherId);
@@ -81,7 +88,7 @@ module.exports = function getHost() {
                 autoSelectPublisher = true;
             }
         },
-        deactivate: function(publisher) {
+        deactivate: function (publisher) {
             var publisherId = (publisher && publisher.id) || publisher;
             autoSelectPublisher = false;
 
@@ -89,10 +96,10 @@ module.exports = function getHost() {
                 view.softHide();
                 // tear down subscriber in 15 sec
                 clearTimeout(teardownTimer);
-                teardownTimer = setTimeout(function() {
+                teardownTimer = setTimeout(function () {
                     selectPublisher();
                 }, 15000);
             }
-        }
-    };
+        },
+    });
 };

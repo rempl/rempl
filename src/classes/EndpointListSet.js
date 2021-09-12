@@ -1,4 +1,4 @@
-var EndpointList = require('./EndpointList.js');
+var EndpointList = require("./EndpointList.js");
 
 function EndpointListSet() {
     this.endpointLists = [];
@@ -6,16 +6,16 @@ function EndpointListSet() {
 }
 
 EndpointListSet.prototype = Object.create(EndpointList.prototype);
-EndpointListSet.prototype.set = function() {
+EndpointListSet.prototype.set = function () {
     return EndpointList.prototype.set.call(
         this,
-        this.endpointLists.reduce(function(result, list) {
+        this.endpointLists.reduce(function (result, list) {
             return result.concat(list.value);
         }, [])
     );
 };
 
-EndpointListSet.prototype.add = function(endpointList) {
+EndpointListSet.prototype.add = function (endpointList) {
     var idx = this.endpointLists.indexOf(endpointList);
     if (idx === -1) {
         this.endpointLists.push(endpointList);
@@ -24,7 +24,7 @@ EndpointListSet.prototype.add = function(endpointList) {
     }
 };
 
-EndpointListSet.prototype.remove = function(endpointList) {
+EndpointListSet.prototype.remove = function (endpointList) {
     var idx = this.endpointLists.indexOf(endpointList);
     if (idx !== -1) {
         this.endpointLists.splice(idx, 1);

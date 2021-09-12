@@ -1,34 +1,39 @@
-var Namespace = require('../classes/Namespace.js');
-var Endpoint = require('../classes/Endpoint.js');
+var Namespace = require("../classes/Namespace.js");
+var Endpoint = require("../classes/Endpoint.js");
 
-var PublisherNamespace = function(name, owner) {
+var PublisherNamespace = function (name, owner) {
     Namespace.call(this, name, owner);
 
-    this.provide('init', function(callback) {
-        callback(this._lastData);
-    }.bind(this));
+    this.provide(
+        "init",
+        function (callback) {
+            callback(this._lastData);
+        }.bind(this)
+    );
 };
 
 PublisherNamespace.prototype = Object.create(Namespace.prototype);
 PublisherNamespace.prototype._lastData = null;
-PublisherNamespace.prototype.publish = function(payload) {
+PublisherNamespace.prototype.publish = function (payload) {
     this._lastData = payload;
-    Namespace.send(this.owner, [{
-        type: 'data',
-        ns: this.name,
-        payload: payload
-    }]);
+    Namespace.send(this.owner, [
+        {
+            type: "data",
+            ns: this.name,
+            payload: payload,
+        },
+    ]);
 };
 
-PublisherNamespace.prototype.pipe = function(fn, init) {
+PublisherNamespace.prototype.pipe = function (fn, init) {
     var publisher = this;
-    var pipe = function() {
+    var pipe = function () {
         publisher.publish(fn.apply(this, arguments));
     };
 
     if (!fn) {
         init = false;
-        fn = function(value) {
+        fn = function (value) {
             return value;
         };
     }
@@ -40,12 +45,12 @@ PublisherNamespace.prototype.pipe = function(fn, init) {
     return pipe;
 };
 
-var Publisher = function(id) {
+var Publisher = function (id) {
     Endpoint.call(this, id);
 };
 
 Publisher.prototype = Object.create(Endpoint.prototype);
 Publisher.prototype.namespaceClass = PublisherNamespace;
-Publisher.prototype.type = 'Publisher';
+Publisher.prototype.type = "Publisher";
 
 module.exports = Publisher;

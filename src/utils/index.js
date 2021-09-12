@@ -1,7 +1,9 @@
-'use strict';
+"use strict";
 
-var isNode = typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]' &&
-             Object.prototype.toString.call(global.self) !== '[object Window]';
+var isNode =
+    typeof process !== "undefined" &&
+    Object.prototype.toString.call(process) === "[object process]" &&
+    Object.prototype.toString.call(global.self) !== "[object Window]";
 
 function complete(dest, source) {
     for (var key in source) {
@@ -30,7 +32,7 @@ function genUID(len) {
     }
 
     while (result.length < len) {
-        result += base36(new Date * Math.random());
+        result += base36(new Date() * Math.random());
     }
 
     return result.substr(0, len);
@@ -39,7 +41,7 @@ function genUID(len) {
 function subscribe(list, item) {
     list.push(item);
 
-    return function() {
+    return function () {
         var idx = list.indexOf(item);
         if (idx !== -1) {
             list.splice(idx, 1);
@@ -47,24 +49,30 @@ function subscribe(list, item) {
     };
 }
 
-var consoleMethods = (function() {
+var consoleMethods = (function () {
     var console = global.console;
     var methods = {
-        log: function() {},
-        info: function() {},
-        warn: function() {},
-        error: function() {}
+        log: function () {},
+        info: function () {},
+        warn: function () {},
+        error: function () {},
     };
 
     if (console) {
         for (var methodName in methods) {
-            methods[methodName] = 'bind' in Function.prototype && typeof console[methodName] == 'function'
-                ? Function.prototype.bind.call(console[methodName], console)
-                // IE8 and lower solution. It's also more safe when Function.prototype.bind
-                // defines by other libraries (like es5-shim).
-                : function() {
-                    Function.prototype.apply.call(console[methodName], console, arguments);
-                };
+            methods[methodName] =
+                "bind" in Function.prototype &&
+                typeof console[methodName] == "function"
+                    ? Function.prototype.bind.call(console[methodName], console)
+                    : // IE8 and lower solution. It's also more safe when Function.prototype.bind
+                      // defines by other libraries (like es5-shim).
+                      function () {
+                          Function.prototype.apply.call(
+                              console[methodName],
+                              console,
+                              arguments
+                          );
+                      };
         }
     }
 
@@ -80,5 +88,5 @@ module.exports = {
     log: consoleMethods.log,
     info: consoleMethods.info,
     warn: consoleMethods.warn,
-    error: consoleMethods.error
+    error: consoleMethods.error,
 };
