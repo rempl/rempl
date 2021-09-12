@@ -1,7 +1,5 @@
-import Token from "../classes/Token.js";
-
-import EndpointList from "../classes/EndpointList.js";
-
+import Token from "../classes/Token";
+import EndpointList from "../classes/EndpointList";
 import * as utils from "../utils";
 
 // @ts-ignore

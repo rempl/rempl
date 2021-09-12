@@ -1,8 +1,10 @@
-var isNode = require("../utils/index.js").isNode;
-var createEnv = require("./publisher.js");
-var getEnv = require("./subscriber.js");
+import { isNode } from "../utils";
 
-module.exports = !isNode
+import createEnv from "./publisher";
+
+import getEnv from "./subscriber";
+
+export default !isNode
     ? {
           createEnv: createEnv,
           getEnv: getEnv,

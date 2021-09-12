@@ -1,4 +1,4 @@
-import Token from "./Token.js";
+import Token from "./Token";
 
 function normalize(oldList: string[], newList?: string[]) {
     if (!Array.isArray(newList)) {

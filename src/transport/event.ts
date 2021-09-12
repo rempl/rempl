@@ -91,7 +91,7 @@ export default class EventTransport {
     static get(
         name: string,
         connectTo: string,
-        win?: typeof window | typeof global
+        win?: Window | typeof global
     ): EventTransport {
         if (!win) {
             win = global;
@@ -113,7 +113,7 @@ export default class EventTransport {
 
     name: string;
     connectTo: string;
-    window: typeof window | typeof global;
+    window: Window | typeof global;
     inputChannelId: string;
     connections: Record<string, Connection> = Object.create(null);
     connected = new Token(false);
@@ -126,11 +126,7 @@ export default class EventTransport {
     sendCallbacks: Record<string, AnyFn> = {};
     inited = false;
 
-    constructor(
-        name: string,
-        connectTo: string,
-        win?: typeof window | typeof global
-    ) {
+    constructor(name: string, connectTo: string, win?: Window | typeof global) {
         EventTransport.all.push(this);
 
         this.name = name;
@@ -440,5 +436,3 @@ export default class EventTransport {
         return this;
     }
 }
-
-module.exports = EventTransport;

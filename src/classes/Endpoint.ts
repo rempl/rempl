@@ -1,5 +1,5 @@
-import Namespace from "./Namespace.js";
-import Token from "./Token.js";
+import Namespace from "./Namespace";
+import Token from "./Token";
 import * as utils from "../utils";
 import { AnyFn } from "../utils";
 import EndpointListSet from "./EndpointListSet";
@@ -224,5 +224,3 @@ export default class Endpoint<TNamespace extends Namespace> {
         }
     }
 }
-
-module.exports = Endpoint;
