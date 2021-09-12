@@ -1,6 +1,6 @@
 import Token from "./Token.js";
 
-function normalize(oldList: string[], newList: string[]) {
+function normalize(oldList: string[], newList?: string[]) {
     if (!Array.isArray(newList)) {
         newList = [];
     }
@@ -19,7 +19,7 @@ function normalize(oldList: string[], newList: string[]) {
 }
 
 export default class EndpointList extends Token<string[]> {
-    constructor(list: string[]) {
+    constructor(list?: string[]) {
         super(normalize([], list));
     }
 

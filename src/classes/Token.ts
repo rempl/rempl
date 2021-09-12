@@ -34,7 +34,10 @@ export default class Token<TValue> {
     /**
      * Adds a callback on token value changes.
      */
-    on<TContext>(fn: Fn<[TValue], unknown, TContext>, context: TContext): void {
+    on<TContext>(
+        fn: Fn<[TValue], unknown, TContext>,
+        context?: TContext
+    ): void {
         // todo rework
         let cursor: Handler | null = this as unknown as Handler;
         while ((cursor = cursor.handler)) {
@@ -55,16 +58,16 @@ export default class Token<TValue> {
      */
     link<TContext>(
         fn: Fn<[TValue], unknown, TContext>,
-        context: TContext
+        context?: TContext
     ): void {
         this.on(fn, context);
-        fn.call(context, this.value);
+        fn.call(context as TContext, this.value);
     }
 
     /**
      * Removes a callback. Must be passed the same arguments as for Token#on() method.
      */
-    off(fn: AnyFn, context: unknown): void {
+    off(fn: AnyFn, context?: unknown): void {
         // todo rework
         let cursor: Handler | null = this as unknown as Handler;
         let prev;

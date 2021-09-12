@@ -12,7 +12,7 @@ export type Fn<TArgs extends unknown[], TReturn, TThis = unknown> = (
     ...args: TArgs
 ) => TReturn;
 
-export type AnyFn = Fn<unknown[], unknown>;
+export type AnyFn = Fn<any[], any>;
 
 export type TypeRecord = Record<string, unknown>;
 

@@ -3,6 +3,7 @@ import Token from "./Token.js";
 import * as utils from "../utils";
 import { AnyFn } from "../utils";
 import EndpointListSet from "./EndpointListSet";
+import EndpointList from "./EndpointList";
 
 export type Channel = {
     type: string;
@@ -197,7 +198,7 @@ export default class Endpoint<TNamespace extends Namespace> {
     setupChannel(
         type: string,
         send: AnyFn,
-        remoteEndpoints: EndpointListSet,
+        remoteEndpoints: EndpointList,
         available: boolean
     ): void {
         if (available) {
