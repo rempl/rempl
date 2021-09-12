@@ -38,13 +38,18 @@ export type Connection = {
 };
 
 export type GetRemoteUICallback = (
-    error: string | null,
+    // todo should not be string
+    error: string | Error | null,
     type?: "script",
     content?: string
 ) => void;
 
+export type GetRemoteUISettings = {
+    dev: boolean;
+    [key: string]: unknown;
+};
 export type GetRemoteUIFnArgs = [
-    settings: unknown,
+    settings: GetRemoteUISettings,
     callback: GetRemoteUICallback
 ];
 export type GetRemoteUIFn = (...args: GetRemoteUIFnArgs) => void;
@@ -81,7 +86,7 @@ export type OnDataPayload =
     | {
           type: "getRemoteUI";
           endpoint: string;
-          data: unknown[];
+          data: GetRemoteUISettings[];
           callback: AnyFn;
       };
 

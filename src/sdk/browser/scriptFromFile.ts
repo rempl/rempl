@@ -1,7 +1,12 @@
 /* eslint-env browser */
 
-function fetchFile(filename, callback) {
-    var xhr = new XMLHttpRequest();
+import { GetRemoteUIFn } from "../../transport/event";
+
+function fetchFile(
+    filename: string,
+    callback: (error: string | null, response?: string) => void
+) {
+    const xhr = new XMLHttpRequest();
     xhr.onerror = function () {
         callback(
             "An error occurred while transferring the file – `" + filename + "`"
@@ -26,20 +31,23 @@ function fetchFile(filename, callback) {
     xhr.send(null);
 }
 
-module.exports = function (filename) {
-    var cache = null;
+module.exports = function (filename: string): GetRemoteUIFn {
+    let cache: string | null = null;
 
     // TODO: take in account settings.accept setting
     return function (settings, callback) {
         if (settings.dev || cache === null) {
-            fetchFile(filename, function (err, content) {
-                if (err) {
-                    callback(err);
-                }
+            fetchFile(
+                filename,
+                (err: string | null, content?: string): void => {
+                    if (err) {
+                        callback(err);
+                    }
 
-                cache = content;
-                callback(null, "script", content);
-            });
+                    cache = content ?? null;
+                    callback(null, "script", content);
+                }
+            );
         } else {
             callback(null, "script", cache);
         }

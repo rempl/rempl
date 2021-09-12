@@ -1,5 +1,5 @@
-var isNode = require("../utils/index.js").isNode;
+import { isNode } from "../utils";
 
-module.exports = !isNode
+export default !isNode
     ? require("./browser/scriptFromFile.js")
     : require("./nodejs/scriptFromFile.js");
