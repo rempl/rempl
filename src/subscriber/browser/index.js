@@ -1,7 +1,7 @@
 /* eslint-env browser */
-var Subscriber = require("../../classes/Subscriber.js");
-var EventTransport = require("../../transport/event.js");
-var setOverlayVisible = require("./disconnected-overlay.js");
+var Subscriber = require('../../classes/Subscriber.js');
+var EventTransport = require('../../transport/event.js');
+var setOverlayVisible = require('./disconnected-overlay.js');
 var subscriber = null;
 
 function createSubscriber() {
@@ -18,11 +18,7 @@ function createSubscriber() {
     }, subscriber);
 
     // link to transport
-    EventTransport.get(
-        "rempl-subscriber",
-        "rempl-sandbox",
-        opener || parent
-    ).sync(subscriber);
+    EventTransport.get('rempl-subscriber', 'rempl-sandbox', opener || parent).sync(subscriber);
 
     return subscriber;
 }
@@ -32,9 +28,9 @@ module.exports = function (fn) {
         subscriber = createSubscriber();
     }
 
-    if (typeof fn === "function") {
+    if (typeof fn === 'function') {
         console.warn(
-            "[rempl] Passing function to rempl.getSubscriber() is deprecated, please use a return value instead"
+            '[rempl] Passing function to rempl.getSubscriber() is deprecated, please use a return value instead'
         );
         fn(subscriber);
     }

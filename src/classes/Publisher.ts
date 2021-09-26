@@ -1,5 +1,5 @@
-import Namespace from "../classes/Namespace";
-import Endpoint from "../classes/Endpoint";
+import Namespace from '../classes/Namespace';
+import Endpoint from '../classes/Endpoint';
 
 export type PipeFn = (...args: unknown[]) => unknown;
 
@@ -9,7 +9,7 @@ export class PublisherNamespace extends Namespace {
     constructor(name: string, owner: Endpoint<Namespace>) {
         super(name, owner);
 
-        this.provide("init", (callback: (data: unknown) => void) => {
+        this.provide('init', (callback: (data: unknown) => void) => {
             callback(this._lastData);
         });
     }
@@ -18,7 +18,7 @@ export class PublisherNamespace extends Namespace {
         this._lastData = payload;
         Namespace.send(this.owner, [
             {
-                type: "data",
+                type: 'data',
                 ns: this.name,
                 payload: payload,
             },
@@ -47,5 +47,5 @@ export class PublisherNamespace extends Namespace {
 
 export default class Publisher extends Endpoint<PublisherNamespace> {
     namespaceClass = PublisherNamespace;
-    type = "Publisher";
+    type = 'Publisher';
 }

@@ -1,32 +1,26 @@
 /* eslint-env browser */
 /* global REMPL_SERVER */
 
-var WsTransport = require("../../transport/ws-publisher.js");
-var identify = require("./identify.js");
-var STORAGE_KEY = "rempl:id";
+var WsTransport = require('../../transport/ws-publisher.js');
+var identify = require('./identify.js');
+var STORAGE_KEY = 'rempl:id';
 var sessionStorage = global.sessionStorage || {};
 
 function fetchWsSettings() {
     function fetchEnvVariable() {
-        if (
-            typeof REMPL_SERVER !== "undefined" &&
-            REMPL_SERVER !== global.REMPL_SERVER
-        ) {
+        if (typeof REMPL_SERVER !== 'undefined' && REMPL_SERVER !== global.REMPL_SERVER) {
             return REMPL_SERVER;
         }
     }
 
     function fetchMeta() {
-        var meta =
-            document.querySelector &&
-            document.querySelector('meta[name="rempl:server"]');
+        var meta = document.querySelector && document.querySelector('meta[name="rempl:server"]');
 
-        return (meta && meta.getAttribute("content")) || undefined;
+        return (meta && meta.getAttribute('content')) || undefined;
     }
 
     var setup = fetchEnvVariable();
-    var implicitUri =
-        location.protocol + "//" + (location.hostname || "localhost") + ":8177";
+    var implicitUri = location.protocol + '//' + (location.hostname || 'localhost') + ':8177';
     var explicitUri = undefined;
 
     if (setup === undefined) {
@@ -34,20 +28,20 @@ function fetchWsSettings() {
     }
 
     switch (setup) {
-        case "none":
+        case 'none':
         case undefined:
         case false:
             // no explicit setting
             break;
 
-        case "implicit":
-        case "auto":
+        case 'implicit':
+        case 'auto':
         case true:
             explicitUri = implicitUri;
             break;
 
         default:
-            if (typeof setup === "string") {
+            if (typeof setup === 'string') {
                 explicitUri = setup;
             }
     }
@@ -63,9 +57,9 @@ function BrowserWsTransport(uri) {
 
     this.id = sessionStorage[STORAGE_KEY];
     this.transport
-        .on("rempl:identify", identify.start)
-        .on("rempl:stop identify", identify.stop)
-        .on("disconnect", identify.stop);
+        .on('rempl:identify', identify.start)
+        .on('rempl:stop identify', identify.stop)
+        .on('disconnect', identify.stop);
 }
 
 BrowserWsTransport.settings = fetchWsSettings();
@@ -77,9 +71,11 @@ BrowserWsTransport.prototype.setClientId = function (id) {
     sessionStorage[STORAGE_KEY] = this.id;
 };
 
-BrowserWsTransport.prototype.type = "browser";
-BrowserWsTransport.prototype.infoFields =
-    WsTransport.prototype.infoFields.concat("title", "location");
+BrowserWsTransport.prototype.type = 'browser';
+BrowserWsTransport.prototype.infoFields = WsTransport.prototype.infoFields.concat(
+    'title',
+    'location'
+);
 BrowserWsTransport.prototype.getInfo = function () {
     this.title = global.top.document.title;
     this.location = String(location);

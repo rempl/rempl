@@ -1,4 +1,4 @@
-import { AnyFn, Fn } from "../utils";
+import { AnyFn, Fn } from '../utils';
 
 export type Handler = {
     fn: AnyFn;
@@ -34,15 +34,12 @@ export default class Token<TValue> {
     /**
      * Adds a callback on token value changes.
      */
-    on<TContext>(
-        fn: Fn<[TValue], unknown, TContext>,
-        context?: TContext
-    ): void {
+    on<TContext>(fn: Fn<[TValue], unknown, TContext>, context?: TContext): void {
         // todo rework
         let cursor: Handler | null = this as unknown as Handler;
         while ((cursor = cursor.handler)) {
             if (cursor.fn === fn && cursor.context === context) {
-                console.warn("Token#on: duplicate fn & context pair");
+                console.warn('Token#on: duplicate fn & context pair');
             }
         }
 
@@ -56,10 +53,7 @@ export default class Token<TValue> {
     /**
      * Adds a callback on token value changes and invokes callback with current value.
      */
-    link<TContext>(
-        fn: Fn<[TValue], unknown, TContext>,
-        context?: TContext
-    ): void {
+    link<TContext>(fn: Fn<[TValue], unknown, TContext>, context?: TContext): void {
         this.on(fn, context);
         fn.call(context as TContext, this.value);
     }
@@ -84,9 +78,7 @@ export default class Token<TValue> {
             }
         }
 
-        console.warn(
-            "Token#off: fn & context pair not found, nothing was removed"
-        );
+        console.warn('Token#off: fn & context pair not found, nothing was removed');
     }
 
     /**

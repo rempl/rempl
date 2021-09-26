@@ -1,15 +1,15 @@
 /* eslint-env browser */
 
-import Token from "../classes/Token";
-import EndpointList from "../classes/EndpointList";
-import EndpointListSet from "../classes/EndpointListSet";
-import * as utils from "../utils/";
-import { AnyFn, Fn, hasOwnProperty, Unsubscribe } from "../utils";
-import Endpoint from "../classes/Endpoint";
-import Namespace from "../classes/Namespace";
+import Token from '../classes/Token';
+import EndpointList from '../classes/EndpointList';
+import EndpointListSet from '../classes/EndpointListSet';
+import * as utils from '../utils/';
+import { AnyFn, Fn, hasOwnProperty, Unsubscribe } from '../utils';
+import Endpoint from '../classes/Endpoint';
+import Namespace from '../classes/Namespace';
 
 const DEBUG = false;
-const DEBUG_PREFIX = "[rempl][event-transport] ";
+const DEBUG_PREFIX = '[rempl][event-transport] ';
 
 export type ConnectPayload = {
     initiator: string;
@@ -26,10 +26,7 @@ export type OnInitCallbackArg = {
 
 export type OnInitCallback = (arg: OnInitCallbackArg) => void;
 
-export type OnInitFnArgs = [
-    endpoint: Endpoint<Namespace>,
-    callback: OnInitCallback
-];
+export type OnInitFnArgs = [endpoint: Endpoint<Namespace>, callback: OnInitCallback];
 export type OnInitFn<TThis> = (this: TThis, ...args: OnInitFnArgs) => TThis;
 
 export type Connection = {
@@ -40,7 +37,7 @@ export type Connection = {
 export type GetRemoteUICallback = (
     // todo should not be string
     error: string | Error | null,
-    type?: "script",
+    type?: 'script',
     content?: string
 ) => void;
 
@@ -48,43 +45,40 @@ export type GetRemoteUISettings = {
     dev: boolean;
     [key: string]: unknown;
 };
-export type GetRemoteUIFnArgs = [
-    settings: GetRemoteUISettings,
-    callback: GetRemoteUICallback
-];
+export type GetRemoteUIFnArgs = [settings: GetRemoteUISettings, callback: GetRemoteUICallback];
 export type GetRemoteUIFn = (...args: GetRemoteUIFnArgs) => void;
 
 export type CallbackPayload<TArgs extends unknown[]> = {
-    type: "callback";
+    type: 'callback';
     callback: Fn<TArgs, void>;
     data: TArgs;
 };
 
 export type OnDataPayload =
     | {
-          type: "connect";
+          type: 'connect';
           endpoints: string[];
       }
     | {
-          type: "endpoints";
+          type: 'endpoints';
           data: [string[]];
       }
     | {
-          type: "disconnect";
+          type: 'disconnect';
       }
     | {
-          type: "callback";
+          type: 'callback';
           callback: string;
           data: unknown[];
       }
     | {
-          type: "data";
+          type: 'data';
           data: unknown;
           callback: AnyFn;
           endpoint: string;
       }
     | {
-          type: "getRemoteUI";
+          type: 'getRemoteUI';
           endpoint: string;
           data: GetRemoteUISettings[];
           callback: AnyFn;
@@ -93,11 +87,7 @@ export type OnDataPayload =
 export default class EventTransport {
     static all: EventTransport[] = [];
 
-    static get(
-        name: string,
-        connectTo: string,
-        win?: Window | typeof global
-    ): EventTransport {
+    static get(name: string, connectTo: string, win?: Window | typeof global): EventTransport {
         if (!win) {
             win = global;
         }
@@ -137,12 +127,12 @@ export default class EventTransport {
         this.name = name;
         this.connectTo = connectTo;
 
-        this.inputChannelId = name + ":" + utils.genUID();
+        this.inputChannelId = name + ':' + utils.genUID();
 
         this.ownEndpoints.on(function (endpoints) {
             if (this.connected.value) {
                 this.send({
-                    type: "endpoints",
+                    type: 'endpoints',
                     data: [endpoints],
                 });
             }
@@ -151,20 +141,14 @@ export default class EventTransport {
         this.window = win || global;
 
         if (
-            typeof this.window.postMessage !== "function" ||
-            typeof addEventListener !== "function"
+            typeof this.window.postMessage !== 'function' ||
+            typeof addEventListener !== 'function'
         ) {
-            utils.warn(
-                DEBUG_PREFIX + "Event (postMessage) transport isn't supported"
-            );
+            utils.warn(DEBUG_PREFIX + "Event (postMessage) transport isn't supported");
             return;
         }
 
-        addEventListener(
-            "message",
-            (e: MessageEvent) => this._onMessage(e),
-            false
-        );
+        addEventListener('message', (e: MessageEvent) => this._onMessage(e), false);
         this._handshake(false);
     }
 
@@ -174,7 +158,7 @@ export default class EventTransport {
             inited: inited,
             endpoints: this.ownEndpoints.value,
         };
-        this._send(this.connectTo + ":connect", payload);
+        this._send(this.connectTo + ':connect', payload);
     }
 
     _onMessage(event: MessageEvent): void {
@@ -186,7 +170,7 @@ export default class EventTransport {
         }
 
         switch (data.to) {
-            case this.name + ":connect":
+            case this.name + ':connect':
                 if (payload.initiator === this.connectTo) {
                     this._onConnect(data.from, payload);
                 }
@@ -196,10 +180,7 @@ export default class EventTransport {
                 if (data.from in this.connections) {
                     this._onData(data.from, payload);
                 } else {
-                    utils.warn(
-                        DEBUG_PREFIX + "unknown incoming connection",
-                        data.from
-                    );
+                    utils.warn(DEBUG_PREFIX + 'unknown incoming connection', data.from);
                 }
                 break;
         }
@@ -218,7 +199,7 @@ export default class EventTransport {
                 endpoints: endpoints,
             };
             this._send(from, {
-                type: "connect",
+                type: 'connect',
                 endpoints: this.ownEndpoints.value,
             });
         }
@@ -228,46 +209,37 @@ export default class EventTransport {
 
     _onData(from: string, payload: OnDataPayload): void {
         if (DEBUG) {
-            utils.log(
-                DEBUG_PREFIX + "receive from " + this.connectTo,
-                payload.type,
-                payload
-            );
+            utils.log(DEBUG_PREFIX + 'receive from ' + this.connectTo, payload.type, payload);
         }
 
         switch (payload.type) {
-            case "connect": {
+            case 'connect': {
                 this.connections[from].endpoints.set(payload.endpoints);
                 this.connected.set(true);
-                this.initCallbacks
-                    .splice(0)
-                    .forEach((args) => this.onInit(...args));
+                this.initCallbacks.splice(0).forEach((args) => this.onInit(...args));
                 break;
             }
 
-            case "endpoints": {
+            case 'endpoints': {
                 this.connections[from].endpoints.set(payload.data[0]);
                 break;
             }
 
-            case "disconnect": {
+            case 'disconnect': {
                 this.connections[from].endpoints.set([]);
                 this.connected.set(false);
                 break;
             }
 
-            case "callback": {
+            case 'callback': {
                 if (hasOwnProperty(this.sendCallbacks, payload.callback)) {
-                    this.sendCallbacks[payload.callback].apply(
-                        null,
-                        payload.data
-                    );
+                    this.sendCallbacks[payload.callback].apply(null, payload.data);
                     delete this.sendCallbacks[payload.callback];
                 }
                 break;
             }
 
-            case "data": {
+            case 'data': {
                 let args = Array.prototype.slice.call(payload.data);
                 const callback = payload.callback;
 
@@ -282,23 +254,21 @@ export default class EventTransport {
                 });
                 break;
             }
-            case "getRemoteUI": {
+            case 'getRemoteUI': {
                 if (!hasOwnProperty(this.endpointGetUI, payload.endpoint)) {
                     utils.warn(
                         DEBUG_PREFIX +
-                            "receive unknown endpoint for getRemoteUI(): " +
+                            'receive unknown endpoint for getRemoteUI(): ' +
                             payload.endpoint
                     );
                     this._wrapCallback(
                         from,
                         payload.callback
-                    )("Wrong endpoint – " + payload.endpoint);
+                    )('Wrong endpoint – ' + payload.endpoint);
                 } else {
                     this.endpointGetUI[payload.endpoint](
                         payload.data[0] || false,
-                        payload.callback
-                            ? this._wrapCallback(from, payload.callback)
-                            : () => void 0
+                        payload.callback ? this._wrapCallback(from, payload.callback) : () => void 0
                     );
                 }
                 break;
@@ -307,24 +277,21 @@ export default class EventTransport {
             default:
                 utils.warn(
                     DEBUG_PREFIX +
-                        "Unknown message type `" +
+                        'Unknown message type `' +
                         // @ts-ignore
                         payload.type +
-                        "` for `" +
+                        '` for `' +
                         this.name +
-                        "`",
+                        '`',
                     payload
                 );
         }
     }
 
-    _wrapCallback<TArgs extends unknown[]>(
-        to: string,
-        callback: Fn<TArgs, void>
-    ) {
+    _wrapCallback<TArgs extends unknown[]>(to: string, callback: Fn<TArgs, void>) {
         return (...args: TArgs): void => {
             const callbackPayload: CallbackPayload<TArgs> = {
-                type: "callback",
+                type: 'callback',
                 callback: callback,
                 data: args,
             };
@@ -334,17 +301,17 @@ export default class EventTransport {
 
     _send(to: string, payload: unknown): void {
         if (DEBUG) {
-            utils.log(DEBUG_PREFIX + "emit event", to, payload);
+            utils.log(DEBUG_PREFIX + 'emit event', to, payload);
         }
 
-        if (typeof this.window.postMessage === "function") {
+        if (typeof this.window.postMessage === 'function') {
             this.window.postMessage(
                 {
                     from: this.inputChannelId,
                     to: to,
                     payload: payload,
                 },
-                "*"
+                '*'
             );
         }
     }
@@ -356,11 +323,7 @@ export default class EventTransport {
         });
     }
 
-    sendToEndpoint(
-        endpoint: string | null,
-        type: string,
-        ...args: unknown[]
-    ): void {
+    sendToEndpoint(endpoint: string | null, type: string, ...args: unknown[]): void {
         // if (endpoint !== this.remoteName && this.remoteEndpoints.value.indexOf(endpoint) === -1) {
         //     // console.warn(this.name, endpoint, this.remoteName, this.remoteEndpoints.value);
         //     if (1||DEBUG) {
@@ -371,7 +334,7 @@ export default class EventTransport {
 
         let callback: string | boolean = false;
 
-        if (args.length && typeof args[args.length - 1] === "function") {
+        if (args.length && typeof args[args.length - 1] === 'function') {
             callback = utils.genUID();
             this.sendCallbacks[callback] = args.pop() as AnyFn;
         }
@@ -403,7 +366,7 @@ export default class EventTransport {
 
         if (id) {
             this.ownEndpoints.set(this.ownEndpoints.value.concat(id));
-            if (typeof endpoint.getRemoteUI === "function") {
+            if (typeof endpoint.getRemoteUI === 'function') {
                 this.endpointGetUI[id] = endpoint.getRemoteUI;
             }
         }
@@ -411,9 +374,9 @@ export default class EventTransport {
         if (this.inited) {
             callback({
                 connected: this.connected,
-                getRemoteUI: this.sendToEndpoint.bind(this, id, "getRemoteUI"),
+                getRemoteUI: this.sendToEndpoint.bind(this, id, 'getRemoteUI'),
                 subscribe: this.subscribeToEndpoint.bind(this, id),
-                send: this.sendToEndpoint.bind(this, id, "data"),
+                send: this.sendToEndpoint.bind(this, id, 'data'),
             });
         } else {
             this.initCallbacks.push([endpoint, callback]);
@@ -423,18 +386,13 @@ export default class EventTransport {
     };
 
     sync(endpoint: Endpoint<Namespace>): this {
-        const channel = utils.genUID(8) + ":" + this.connectTo;
+        const channel = utils.genUID(8) + ':' + this.connectTo;
         const remoteEndpoints = this.remoteEndpoints;
 
         this.onInit(endpoint, function (api) {
             api.subscribe(endpoint.processInput);
             api.connected.link((connected) => {
-                endpoint.setupChannel(
-                    channel,
-                    api.send,
-                    remoteEndpoints,
-                    connected
-                );
+                endpoint.setupChannel(channel, api.send, remoteEndpoints, connected);
             });
         });
 

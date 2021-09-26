@@ -1,8 +1,8 @@
 /* eslint-env browser */
 /* global asset */
 
-var createElement = require("./createElement.js");
-var uid = require("../../utils/index.js").genUID();
+var createElement = require('./createElement.js');
+var uid = require('../../utils/index.js').genUID();
 var publishers = [];
 var selectedPublisher = null;
 var selectPublisher;
@@ -13,7 +13,7 @@ var onClose;
 var settingsStorage = global.localStorage || {};
 var settings = {};
 try {
-    settings = JSON.parse(settingsStorage.rempl || "{}");
+    settings = JSON.parse(settingsStorage.rempl || '{}');
 } catch (e) {}
 
 function setSetting(name, value) {
@@ -23,18 +23,18 @@ function setSetting(name, value) {
 
 function updateTabSelectedState(tabEl) {
     tabEl.classList.toggle(
-        isolateName("tab_selected"),
-        tabEl.getAttribute("publisher") === selectedPublisher
+        isolateName('tab_selected'),
+        tabEl.getAttribute('publisher') === selectedPublisher
     );
 }
 
 function updatePublisherList() {
     var list = getView().tabs;
-    list.innerHTML = "";
+    list.innerHTML = '';
     publishers.forEach(function (publisher) {
         var tabEl = createElement({
             publisher: publisher,
-            class: isolateName("tab"),
+            class: isolateName('tab'),
             children: [publisher],
             events: {
                 click: function () {
@@ -50,70 +50,63 @@ function updatePublisherList() {
 function createLayoutButton(side, onclick) {
     return {
         side: side,
-        title: "Dock to " + side,
-        class: isolateName("layout-button"),
+        title: 'Dock to ' + side,
+        class: isolateName('layout-button'),
         events: {
             click:
-                typeof onclick === "function"
+                typeof onclick === 'function'
                     ? onclick
                     : function () {
-                          view.element.setAttribute("side", side);
-                          setSetting("host-dock", side);
+                          view.element.setAttribute('side', side);
+                          setSetting('host-dock', side);
                       },
         },
     };
 }
 
 function isolateName(name) {
-    return uid + "-" + name;
+    return uid + '-' + name;
 }
 
 function preprocessCSS(css) {
-    return css.replace(/\.([a-z])/gi, "." + isolateName("$1"));
+    return css.replace(/\.([a-z])/gi, '.' + isolateName('$1'));
 }
 
 function getView() {
     if (view === null) {
         view = createElement({
-            class: isolateName("host"),
-            side: settings["host-dock"] || "bottom",
+            class: isolateName('host'),
+            side: settings['host-dock'] || 'bottom',
             children: [
                 {
-                    tagName: "style",
+                    tagName: 'style',
                     children: [
                         preprocessCSS(
-                            typeof asset === "function"
-                                ? asset("./style.css", true)
-                                : require("fs").readFileSync(
-                                      __dirname + "/style.css",
-                                      "utf8"
-                                  )
+                            typeof asset === 'function'
+                                ? asset('./style.css', true)
+                                : require('fs').readFileSync(__dirname + '/style.css', 'utf8')
                         ),
                     ],
                 },
                 {
-                    class: isolateName("toolbar"),
+                    class: isolateName('toolbar'),
                     children: [
                         {
-                            ref: "tabs",
+                            ref: 'tabs',
                             style: {
-                                display: "flex",
+                                display: 'flex',
                                 flex: 1,
                             },
                         },
                         {
-                            ref: "buttons",
-                            class: isolateName("layout-buttons"),
+                            ref: 'buttons',
+                            class: isolateName('layout-buttons'),
                             children: [].concat(
-                                [
-                                    "left",
-                                    "top",
-                                    "bottom",
-                                    "right",
-                                    "fit the page",
-                                ].map(createLayoutButton),
+                                ['left', 'top', 'bottom', 'right', 'fit the page'].map(
+                                    createLayoutButton
+                                ),
                                 {
-                                    class: isolateName("close-button"),
+                                    class: isolateName('close-button'),
                                     events: {
                                         click: function () {
                                             onClose();
@@ -125,8 +118,8 @@ function getView() {
                     ],
                 },
                 {
-                    ref: "sandbox",
-                    class: isolateName("sandbox"),
+                    ref: 'sandbox',
+                    class: isolateName('sandbox'),
                 },
             ],
         });
@@ -150,14 +143,14 @@ function showView(closeCallback) {
 
     onClose = closeCallback;
 
-    element.style.display = "";
+    element.style.display = '';
     if (!document.contains(element)) {
         injectElement(document.body || document.documentElement, element);
     }
 }
 
 function softHideView() {
-    getView().element.style.display = "none";
+    getView().element.style.display = 'none';
 }
 
 function hideView() {
@@ -180,10 +173,7 @@ module.exports = {
         if (publisher !== selectedPublisher) {
             selectedPublisher = publisher;
             if (view) {
-                Array.prototype.forEach.call(
-                    getView().tabs.children,
-                    updateTabSelectedState
-                );
+                Array.prototype.forEach.call(getView().tabs.children, updateTabSelectedState);
             }
         }
     },

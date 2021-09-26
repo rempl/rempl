@@ -1,52 +1,38 @@
 /* eslint-env browser */
 module.exports = function (root) {
     function createElement(options) {
-        var element = document.createElement(options.tagName || "div");
+        var element = document.createElement(options.tagName || 'div');
 
         for (var name in options) {
             switch (name) {
-                case "tagName":
+                case 'tagName':
                     break;
 
-                case "ref":
+                case 'ref':
                     if (map) {
                         map[options.ref] = element;
                     }
                     break;
 
-                case "style":
+                case 'style':
                     element.setAttribute(
-                        "style",
-                        Object.keys(options.style).reduce(function (
-                            style,
-                            property
-                        ) {
-                            return (
-                                style +
-                                property +
-                                ":" +
-                                options.style[property] +
-                                ";"
-                            );
-                        },
-                        "")
+                        'style',
+                        Object.keys(options.style).reduce(function (style, property) {
+                            return style + property + ':' + options.style[property] + ';';
+                        }, '')
                     );
                     break;
 
-                case "events":
+                case 'events':
                     for (var event in options.events) {
-                        element.addEventListener(
-                            event,
-                            options.events[event],
-                            false
-                        );
+                        element.addEventListener(event, options.events[event], false);
                     }
                     break;
 
-                case "children":
+                case 'children':
                     options.children.forEach(function (child) {
                         element.appendChild(
-                            typeof child === "string"
+                            typeof child === 'string'
                                 ? document.createTextNode(child)
                                 : createElement(child)
                         );

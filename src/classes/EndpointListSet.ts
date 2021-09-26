@@ -1,4 +1,4 @@
-import EndpointList from "./EndpointList";
+import EndpointList from './EndpointList';
 
 export default class EndpointListSet extends EndpointList {
     endpointLists: EndpointList[] = [];
@@ -9,10 +9,7 @@ export default class EndpointListSet extends EndpointList {
 
     set(): void {
         super.set(
-            this.endpointLists.reduce(
-                (result, list) => result.concat(list.value),
-                [] as string[]
-            )
+            this.endpointLists.reduce((result, list) => result.concat(list.value), [] as string[])
         );
     }
 

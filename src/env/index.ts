@@ -1,8 +1,8 @@
-import { isNode } from "../utils";
+import { isNode } from '../utils';
 
-import createEnv from "./publisher";
+import createEnv from './publisher';
 
-import getEnv from "./subscriber";
+import getEnv from './subscriber';
 
 export default !isNode
     ? {
@@ -11,9 +11,7 @@ export default !isNode
       }
     : {
           createEnv: function () {
-              throw new Error(
-                  "[rempl] createEnv() doesn't supported for node.js"
-              );
+              throw new Error("[rempl] createEnv() doesn't supported for node.js");
           },
           getEnv: function () {
               throw new Error("[rempl] getEnv() doesn't supported for node.js");

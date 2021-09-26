@@ -1,7 +1,7 @@
 /* eslint-env browser */
-var EventTransport = require("../../transport/event.js");
-var createSandbox = require("../../sandbox/index.js");
-var view = require("./view.js");
+var EventTransport = require('../../transport/event.js');
+var createSandbox = require('../../sandbox/index.js');
+var view = require('./view.js');
 var publishers = [];
 var selectedPublisher = null;
 var autoSelectPublisher = false;
@@ -58,10 +58,7 @@ module.exports = function getHost() {
         return host;
     }
 
-    transport = new EventTransport(
-        "rempl-inpage-host",
-        "rempl-inpage-publisher"
-    );
+    transport = new EventTransport('rempl-inpage-host', 'rempl-inpage-publisher');
     transport.remoteEndpoints.on(function (endpoints) {
         publishers = endpoints;
         view.setPublisherList(publishers, selectPublisher);

@@ -4,14 +4,12 @@ module.exports = function (publisher, WsTransport, options) {
 
     publisher.connectWs = function (uri) {
         switch (uri) {
-            case "implicit":
+            case 'implicit':
             case undefined:
-                uri =
-                    WsTransport.settings.explicit ||
-                    WsTransport.settings.implicit;
+                uri = WsTransport.settings.explicit || WsTransport.settings.implicit;
                 break;
 
-            case "explicit":
+            case 'explicit':
                 uri = WsTransport.settings.explicit;
 
                 // when no explicit setting do nothing
@@ -22,7 +20,7 @@ module.exports = function (publisher, WsTransport, options) {
                 break;
         }
 
-        if (typeof uri === "string") {
+        if (typeof uri === 'string') {
             WsTransport.get(uri).sync(publisher);
         } else {
             console.warn(
@@ -33,15 +31,15 @@ module.exports = function (publisher, WsTransport, options) {
     };
 
     switch (options.ws) {
-        case "implicit":
-        case "auto":
+        case 'implicit':
+        case 'auto':
         case true:
-            uri = "implicit";
+            uri = 'implicit';
             break;
 
-        case "explicit":
+        case 'explicit':
         case undefined:
-            uri = "explicit";
+            uri = 'explicit';
             break;
 
         case false:
@@ -49,17 +47,17 @@ module.exports = function (publisher, WsTransport, options) {
             return;
 
         default:
-            if (typeof options.ws === "string") {
+            if (typeof options.ws === 'string') {
                 uri = options.ws;
             } else {
                 console.warn(
-                    "[rempl] Bad value of `options.ws` option for `createPublisher(.., .., options)`"
+                    '[rempl] Bad value of `options.ws` option for `createPublisher(.., .., options)`'
                 );
                 return;
             }
     }
 
-    if (typeof uri === "string") {
+    if (typeof uri === 'string') {
         publisher.connectWs(uri);
     }
 };

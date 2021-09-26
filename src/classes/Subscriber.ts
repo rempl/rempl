@@ -1,7 +1,7 @@
-import Namespace from "../classes/Namespace";
-import Endpoint, { Packet } from "../classes/Endpoint";
-import * as utils from "../utils/";
-import { AnyFn, Unsubscribe } from "../utils/";
+import Namespace from '../classes/Namespace';
+import Endpoint, { Packet } from '../classes/Endpoint';
+import * as utils from '../utils/';
+import { AnyFn, Unsubscribe } from '../utils/';
 
 export type DataPacket = {
     type: string;
@@ -17,14 +17,14 @@ export class SubscriberNamespace extends Namespace {
     }
 
     subscribe(fn: AnyFn): Unsubscribe {
-        this.callRemote("init", fn);
+        this.callRemote('init', fn);
         return utils.subscribe(this.subscribers, fn);
     }
 }
 
 export default class Subscriber extends Endpoint<SubscriberNamespace> {
     namespaceClass = SubscriberNamespace;
-    type = "Subscriber";
+    type = 'Subscriber';
 
     constructor(id?: string) {
         super(id);
@@ -36,7 +36,7 @@ export default class Subscriber extends Endpoint<SubscriberNamespace> {
                     const ns = this.namespaces[name] as SubscriberNamespace;
                     if (ns.subscribers.length) {
                         ns.callRemote(
-                            "init",
+                            'init',
                             function (this: typeof ns, data: unknown) {
                                 this.subscribers.forEach(function (callback) {
                                     callback(data);
@@ -53,9 +53,9 @@ export default class Subscriber extends Endpoint<SubscriberNamespace> {
 
     processInput = (packet: Packet, callback: AnyFn): void => {
         switch (packet.type) {
-            case "data": {
+            case 'data': {
                 const thePacket = packet as DataPacket;
-                this.ns(thePacket.ns || "*")
+                this.ns(thePacket.ns || '*')
                     .subscribers.slice()
                     .forEach(function (callback) {
                         callback(thePacket.payload);

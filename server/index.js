@@ -1,9 +1,27 @@
 var fs = require('fs');
 var path = require('path');
 var chalk = require('chalk');
-var genUID = require('../src/utils').genUID;
 var EndpointList = require('./EndpointList');
 var Endpoint = require('./Endpoint');
+
+function genUID(len) {
+    function base36(val) {
+        return Math.round(val).toString(36);
+    }
+
+    // uid should starts with alpha
+    let result = base36(10 + 25 * Math.random());
+
+    if (!len) {
+        len = 16;
+    }
+
+    while (result.length < len) {
+        result += base36(Date.now() * Math.random());
+    }
+
+    return result.substr(0, len);
+}
 
 function packet(type, args) {
     return [type].concat(Array.prototype.slice.call(args));

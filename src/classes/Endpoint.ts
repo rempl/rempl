@@ -1,9 +1,9 @@
-import Namespace from "./Namespace";
-import Token from "./Token";
-import * as utils from "../utils";
-import { AnyFn } from "../utils";
-import EndpointListSet from "./EndpointListSet";
-import EndpointList from "./EndpointList";
+import Namespace from './Namespace';
+import Token from './Token';
+import * as utils from '../utils';
+import { AnyFn } from '../utils';
+import EndpointListSet from './EndpointListSet';
+import EndpointList from './EndpointList';
 
 export type Channel = {
     type: string;
@@ -13,17 +13,17 @@ export type Channel = {
 export type API = Record<string, string[]>;
 
 export type CallPacket = {
-    type: "call";
+    type: 'call';
     ns?: string;
     method: string;
     args: unknown[];
 };
 export type RemoteMethodsPacket = {
-    type: "remoteMethods";
+    type: 'remoteMethods';
     methods: API;
 };
 export type GetProvidedMethodsPacket = {
-    type: "getProvidedMethods";
+    type: 'getProvidedMethods';
 };
 
 export type Packet = {
@@ -34,7 +34,7 @@ export default class Endpoint<TNamespace extends Namespace> {
     id: string | null;
     namespaces: Record<string, TNamespace>;
     namespaceClass = Namespace;
-    type = "Endpoint";
+    type = 'Endpoint';
     channels: Channel[] = [];
     connected = new Token(false);
     remoteEndpoints = new EndpointListSet();
@@ -48,14 +48,14 @@ export default class Endpoint<TNamespace extends Namespace> {
         this.remoteEndpoints.on((endpoints) => {
             // Star is used as a hack for subscriber<->sandbox communication
             // TODO: find a better solution
-            this.connected.set(endpoints.includes(this.id || "*"));
+            this.connected.set(endpoints.includes(this.id || '*'));
         }, this);
 
-        const defaultNS = this.ns("*");
+        const defaultNS = this.ns('*');
         for (const method in defaultNS) {
             // todo rework in the next version
             // @ts-ignore
-            if (typeof defaultNS[method] === "function") {
+            if (typeof defaultNS[method] === 'function') {
                 // @ts-ignore
                 this[method] = defaultNS[method].bind(defaultNS);
             }
@@ -63,15 +63,12 @@ export default class Endpoint<TNamespace extends Namespace> {
     }
 
     getName(): string {
-        return this.type + (this.id ? "#" + this.id : "");
+        return this.type + (this.id ? '#' + this.id : '');
     }
 
     ns(name: string): TNamespace {
         if (!this.namespaces[name]) {
-            this.namespaces[name] = new this.namespaceClass(
-                name,
-                this
-            ) as TNamespace;
+            this.namespaces[name] = new this.namespaceClass(name, this) as TNamespace;
         }
 
         return this.namespaces[name];
@@ -79,7 +76,7 @@ export default class Endpoint<TNamespace extends Namespace> {
 
     requestRemoteApi(): void {
         const getProvidedMethodsPacket: GetProvidedMethodsPacket = {
-            type: "getProvidedMethods",
+            type: 'getProvidedMethods',
         };
         Namespace.send(this, [
             getProvidedMethodsPacket,
@@ -142,7 +139,7 @@ export default class Endpoint<TNamespace extends Namespace> {
             this.providedMethodsUpdateTimer = setTimeout(() => {
                 this.providedMethodsUpdateTimer = null;
                 const remoteMethodsPacket: RemoteMethodsPacket = {
-                    type: "remoteMethods",
+                    type: 'remoteMethods',
                     methods: this.getProvidedApi(),
                 };
                 Namespace.send(this, [remoteMethodsPacket]);
@@ -152,43 +149,38 @@ export default class Endpoint<TNamespace extends Namespace> {
 
     processInput = (packet: Packet, callback: AnyFn): void => {
         switch (packet.type) {
-            case "call": {
+            case 'call': {
                 const thePacket = packet as CallPacket;
-                const ns = this.ns(thePacket.ns || "*");
+                const ns = this.ns(thePacket.ns || '*');
 
                 if (!ns.isMethodProvided(thePacket.method)) {
                     return utils.warn(
-                        "[rempl][sync] " +
+                        '[rempl][sync] ' +
                             this.getName() +
-                            " (namespace: " +
-                            (thePacket.ns || "default") +
-                            ") has no remote method:",
+                            ' (namespace: ' +
+                            (thePacket.ns || 'default') +
+                            ') has no remote method:',
                         thePacket.method
                     );
                 }
 
-                Namespace.invoke(
-                    ns,
-                    thePacket.method,
-                    thePacket.args,
-                    callback
-                );
+                Namespace.invoke(ns, thePacket.method, thePacket.args, callback);
                 break;
             }
 
-            case "remoteMethods": {
+            case 'remoteMethods': {
                 const thePacket = packet as RemoteMethodsPacket;
                 this.setRemoteApi(thePacket.methods);
                 break;
             }
 
-            case "getProvidedMethods":
+            case 'getProvidedMethods':
                 callback(this.getProvidedApi());
                 break;
 
             default:
                 utils.warn(
-                    "[rempl][sync] " + this.getName() + "Unknown packet type:",
+                    '[rempl][sync] ' + this.getName() + 'Unknown packet type:',
                     // @ts-ignore
                     packet.type
                 );
@@ -212,10 +204,7 @@ export default class Endpoint<TNamespace extends Namespace> {
             this.remoteEndpoints.add(remoteEndpoints);
         } else {
             for (let i = 0; i < this.channels.length; i++) {
-                if (
-                    this.channels[i].type === type &&
-                    this.channels[i].send === send
-                ) {
+                if (this.channels[i].type === type && this.channels[i].send === send) {
                     this.remoteEndpoints.remove(remoteEndpoints);
                     this.channels.splice(i, 1);
                     break;

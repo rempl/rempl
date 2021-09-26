@@ -1,9 +1,9 @@
 export type TODO = any;
 
 export const isNode =
-    typeof process !== "undefined" &&
-    Object.prototype.toString.call(process) === "[object process]" &&
-    Object.prototype.toString.call(global.self) !== "[object Window]";
+    typeof process !== 'undefined' &&
+    Object.prototype.toString.call(process) === '[object process]' &&
+    Object.prototype.toString.call(global.self) !== '[object Window]';
 
 export type Complete<TDest, TSource> = TDest & Omit<TSource, keyof TDest>;
 
@@ -69,7 +69,7 @@ export function subscribe<TItem>(list: TItem[], item: TItem): Unsubscribe {
 
 const consoleMethods = (() => {
     const console = global.console;
-    const methods: Pick<typeof console, "log" | "info" | "warn" | "error"> = {
+    const methods: Pick<typeof console, 'log' | 'info' | 'warn' | 'error'> = {
         log: () => {},
         info: () => {},
         warn: () => {},
@@ -80,17 +80,12 @@ const consoleMethods = (() => {
         for (const key of Object.keys(methods)) {
             const methodName = key as keyof typeof methods;
             methods[methodName] =
-                "bind" in Function.prototype &&
-                typeof console[methodName] == "function"
+                'bind' in Function.prototype && typeof console[methodName] == 'function'
                     ? Function.prototype.bind.call(console[methodName], console)
                     : // IE8 and lower solution. It's also more safe when Function.prototype.bind
                       // defines by other libraries (like es5-shim).
                       function (...args) {
-                          Function.prototype.apply.call(
-                              console[methodName],
-                              console,
-                              args
-                          );
+                          Function.prototype.apply.call(console[methodName], console, args);
                       };
         }
     }

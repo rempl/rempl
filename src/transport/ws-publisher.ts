@@ -1,23 +1,20 @@
-import Token from "../classes/Token";
-import EndpointList from "../classes/EndpointList";
-import * as utils from "../utils";
+import Token from '../classes/Token';
+import EndpointList from '../classes/EndpointList';
+import * as utils from '../utils';
 
 // @ts-ignore
-import socketIO from "socket.io-client/dist/socket.io.slim.js";
-import Endpoint from "../classes/Endpoint";
-import Namespace from "../classes/Namespace";
-import { AnyFn, hasOwnProperty, TypeRecord, Unsubscribe } from "../utils";
-import { GetRemoteUICallback, GetRemoteUIFn } from "./event";
+import socketIO from 'socket.io-client/dist/socket.io.slim.js';
+import Endpoint from '../classes/Endpoint';
+import Namespace from '../classes/Namespace';
+import { AnyFn, hasOwnProperty, TypeRecord, Unsubscribe } from '../utils';
+import { GetRemoteUICallback, GetRemoteUIFn } from './event';
 
 const endpoints: Record<string, WSTransport> = Object.create(null);
 const INFO_UPDATE_TIME = 100;
 const DEBUG = false;
-const DEBUG_PREFIX = "[rempl][ws-transport] ";
+const DEBUG_PREFIX = '[rempl][ws-transport] ';
 
-export type SelfInfo = Pick<
-    WSTransport,
-    "id" | "sessionId" | "type" | "publishers"
->;
+export type SelfInfo = Pick<WSTransport, 'id' | 'sessionId' | 'type' | 'publishers'>;
 
 export type API = {
     connected: Token<boolean>;
@@ -50,25 +47,19 @@ function normalizeUri(uri: string) {
     uri = String(uri);
 
     if (/^\d+$/.test(uri)) {
-        return "ws://localhost:" + uri;
+        return 'ws://localhost:' + uri;
     }
 
     return uri
-        .replace(/^http:\/\//i, "ws://")
-        .replace(/^https:\/\//i, "wss://")
+        .replace(/^http:\/\//i, 'ws://')
+        .replace(/^https:\/\//i, 'wss://')
         .replace(/^([a-z]+:\/\/)|^/i, function (m, protocol) {
-            protocol = protocol ? protocol.toLowerCase() : "";
-            return protocol === "ws://" || protocol === "wss://"
-                ? protocol
-                : "ws://";
+            protocol = protocol ? protocol.toLowerCase() : '';
+            return protocol === 'ws://' || protocol === 'wss://' ? protocol : 'ws://';
         });
 }
 
-function subscribe(
-    this: WSTransport,
-    endpoint: string | null,
-    fn: AnyFn
-): Unsubscribe {
+function subscribe(this: WSTransport, endpoint: string | null, fn: AnyFn): Unsubscribe {
     return utils.subscribe(this.dataCallbacks, {
         endpoint: endpoint,
         fn: fn,
@@ -76,7 +67,7 @@ function subscribe(
 }
 
 function send(this: WSTransport, endpoint: string | null, callback?: AnyFn) {
-    this.send("rempl:from publisher", endpoint, callback);
+    this.send('rempl:from publisher', endpoint, callback);
 }
 
 function onConnect(this: WSTransport) {
@@ -85,19 +76,16 @@ function onConnect(this: WSTransport) {
     this.connected.set(true);
     this.info = this.getInfo();
 
-    this.send("rempl:endpoint connect", this.info, (data) => {
-        if ("id" in data) {
+    this.send('rempl:endpoint connect', this.info, (data) => {
+        if ('id' in data) {
             this.setClientId(data.id);
         }
 
-        this.sendInfoTimer = setInterval(
-            this.sendInfo.bind(this),
-            INFO_UPDATE_TIME
-        );
+        this.sendInfoTimer = setInterval(this.sendInfo.bind(this), INFO_UPDATE_TIME);
     });
 
     if (DEBUG) {
-        console.log(DEBUG_PREFIX + "connected");
+        console.log(DEBUG_PREFIX + 'connected');
     }
 }
 
@@ -109,28 +97,20 @@ function onGetUI(
 ) {
     if (!hasOwnProperty(this.publishersMap, id as string)) {
         if (DEBUG) {
-            console.error(
-                DEBUG_PREFIX + "Publisher `" + id + "` isn't registered"
-            );
+            console.error(DEBUG_PREFIX + 'Publisher `' + id + "` isn't registered");
         }
 
-        callback("Publisher `" + id + "` isn't registered");
+        callback('Publisher `' + id + "` isn't registered");
         return;
     }
 
-    this.publishersMap[id as string].getRemoteUI.call(
-        null,
-        settings || {},
-        callback
-    );
+    this.publishersMap[id as string].getRemoteUI.call(null, settings || {}, callback);
 }
 
 function onData(this: WSTransport, id: string | null, ...args: unknown[]) {
     if (!hasOwnProperty(this.publishersMap, id as string)) {
         if (DEBUG) {
-            console.error(
-                DEBUG_PREFIX + "Publisher `" + id + "` isn't registered"
-            );
+            console.error(DEBUG_PREFIX + 'Publisher `' + id + "` isn't registered");
         }
 
         return;
@@ -145,7 +125,7 @@ function onData(this: WSTransport, id: string | null, ...args: unknown[]) {
 
 function onDisconnect(this: WSTransport) {
     if (DEBUG) {
-        console.log(DEBUG_PREFIX + "disconnected");
+        console.log(DEBUG_PREFIX + 'disconnected');
     }
 
     clearInterval(this.sendInfoTimer as number);
@@ -170,15 +150,15 @@ export default class WSTransport {
 
     constructor(uri: string) {
         if (DEBUG) {
-            console.log(DEBUG_PREFIX + "connecting to " + normalizeUri(uri));
+            console.log(DEBUG_PREFIX + 'connecting to ' + normalizeUri(uri));
         }
 
         this.transport = socketIO
             .connect(normalizeUri(uri))
-            .on("connect", onConnect.bind(this))
-            .on("disconnect", onDisconnect.bind(this))
-            .on("rempl:get ui", onGetUI.bind(this))
-            .on("rempl:to publisher", onData.bind(this));
+            .on('connect', onConnect.bind(this))
+            .on('disconnect', onDisconnect.bind(this))
+            .on('rempl:get ui', onGetUI.bind(this))
+            .on('rempl:to publisher', onData.bind(this));
     }
 
     static get(endpoint: string): WSTransport {
@@ -189,8 +169,8 @@ export default class WSTransport {
         return (endpoints[endpoint] = new this(endpoint));
     }
 
-    type = "unknown";
-    infoFields = ["id", "sessionId", "type", "publishers"] as const;
+    type = 'unknown';
+    infoFields = ['id', 'sessionId', 'type', 'publishers'] as const;
 
     setClientId(id: string): void {
         this.id = id;
@@ -228,20 +208,15 @@ export default class WSTransport {
 
         if (valuesChanged(this.info, newInfo)) {
             this.info = newInfo;
-            this.send("rempl:endpoint info", this.info);
+            this.send('rempl:endpoint info', this.info);
         }
     }
 
-    createApi(
-        endpoint: Endpoint<Namespace> & { getRemoteUI?: GetRemoteUIFn }
-    ): API | undefined {
+    createApi(endpoint: Endpoint<Namespace> & { getRemoteUI?: GetRemoteUIFn }): API | undefined {
         if (hasOwnProperty(this.publishersMap, endpoint.id as string)) {
             if (DEBUG) {
                 console.error(
-                    DEBUG_PREFIX +
-                        "Publisher `" +
-                        endpoint.id +
-                        "` is already registered"
+                    DEBUG_PREFIX + 'Publisher `' + endpoint.id + '` is already registered'
                 );
             }
 
@@ -270,12 +245,7 @@ export default class WSTransport {
         }
         api.subscribe(endpoint.processInput);
         api.connected.link(function (connected) {
-            endpoint.setupChannel(
-                "ws",
-                api.send,
-                this.remoteEndpoints,
-                connected
-            );
+            endpoint.setupChannel('ws', api.send, this.remoteEndpoints, connected);
         }, this);
     }
 }
