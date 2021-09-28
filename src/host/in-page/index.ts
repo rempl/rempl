@@ -1,14 +1,21 @@
 /* eslint-env browser */
-var EventTransport = require('../../transport/event.js');
-var createSandbox = require('../../sandbox/index.js');
-var view = require('./view.js');
-var publishers = [];
-var selectedPublisher = null;
-var autoSelectPublisher = false;
-var teardownTimer;
-var transport = null;
-var sandbox = null;
-var host = null;
+import EventTransport from '../../transport/event.js';
+import { createSandbox } from '../../sandbox/index.js';
+import view from './view.js';
+import Publisher from '../../classes/Publisher.js';
+
+type Host = {
+    activate(publisher?: Publisher | string): void;
+    deactivate(publisher?: Publisher | string): void;
+};
+
+const publishers: string[] = [];
+let selectedPublisherId: string | null = null;
+let autoSelectPublisher = false;
+let teardownTimer: ReturnType<typeof setTimeout>;
+let transport: EventTransport | null = null;
+let sandbox: ReturnType<typeof createSandbox> | null = null;
+let host: Host | null = null;
 
 function cleanupSandbox() {
     if (sandbox !== null) {
@@ -17,19 +24,19 @@ function cleanupSandbox() {
     }
 }
 
-function selectPublisher(publisher) {
-    if (!publisher) {
-        publisher = null;
+function selectPublisher(publisherId?: string | null) {
+    if (!publisherId) {
+        publisherId = null;
     }
 
-    if (publisher !== selectedPublisher) {
+    if (publisherId !== selectedPublisherId) {
         autoSelectPublisher = false;
-        selectedPublisher = publisher;
+        selectedPublisherId = publisherId;
 
-        if (selectedPublisher) {
-            view.selectPublisher(selectedPublisher);
+        if (selectedPublisherId) {
+            view.selectPublisher(selectedPublisherId);
             view.show(host.deactivate);
-            transport.onInit({ id: selectedPublisher }, function (papi) {
+            transport.onInit({ id: selectedPublisherId }, function (papi) {
                 papi.getRemoteUI(function (error, type, content) {
                     cleanupSandbox();
                     sandbox = createSandbox(
@@ -38,7 +45,7 @@ function selectPublisher(publisher) {
                             type: type,
                             content: content,
                         },
-                        function (api) {
+                        (api) => {
                             papi.subscribe(api.send);
                             api.subscribe(papi.send);
                         }
@@ -59,37 +66,37 @@ module.exports = function getHost() {
     }
 
     transport = new EventTransport('rempl-inpage-host', 'rempl-inpage-publisher');
-    transport.remoteEndpoints.on(function (endpoints) {
+    transport.remoteEndpoints.on((endpoints) => {
+        console.log('?!', { endpoints });
         publishers = endpoints;
         view.setPublisherList(publishers, selectPublisher);
 
-        if (autoSelectPublisher && !selectedPublisher && publishers.length) {
+        if (autoSelectPublisher && !selectedPublisherId && publishers.length) {
             selectPublisher(publishers[0]);
         }
     });
 
     return (host = {
-        activate: function (publisher) {
-            var publisherId =
-                (publisher && publisher.id) ||
-                publisher ||
-                selectedPublisher ||
-                publishers[0] ||
-                null;
+        activate(publisher) {
+            const publisherId =
+                typeof publisher === 'string'
+                    ? publisher
+                    : publisher?.id || selectedPublisherId || publishers[0] || null;
 
             clearTimeout(teardownTimer);
             selectPublisher(publisherId);
-            view.show(host.deactivate);
+            view.show(host?.deactivate);
 
-            if (!selectedPublisher) {
+            if (!selectedPublisherId) {
                 autoSelectPublisher = true;
             }
         },
-        deactivate: function (publisher) {
-            var publisherId = (publisher && publisher.id) || publisher;
+        deactivate(publisher) {
+            const publisherId = typeof publisher === 'string' ? publisher : publisher?.id || null;
+
             autoSelectPublisher = false;
 
-            if (!publisherId || publisherId === selectedPublisher) {
+            if (!publisherId || publisherId === selectedPublisherId) {
                 view.softHide();
                 // tear down subscriber in 15 sec
                 clearTimeout(teardownTimer);

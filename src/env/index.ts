@@ -1,7 +1,5 @@
 import { isNode } from '../utils';
-
 import createEnv from './publisher';
-
 import getEnv from './subscriber';
 
 export default !isNode

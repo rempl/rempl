@@ -1,7 +1,8 @@
-var Publisher = require('../classes/Publisher.js');
+import Publisher from '../classes/Publisher.js';
+
 var publishers = Object.create(null);
 
-module.exports = function createPublisherFactory(fn, onPublishersChange) {
+export default function createPublisherFactory(fn, onPublishersChange) {
     return function getPublisher(id) {
         if (id in publishers === false) {
             publishers[id] = new Publisher(id);
@@ -13,4 +14,4 @@ module.exports = function createPublisherFactory(fn, onPublishersChange) {
 
         return publishers[id];
     };
-};
+}

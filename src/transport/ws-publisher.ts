@@ -146,7 +146,10 @@ export default class WSTransport {
     ownEndpoints = new EndpointList();
     remoteEndpoints = new EndpointList();
 
-    transport: { emit(...args: unknown[]): void };
+    transport: {
+        emit(...args: unknown[]): void;
+        on(event: string, callback: AnyFn): void;
+    };
 
     constructor(uri: string) {
         if (DEBUG) {
@@ -169,8 +172,12 @@ export default class WSTransport {
         return (endpoints[endpoint] = new this(endpoint));
     }
 
-    type = 'unknown';
-    infoFields = ['id', 'sessionId', 'type', 'publishers'] as const;
+    get type(): string {
+        return 'unknown';
+    }
+    get infoFields(): readonly string[] {
+        return ['id', 'sessionId', 'type', 'publishers'];
+    }
 
     setClientId(id: string): void {
         this.id = id;
@@ -189,13 +196,9 @@ export default class WSTransport {
     getInfo(): SelfInfo {
         const result: SelfInfo = {} as SelfInfo;
 
-        this.infoFields.forEach((name) => {
-            // @ts-ignore
-            result[name] = Array.isArray(this[name])
-                ? // @ts-ignore
-                  this[name].slice()
-                : this[name];
-        });
+        for (const name of this.infoFields) {
+            result[name] = Array.isArray(this[name]) ? this[name].slice() : this[name];
+        }
 
         return result;
     }

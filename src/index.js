@@ -1,15 +1,19 @@
-module.exports = {
-    version: require('../package.json').version,
-    source: require('./source.js'),
+import { version } from '../package.json';
+import { source } from './source';
+import env from './env';
+import createSandbox from './sandbox';
+import getHost from './host/in-page';
+import createPublisher from './publisher';
+import getSubscriber from './subscriber';
+import scriptFromFile from './sdk/scriptFromFile.js';
 
-    createEnv: require('./env/index.js').createEnv,
-    getEnv: require('./env/index.js').getEnv,
-
-    createSandbox: require('./sandbox/index.js'),
-    getHost: require('./host/in-page/index.js'),
-
-    createPublisher: require('./publisher/index.js'),
-    getSubscriber: require('./subscriber/index.js'),
-
-    scriptFromFile: require('./sdk/scriptFromFile.js'),
+export default {
+    version,
+    source,
+    ...env,
+    createSandbox,
+    getHost,
+    createPublisher,
+    getSubscriber,
+    scriptFromFile,
 };

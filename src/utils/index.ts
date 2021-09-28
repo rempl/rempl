@@ -1,3 +1,6 @@
+import global from './global';
+
+export { global };
 export type TODO = any;
 
 export const isNode =
@@ -29,10 +32,6 @@ export function complete<
     }
 
     return dest as TComplete;
-}
-
-export function slice(src: unknown[], offset?: number): unknown[] {
-    return Array.prototype.slice.call(src, offset);
 }
 
 export function genUID(len?: number): string {

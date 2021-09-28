@@ -1,5 +1,5 @@
 /* eslint-env browser */
-module.exports = function (root) {
+export default function (root) {
     function createElement(options) {
         var element = document.createElement(options.tagName || 'div');
 
@@ -50,4 +50,4 @@ module.exports = function (root) {
     var map = {};
     map.element = createElement(root, map);
     return map;
-};
+}

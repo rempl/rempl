@@ -4,7 +4,7 @@ import Token from '../classes/Token';
 import EndpointList from '../classes/EndpointList';
 import EndpointListSet from '../classes/EndpointListSet';
 import * as utils from '../utils/';
-import { AnyFn, Fn, hasOwnProperty, Unsubscribe } from '../utils';
+import { global, AnyFn, Fn, hasOwnProperty, Unsubscribe } from '../utils';
 import Endpoint from '../classes/Endpoint';
 import Namespace from '../classes/Namespace';
 

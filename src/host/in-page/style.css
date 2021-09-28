@@ -1,43 +1,48 @@
-.host {
+:host {
     position: fixed;
     z-index: 100000;
-    display: -webkit-flex;
     display: flex;
     flex-direction: column;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: #eee;
-    opacity: 0.9;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(8px);
+    opacity: 1;
     font-family: Tahoma, Verdana, Arial, sans-serif;
     font-size: 12px;
     transition: all cubic-bezier(0.25, 0.59, 0, 1.11) 0.2s;
     border: 0 solid #aaa;
 }
 
-.host[side='left'] {
+@supports not (backdrop-filter: blur(8px)) {
+    :host {
+        background: rgba(255, 255, 255, 0.95);
+    }
+}
+
+:host([side='left']) {
     right: 50%;
     border-right-width: 2px;
 }
 
-.host[side='right'] {
+:host([side='right']) {
     left: 50%;
     border-left-width: 2px;
 }
 
-.host[side='top'] {
+:host([side='top']) {
     bottom: 50%;
     border-bottom-width: 2px;
 }
 
-.host[side='bottom'] {
+:host([side='bottom']) {
     top: 50%;
     border-top-width: 2px;
 }
 
 .toolbar {
-    display: -webkit-flex;
     display: flex;
     padding: 0 0 0 24px;
     background: #f8f8f8 no-repeat 4px center / 16px;
@@ -66,18 +71,13 @@
 }
 
 .layout-buttons {
-    display: -webkit-flex;
     display: flex;
 }
 
 .layout-button {
-    display: -webkit-flex;
     display: flex;
-    -webkit-align-items: center;
     align-items: center;
-    -webkit-justify-content: center;
     justify-content: center;
-    -webkit-flex: 0 0 auto;
     flex: 0 0 auto;
     width: 28px;
     height: 24px;
@@ -97,11 +97,11 @@
     box-sizing: border-box;
 }
 
-.host[side='left'] .layout-button[side='left'],
-.host[side='right'] .layout-button[side='right'],
-.host[side='top'] .layout-button[side='top'],
-.host[side='bottom'] .layout-button[side='bottom'],
-.host[side='fit the page'] .layout-button[side='fit the page'] {
+:host([side='left']) .layout-button[side='left'],
+:host([side='right']) .layout-button[side='right'],
+:host([side='top']) .layout-button[side='top'],
+:host([side='bottom']) .layout-button[side='bottom'],
+:host([side='fit the page']) .layout-button[side='fit the page'] {
     color: rgb(66, 128, 236);
     background: none;
 }
@@ -157,17 +157,16 @@
 }
 
 .sandbox {
-    -webkit-flex: 1 1 auto;
     flex: 1 1 auto;
     position: relative;
 }
 
-.sandbox > iframe {
+iframe {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     border: 0;
-    background: white;
+    background: transparent;
 }
