@@ -1,12 +1,13 @@
 /* eslint-env browser */
-/* global REMPL_SERVER */
 
-import WsTransport from '../../transport/ws-publisher.js';
-import identify from './identify.js';
+import WsTransport from '../../transport/ws.js';
+import { startIdentify, stopIdentify } from './identify.js';
 import { global } from '../../utils/index.js';
+import { createWsConnectionFactory } from '../factory.js';
 
 const STORAGE_KEY = 'rempl:id';
 const sessionStorage = global.sessionStorage || {};
+declare let REMPL_SERVER: string | boolean;
 
 function fetchWsSettings() {
     function fetchEnvVariable() {
@@ -16,7 +17,7 @@ function fetchWsSettings() {
     }
 
     function fetchMeta() {
-        const meta = document.querySelector && document.querySelector('meta[name="rempl:server"]');
+        const meta = document.querySelector('meta[name="rempl:server"]');
 
         return (meta && meta.getAttribute('content')) || undefined;
     }
@@ -54,37 +55,38 @@ function fetchWsSettings() {
     };
 }
 
-export default class BrowserWsTransport extends WsTransport {
+export class BrowserWsTransport extends WsTransport {
     static settings = fetchWsSettings();
-
-    title = '';
-    location = '';
 
     constructor(uri: string) {
         super(uri);
 
         this.id = sessionStorage[STORAGE_KEY];
-        this.transport
-            .on('rempl:identify', identify.start)
-            .on('rempl:stop identify', identify.stop)
-            .on('disconnect', identify.stop);
+        this.socket
+            .on('rempl:identify', startIdentify)
+            .on('rempl:stop identify', stopIdentify)
+            .on('disconnect', stopIdentify);
     }
 
-    setClientId(id: string): void {
+    get type() {
+        return 'browser';
+    }
+
+    setClientId(id: string) {
         super.setClientId(id);
         sessionStorage[STORAGE_KEY] = this.id;
     }
 
-    get type(): string {
-        return 'browser';
-    }
-    get infoFields(): readonly string[] {
-        return super.infoFields.concat('title', 'location');
-    }
-
     getInfo() {
-        this.title = global.top.document.title;
-        this.location = String(location);
-        return super.getInfo();
+        return {
+            ...super.getInfo(),
+            location: String(location),
+            title: global.top.document.title,
+        };
     }
 }
+
+export const establishWsConnection = createWsConnectionFactory(
+    BrowserWsTransport,
+    BrowserWsTransport.settings
+);

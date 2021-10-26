@@ -92,18 +92,14 @@ export default class EventTransport {
             win = global;
         }
 
-        for (let i = 0; i < EventTransport.all.length; i++) {
-            const transport = EventTransport.all[i];
-            if (
+        const transport = EventTransport.all.find(
+            (transport) =>
                 transport.connectTo === connectTo &&
                 transport.window === win &&
                 transport.name === name
-            ) {
-                return transport;
-            }
-        }
+        );
 
-        return new EventTransport(name, connectTo, win);
+        return transport || new EventTransport(name, connectTo, win);
     }
 
     name: string;
@@ -126,7 +122,6 @@ export default class EventTransport {
 
         this.name = name;
         this.connectTo = connectTo;
-
         this.inputChannelId = name + ':' + utils.genUID();
 
         this.ownEndpoints.on(function (endpoints) {
@@ -155,9 +150,10 @@ export default class EventTransport {
     _handshake(inited: boolean): void {
         const payload: ConnectPayload = {
             initiator: this.name,
-            inited: inited,
+            inited,
             endpoints: this.ownEndpoints.value,
         };
+
         this._send(this.connectTo + ':connect', payload);
     }
 

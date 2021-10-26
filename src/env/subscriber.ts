@@ -2,13 +2,15 @@
 import EventTransport from '../transport/event';
 import Subscriber from '../classes/Subscriber';
 
-const env: Record<string, Subscriber> = Object.create(null);
+const subscribers = new Map<string, Subscriber>();
 
 export default function getEnv(id: string): Subscriber {
-    if (!(id in env)) {
-        env[id] = new Subscriber(id);
-        EventTransport.get('rempl-env-subscriber', 'rempl-env-publisher', parent).sync(env[id]);
+    let subscriber = subscribers.get(id);
+
+    if (!subscriber) {
+        subscribers.set(id, (subscriber = new Subscriber(id)));
+        EventTransport.get('rempl-env-subscriber', 'rempl-env-publisher', parent).sync(subscriber);
     }
 
-    return env[id];
+    return subscriber;
 }

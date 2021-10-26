@@ -1,17 +1,17 @@
 /* eslint-env browser */
 
-var utils = require('../../utils/index.js');
-var setOverlayVisible = function () {};
-var initOverlayEl = function () {};
-var enterClass = utils.genUID();
-var overlayEl = null;
-var timer;
+import { genUID } from '../../utils/index.js';
+
+let setOverlayVisible: (visible: boolean) => void = () => {};
 
 if (typeof document !== 'undefined') {
-    initOverlayEl = function () {
+    let overlayEl: HTMLDivElement | null = null;
+    let timer: ReturnType<typeof setTimeout>;
+    const enterClass = genUID();
+    const initOverlayEl = () => {
         if (overlayEl === null) {
-            var circleClass = utils.genUID();
-            var overlayClass = utils.genUID();
+            const circleClass = genUID();
+            const overlayClass = genUID();
 
             overlayEl = document.createElement('div');
             overlayEl.setAttribute(
@@ -56,15 +56,18 @@ if (typeof document !== 'undefined') {
                 '"></div>' +
                 '</div>';
         }
+
+        return overlayEl;
     };
 
-    setOverlayVisible = function (visible) {
+    setOverlayVisible = function (visible: boolean) {
         if (visible) {
             timer = setTimeout(function () {
-                initOverlayEl();
+                const overlayEl = initOverlayEl();
+
                 overlayEl.classList.add(enterClass);
-                document.body.appendChild(overlayEl);
-                setTimeout(function () {
+                document.body.append(overlayEl);
+                setTimeout(() => {
                     overlayEl.classList.remove(enterClass);
                 }, 16);
             }, 300);
@@ -77,4 +80,4 @@ if (typeof document !== 'undefined') {
     };
 }
 
-module.exports = setOverlayVisible;
+export default setOverlayVisible;

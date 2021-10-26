@@ -20,7 +20,7 @@
         "build:rempl_": "browserify -t package-json-versionify --standalone rempl src/index.js | node scripts/process-rempl-bundle.js | uglifyjs --compress keep_fargs=false --mangle --output dist/rempl.js",
         "build:rempl-dev": "browserify -t package-json-versionify --standalone rempl src/index.js | node scripts/process-rempl-bundle.js > dist/rempl.js",
         "build:server-assets": "node node_modules/basisjs-tools-build/bin/build -c server/client/build.config",
-        "watch": "watch \"npm run build:rempl-dev\" src --interval .2",
+        "watch": "watch \"npm run build:rempl\" src --interval .2",
         "travis": "npm run lint && npm run test",
         "prepublishOnly": "npm run build"
     },

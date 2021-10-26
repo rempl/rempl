@@ -40,6 +40,7 @@ export default class Namespace {
             }
         } else {
             const methods = methodName;
+
             for (methodName in methods) {
                 if (
                     hasOwnProperty(methods, methodName) &&
@@ -151,13 +152,14 @@ export default class Namespace {
 
         for (const method in namespace.remoteMethodWrappers) {
             namespace.remoteMethodWrappers[method].available =
-                namespace.remoteMethods.indexOf(method) !== -1;
+                namespace.remoteMethods.includes(method);
         }
 
         while (cursor !== null) {
             if (cursor.event === 'remoteMethodsChanged') {
-                cursor.callback.call(null, namespace.remoteMethods.slice());
+                cursor.callback.call(null, [...namespace.remoteMethods]);
             }
+
             cursor = cursor.listeners;
         }
     }
@@ -166,8 +168,8 @@ export default class Namespace {
         owner: Endpoint<Namespace>,
         args: [Packet, (((...args: unknown[]) => void) | null)?]
     ): void {
-        owner.channels.forEach((channel) => {
-            channel.send.apply(null, args);
-        });
+        for (const { send } of owner.channels) {
+            send(...args);
+        }
     }
 }

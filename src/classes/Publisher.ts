@@ -1,5 +1,5 @@
-import Namespace from '../classes/Namespace';
-import Endpoint from '../classes/Endpoint';
+import Namespace from './Namespace';
+import Endpoint from './Endpoint';
 
 export type PipeFn = (...args: unknown[]) => unknown;
 
@@ -20,17 +20,13 @@ export class PublisherNamespace extends Namespace {
             {
                 type: 'data',
                 ns: this.name,
-                payload: payload,
+                payload,
             },
         ]);
     }
 
     pipe(fn: PipeFn, init?: unknown): PipeFn {
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const publisher = this;
-        const pipe = function (this: unknown, ...args: unknown[]) {
-            publisher.publish(fn.apply(this, args));
-        };
+        const pipe = (...args: unknown[]) => this.publish(fn(...args));
 
         if (!fn) {
             init = false;
@@ -46,6 +42,8 @@ export class PublisherNamespace extends Namespace {
 }
 
 export default class Publisher extends Endpoint<PublisherNamespace> {
-    namespaceClass = PublisherNamespace;
     type = 'Publisher';
+    get namespaceClass() {
+        return PublisherNamespace;
+    }
 }

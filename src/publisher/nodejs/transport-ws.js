@@ -1,7 +1,9 @@
-var fs = require('fs');
-var path = require('path');
-var WsTransport = require('../../transport/ws-publisher.js');
-var CLIENT_ID_FILENAME = '.rempl_endpoint_id'; // FIXME: dirty solution
+import fs from 'fs';
+import path from 'path';
+import WsTransport from '../../transport/ws.js';
+import { createWsConnectionFactory } from '../factory';
+
+const CLIENT_ID_FILENAME = path.resolve('.rempl_endpoint_id'); // FIXME: dirty solution
 
 function fetchWsSettings() {
     function fetchEnvVariable() {
@@ -37,30 +39,36 @@ function fetchWsSettings() {
     };
 }
 
-function NodeWsTransport(uri) {
-    WsTransport.call(this, uri);
+export class NodeWsTransport extends WsTransport {
+    static settings = fetchWsSettings();
+    get type() {
+        return 'node';
+    }
 
-    // TODO make it through temp file
-    if (fs.existsSync(path.resolve(CLIENT_ID_FILENAME))) {
-        this.id = fs.readFileSync(path.resolve(CLIENT_ID_FILENAME), 'utf-8');
+    constructor(uri) {
+        super(uri);
+
+        // TODO make it through temp file
+        if (fs.existsSync(CLIENT_ID_FILENAME)) {
+            this.id = fs.readFileSync(CLIENT_ID_FILENAME, 'utf-8');
+        }
+    }
+
+    setClientId(id) {
+        super.setClientId(id);
+        fs.writeFileSync(CLIENT_ID_FILENAME, this.id);
+    }
+
+    getInfo() {
+        return {
+            ...super.getInfo(),
+            pid: process.pid,
+            title: process.title,
+        };
     }
 }
 
-NodeWsTransport.settings = fetchWsSettings();
-NodeWsTransport.get = WsTransport.get;
-NodeWsTransport.prototype = Object.create(WsTransport.prototype);
-
-NodeWsTransport.prototype.setClientId = function (id) {
-    WsTransport.prototype.setClientId.call(this, id);
-    fs.writeFileSync(CLIENT_ID_FILENAME, this.id);
-};
-
-NodeWsTransport.prototype.type = 'node';
-NodeWsTransport.prototype.infoFields = WsTransport.prototype.infoFields.concat('pid', 'title');
-NodeWsTransport.prototype.getInfo = function () {
-    this.pid = process.pid;
-    this.title = process.title;
-    return WsTransport.prototype.getInfo.call(this);
-};
-
-module.exports = NodeWsTransport;
+export const establishWsConnection = createWsConnectionFactory(
+    NodeWsTransport,
+    NodeWsTransport.settings
+);

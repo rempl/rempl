@@ -1,3 +1,7 @@
+## next
+
+- Removed callback support for `getSubscriber()` which was deprecated in `1.0.0-alpha14`
+
 ## 1.0.0-alpha.19 (November 10, 2017)
 
 - Added `browser` field to `package.json` to fix build issue with webpack (@restrry, #18)

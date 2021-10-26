@@ -1,21 +1,12 @@
 import Token from './Token';
 
 function normalize(oldList: string[], newList?: string[]) {
-    if (!Array.isArray(newList)) {
-        newList = [];
-    }
-
-    newList = newList.filter((endpoint, idx, array) => {
-        // unique values
-        return idx === 0 || array.lastIndexOf(endpoint, idx - 1) === -1;
-    });
+    const uniqueItems = [...new Set(Array.isArray(newList) ? newList : [])];
     const diff =
-        newList.length !== oldList.length ||
-        newList.some(function (endpoint) {
-            return oldList.indexOf(endpoint) === -1;
-        });
+        uniqueItems.length !== oldList.length ||
+        uniqueItems.some((endpoint) => !oldList.includes(endpoint));
 
-    return diff ? newList : oldList;
+    return diff ? uniqueItems : oldList;
 }
 
 export default class EndpointList extends Token<string[]> {

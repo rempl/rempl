@@ -1,6 +1,6 @@
 /* eslint-env browser */
 import EventTransport from '../../transport/event.js';
-import { createSandbox } from '../../sandbox/index.js';
+import createSandbox from '../../sandbox/index.js';
 import view from './view.js';
 import Publisher from '../../classes/Publisher.js';
 
@@ -9,7 +9,7 @@ type Host = {
     deactivate(publisher?: Publisher | string): void;
 };
 
-const publishers: string[] = [];
+let publishers: string[] = [];
 let selectedPublisherId: string | null = null;
 let autoSelectPublisher = false;
 let teardownTimer: ReturnType<typeof setTimeout>;
@@ -60,14 +60,13 @@ function selectPublisher(publisherId?: string | null) {
     }
 }
 
-module.exports = function getHost() {
+export default function getHost() {
     if (host !== null) {
         return host;
     }
 
     transport = new EventTransport('rempl-inpage-host', 'rempl-inpage-publisher');
     transport.remoteEndpoints.on((endpoints) => {
-        console.log('?!', { endpoints });
         publishers = endpoints;
         view.setPublisherList(publishers, selectPublisher);
 
@@ -106,4 +105,4 @@ module.exports = function getHost() {
             }
         },
     });
-};
+}

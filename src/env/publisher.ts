@@ -1,14 +1,12 @@
 import EventTransport from '../transport/event';
 import Publisher from '../classes/Publisher';
 
+class EnvPublisher extends Publisher {
+    linkWindow(target: Window | typeof global) {
+        EventTransport.get('rempl-env-publisher', 'rempl-env-subscriber', target).sync(this);
+    }
+}
+
 export default function createEnv(id?: string) {
-    const env = new Publisher(id);
-
-    // todo ????
-    // @ts-ignore
-    env.linkWindow = function (target) {
-        EventTransport.get('rempl-env-publisher', 'rempl-env-subscriber', target).sync(env);
-    };
-
-    return env;
+    return new EnvPublisher(id);
 }

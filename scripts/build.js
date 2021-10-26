@@ -1,3 +1,4 @@
+const fs = require('fs');
 const esbuild = require('esbuild');
 
 module.exports = {
@@ -18,10 +19,10 @@ async function buildMain(config, configCSS) {
     });
 
     const result = await esbuild.build({
-        entryPoints: ['src/index.js'],
+        entryPoints: ['src/index.ts'],
         bundle: true,
-        sourcemap: true,
-        format: 'esm',
+        // sourcemap: true,
+        format: 'iife',
         write: false,
         ...config,
         define: {
@@ -37,10 +38,10 @@ async function buildMain(config, configCSS) {
 
 if (require.main === module) {
     (async () => {
-        buildMain(
+        let bundle = await buildMain(
             {
-                write: true,
-                outfile: 'dist/rempl-new.js',
+                // write: true,
+                // outfile: 'dist/rempl-new.js',
                 format: 'esm',
                 // minify: true,
                 // sourcemap: false,
@@ -52,6 +53,24 @@ if (require.main === module) {
                 // minify: true,
                 // sourcemap: false,
             }
+        );
+
+        let exportDef = '';
+        bundle = bundle.replace(/export\s*\{((?:.|\s)+)\}/, (_, e) => {
+            exportDef = e.trim();
+            return '';
+        });
+        const names = exportDef.split(/\s*,\s*/).map((entry) => {
+            const [name, alias = name] = entry.split(/\s+as\s+/);
+
+            return { name, alias };
+        });
+
+        fs.writeFileSync(
+            './dist/rempl-new.js',
+            `const {${names.map((n) => n.alias)}} = (function rempl() {\n${bundle}\nreturn {${names
+                .map((n) => `${n.alias}: ${n.name}`)
+                .join(',\n')}}\n})();\n\nexport default {${names.map((n) => n.alias)}}`
         );
     })();
 }

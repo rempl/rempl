@@ -33,7 +33,9 @@ export type Packet = {
 export default class Endpoint<TNamespace extends Namespace> {
     id: string | null;
     namespaces: Record<string, TNamespace>;
-    namespaceClass = Namespace;
+    get namespaceClass() {
+        return Namespace;
+    }
     type = 'Endpoint';
     channels: Channel[] = [];
     connected = new Token(false);
@@ -51,8 +53,18 @@ export default class Endpoint<TNamespace extends Namespace> {
             this.connected.set(endpoints.includes(this.id || '*'));
         }, this);
 
+        // TODO: rework
         const defaultNS = this.ns('*');
-        for (const method in defaultNS) {
+        const methodNames = [];
+        let cursor = defaultNS.constructor;
+        for (
+            let cursor = defaultNS;
+            cursor && cursor != Object.prototype;
+            cursor = Object.getPrototypeOf(cursor)
+        ) {
+            methodNames.push(...Object.getOwnPropertyNames(cursor));
+        }
+        for (const method of methodNames) {
             // todo rework in the next version
             // @ts-ignore
             if (typeof defaultNS[method] === 'function') {
@@ -78,6 +90,7 @@ export default class Endpoint<TNamespace extends Namespace> {
         const getProvidedMethodsPacket: GetProvidedMethodsPacket = {
             type: 'getProvidedMethods',
         };
+
         Namespace.send(this, [
             getProvidedMethodsPacket,
             (methods) => {
@@ -119,9 +132,7 @@ export default class Endpoint<TNamespace extends Namespace> {
             }
         }
 
-        changed.forEach(function (ns) {
-            Namespace.notifyRemoteMethodsChanged(ns);
-        });
+        changed.forEach((ns) => Namespace.notifyRemoteMethodsChanged(ns));
     }
 
     getProvidedApi(): API {
@@ -195,8 +206,8 @@ export default class Endpoint<TNamespace extends Namespace> {
     ): void {
         if (available) {
             this.channels.push({
-                type: type,
-                send: send,
+                type,
+                send,
             });
             // Note that endpoints should be changed after channels is changed,
             // since it may change this.connected that can send something to remote side

@@ -1,46 +1,53 @@
 /* eslint-env browser */
 
-var publishersEl = document.createElement('div');
-var overlayEl = createOverlay();
-var documentStyleOverflow;
-var pickPublisherCallback;
-var publishers = [];
+const publishersEl = document.createElement('div');
+const overlayEl = createOverlay();
+let documentStyleOverflow = '';
+let pickPublisherCallback: ((name: string) => void) | null = null;
+let publishers: string[] = [];
 
 function createOverlay() {
-    var temp = document.createElement('div');
+    const temp = document.createElement('div');
+
     temp.innerHTML =
         '<div style="position:fixed;overflow:auto;top:0;left:0;bottom:0;right:0;z-index:100000000;background:rgba(255,255,255,.9);text-align:center;line-height:1.5;font-family:Tahoma,Verdana,Arial,sans-serif">' +
         '<div style="font-size:100px;font-size:33vh">#</div>' +
         '</div>';
-    temp.firstChild.appendChild(publishersEl);
-    return temp.firstChild;
+    temp.firstChild?.appendChild(publishersEl);
+
+    return temp.firstChild as HTMLDivElement;
 }
 
-function createButton(name) {
-    var temp = document.createElement('div');
+function createButton(name: string) {
+    const temp = document.createElement('div');
+
     temp.innerHTML =
         '<div style="margin-bottom:5px;"><button style="font-size:18px;line-height:1;padding:12px 24px;background:#3BAFDA;color:white;border:none;border-radius:3px;cursor:pointer;">' +
         name +
         '</button></div>';
-    temp.firstChild.firstChild.onclick = function () {
-        pickPublisherCallback(name);
-    };
-    return temp.firstChild;
+    temp.firstChild?.firstChild?.addEventListener('click', () => {
+        if (pickPublisherCallback !== null) {
+            pickPublisherCallback(name);
+        }
+    });
+
+    return temp.firstChild as HTMLDivElement;
 }
 
 function updatePublisherList() {
     if (publishers.length && pickPublisherCallback) {
         publishersEl.innerHTML = '<div style="margin-bottom:10px">Pick a publisher:</div>';
-        for (var i = 0; i < publishers.length; i++) {
-            publishersEl.appendChild(createButton(publishers[i]));
-        }
+        publishersEl.append(...publishers.map((name) => createButton(name)));
     } else {
-        publishersEl.innerHTML = '<div style="color:#AA0000">No rempl publishers inited</div>';
+        publishersEl.innerHTML = '<div style="color:#AA0000">No rempl publishers are found</div>';
     }
 }
 
-function startIdentify(num, callback) {
-    overlayEl.firstChild.innerHTML = num;
+export function startIdentify(num: string, callback: typeof pickPublisherCallback) {
+    if (overlayEl.firstChild) {
+        (overlayEl.firstChild as HTMLElement).innerHTML = num;
+    }
+
     pickPublisherCallback = callback;
     updatePublisherList();
     documentStyleOverflow = document.body.style.overflow;
@@ -48,7 +55,7 @@ function startIdentify(num, callback) {
     document.body.appendChild(overlayEl);
 }
 
-function stopIdentify() {
+export function stopIdentify() {
     pickPublisherCallback = null;
 
     if (overlayEl.parentNode !== document.body) {
@@ -56,14 +63,10 @@ function stopIdentify() {
     }
 
     document.body.style.overflow = documentStyleOverflow;
-    document.body.removeChild(overlayEl);
+    overlayEl.remove();
 }
 
-module.exports = {
-    start: startIdentify,
-    stop: stopIdentify,
-    updatePublisherList: function (value) {
-        publishers = value;
-        updatePublisherList();
-    },
-};
+export function setPublisherList(value: string[]) {
+    publishers = value;
+    updatePublisherList();
+}

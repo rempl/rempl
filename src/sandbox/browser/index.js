@@ -1,7 +1,8 @@
 /* eslint-env browser */
-var EventTransport = require('../../transport/event.js');
-var utils = require('../../utils/index.js');
-var initEnvSubscriberMessage = new WeakMap();
+import EventTransport from '../../transport/event.js';
+import { genUID } from '../../utils/index.js';
+
+const initEnvSubscriberMessage = new WeakMap();
 
 if (parent !== self) {
     addEventListener('message', function (event) {
@@ -12,7 +13,7 @@ if (parent !== self) {
     });
 }
 
-module.exports = function createSandbox(settings, callback) {
+export default function createSandbox(settings, callback) {
     function initSandbox(sandboxWindow) {
         if (settings.type === 'script') {
             for (var name in settings.content) {
@@ -85,7 +86,7 @@ module.exports = function createSandbox(settings, callback) {
         initSandbox(settings.window);
     } else {
         iframe = document.createElement('iframe');
-        iframe.name = utils.genUID(); // to avoid cache
+        iframe.name = genUID(); // to avoid cache
         iframe.onload = function () {
             initSandbox(iframe.contentWindow);
         };
@@ -126,4 +127,4 @@ module.exports = function createSandbox(settings, callback) {
             }
         },
     };
-};
+}
