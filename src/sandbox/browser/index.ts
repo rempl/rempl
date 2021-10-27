@@ -5,8 +5,8 @@ import { genUID } from '../../utils/index.js';
 const initEnvSubscriberMessage = new WeakMap();
 
 if (parent !== self) {
-    addEventListener('message', function (event) {
-        var data = event.data || {};
+    addEventListener('message', function (event: MessageEvent<any>) {
+        const data = event.data || {};
         if (data.to === 'rempl-env-publisher:connect') {
             initEnvSubscriberMessage.set(event.source, data);
         }
@@ -14,25 +14,26 @@ if (parent !== self) {
 }
 
 export default function createSandbox(settings, callback) {
-    function initSandbox(sandboxWindow) {
+    function initSandbox(sandboxWindow: Window | typeof global) {
         if (settings.type === 'script') {
-            for (var name in settings.content) {
+            for (const name in settings.content) {
                 sandboxWindow.eval(settings.content[name] + '\n//# sourceURL=' + name);
             }
         }
 
         if (parent !== self && sandboxWindow !== self) {
-            var toSandbox = NaN;
-            var toEnv = NaN;
+            let toSandbox = NaN;
+            let toEnv = NaN;
 
             if (onEnvMessage) {
                 removeEventListener('message', onEnvMessage, true);
+                onEnvMessage = null;
             }
 
             addEventListener(
                 'message',
-                (onEnvMessage = function (event) {
-                    var data = event.data || {};
+                (onEnvMessage = function (event: MessageEvent<any>) {
+                    const data = event.data || {};
 
                     switch (data.to) {
                         case 'rempl-env-subscriber:connect':
@@ -52,7 +53,7 @@ export default function createSandbox(settings, callback) {
             );
 
             if (settings.type !== 'script') {
-                var initMessage = initEnvSubscriberMessage.get(sandboxWindow);
+                const initMessage = initEnvSubscriberMessage.get(sandboxWindow);
                 if (initMessage) {
                     toSandbox = initMessage.from;
                     parent.postMessage(initMessage, '*');
@@ -64,9 +65,7 @@ export default function createSandbox(settings, callback) {
         // TODO: teardown transport
         transport = EventTransport.get('rempl-sandbox', 'rempl-subscriber', sandboxWindow).onInit(
             {},
-            function (api) {
-                callback(api);
-            }
+            (api) => callback(api)
         );
 
         if (connected) {
@@ -74,11 +73,10 @@ export default function createSandbox(settings, callback) {
         }
     }
 
-    var envUnsubscribe = null;
-    var iframe = null;
-    var onEnvMessage = null;
-    var transport = null;
-    var connected = false;
+    let iframe: HTMLIFrameElement | null = null;
+    let onEnvMessage: ((event: MessageEvent<any>) => void) | null = null;
+    let transport: EventTransport | null = null;
+    let connected = false;
 
     settings = settings || {};
 
@@ -87,9 +85,7 @@ export default function createSandbox(settings, callback) {
     } else {
         iframe = document.createElement('iframe');
         iframe.name = genUID(); // to avoid cache
-        iframe.onload = function () {
-            initSandbox(iframe.contentWindow);
-        };
+        iframe.onload = () => iframe?.contentWindow && initSandbox(iframe.contentWindow);
 
         if (settings.type === 'url') {
             iframe.src = settings.content;
@@ -101,26 +97,25 @@ export default function createSandbox(settings, callback) {
     }
 
     return {
-        setConnected: function (state) {
-            connected = Boolean(state);
+        setConnected(state: boolean) {
+            connected = state;
+
             if (transport) {
                 transport.ownEndpoints.set(connected ? ['*'] : []);
             }
         },
-        destroy: function () {
-            removeEventListener('message', onEnvMessage, true);
+        destroy() {
+            if (onEnvMessage) {
+                removeEventListener('message', onEnvMessage, true);
+                onEnvMessage = null;
+            }
 
             if (transport) {
                 transport.ownEndpoints.set([]);
             }
 
-            if (envUnsubscribe !== null) {
-                envUnsubscribe();
-                envUnsubscribe = null;
-            }
-
             if (iframe !== null) {
-                iframe.parentNode.removeChild(iframe);
+                iframe.remove();
                 iframe.setAttribute('srcdoc', '');
                 iframe.setAttribute('src', '');
                 iframe = null;

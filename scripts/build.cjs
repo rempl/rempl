@@ -19,7 +19,7 @@ async function buildMain(config, configCSS) {
     });
 
     const result = await esbuild.build({
-        entryPoints: ['src/index.ts'],
+        entryPoints: ['src/browser.ts'],
         bundle: true,
         // sourcemap: true,
         format: 'iife',
@@ -50,8 +50,8 @@ if (require.main === module) {
                 },
             },
             {
-                // minify: true,
-                // sourcemap: false,
+                minify: true,
+                sourcemap: false,
             }
         );
 
@@ -66,11 +66,22 @@ if (require.main === module) {
             return { name, alias };
         });
 
-        fs.writeFileSync(
-            './dist/rempl-new.js',
-            `const {${names.map((n) => n.alias)}} = (function rempl() {\n${bundle}\nreturn {${names
-                .map((n) => `${n.alias}: ${n.name}`)
-                .join(',\n')}}\n})();\n\nexport default {${names.map((n) => n.alias)}}`
-        );
+        bundle = `const {${names.map(
+            (n) => n.alias
+        )}} = (function rempl() {\n${bundle}\nreturn {${names
+            .map((n) => `${n.alias}: ${n.name}`)
+            .join(',\n')}}\n})();\n\nexport default {${names.map((n) => n.alias)}}`;
+
+        bundle = esbuild.buildSync({
+            stdin: {
+                contents: bundle,
+            },
+            format: 'esm',
+            minify: true,
+            write: false,
+        }).outputFiles[0].text;
+        // console.log(Object.keys(bundle));
+
+        fs.writeFileSync('./dist/rempl-new.js', bundle);
     })();
 }

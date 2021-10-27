@@ -1,7 +1,6 @@
-import Namespace from './Namespace';
-import Endpoint, { Packet } from './Endpoint';
-import * as utils from '../utils/';
-import { AnyFn } from '../utils/';
+import Namespace from './Namespace.js';
+import Endpoint, { Packet } from './Endpoint.js';
+import { AnyFn, subscribe } from '../utils/index.js';
 
 export type DataPacket = {
     type: string;
@@ -19,7 +18,7 @@ export class SubscriberNamespace extends Namespace {
     subscribe(fn: AnyFn) {
         this.callRemote('init', fn);
 
-        return utils.subscribe(this.subscribers, fn);
+        return subscribe(this.subscribers, fn);
     }
 }
 

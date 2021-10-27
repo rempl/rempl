@@ -3,7 +3,6 @@
 
 import createElement from './createElement.js';
 import { AnyFn, global } from '../../utils/index.js';
-import Publisher from '../../classes/Publisher.js';
 
 type Side = 'left' | 'top' | 'bottom' | 'right' | 'fit the page';
 type View = {
@@ -16,7 +15,7 @@ type View = {
 
 let publishers: string[] = [];
 let selectedPublisher: string | null = null;
-let selectPublisher: (id?: Publisher | string) => void = () => {};
+let selectPublisher: (id?: string) => void = () => {};
 let view: View | null = null;
 let onClose: AnyFn;
 
@@ -155,10 +154,7 @@ export default {
     getSandboxContainer(): HTMLDivElement {
         return getView().sandbox;
     },
-    setPublisherList(
-        publisherList: string[],
-        selectPublisherFn: (id?: Publisher | string) => void
-    ): void {
+    setPublisherList(publisherList: string[], selectPublisherFn: (id?: string) => void): void {
         publishers = publisherList;
         selectPublisher = selectPublisherFn;
         updatePublisherList();

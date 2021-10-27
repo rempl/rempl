@@ -1,12 +1,12 @@
 /* eslint-env browser */
 
-import Token from '../classes/Token';
-import EndpointList from '../classes/EndpointList';
-import EndpointListSet from '../classes/EndpointListSet';
-import * as utils from '../utils/';
-import { global, AnyFn, Fn, hasOwnProperty, Unsubscribe } from '../utils';
-import Endpoint from '../classes/Endpoint';
-import Namespace from '../classes/Namespace';
+import Token from '../classes/Token.js';
+import EndpointList from '../classes/EndpointList.js';
+import EndpointListSet from '../classes/EndpointListSet.js';
+import Endpoint from '../classes/Endpoint.js';
+import Namespace from '../classes/Namespace.js';
+import * as utils from '../utils/index.js';
+import { global, AnyFn, Fn, hasOwnProperty, Unsubscribe } from '../utils/index.js';
 
 const DEBUG = false;
 const DEBUG_PREFIX = '[rempl][event-transport] ';
@@ -25,9 +25,7 @@ export type OnInitCallbackArg = {
 };
 
 export type OnInitCallback = (arg: OnInitCallbackArg) => void;
-
 export type OnInitFnArgs = [endpoint: Endpoint<Namespace>, callback: OnInitCallback];
-export type OnInitFn<TThis> = (this: TThis, ...args: OnInitFnArgs) => TThis;
 
 export type Connection = {
     ttl: number;
@@ -147,7 +145,7 @@ export default class EventTransport {
         this._handshake(false);
     }
 
-    _handshake(inited: boolean): void {
+    _handshake(inited: boolean) {
         const payload: ConnectPayload = {
             initiator: this.name,
             inited,
@@ -157,7 +155,7 @@ export default class EventTransport {
         this._send(this.connectTo + ':connect', payload);
     }
 
-    _onMessage(event: MessageEvent): void {
+    _onMessage(event: MessageEvent) {
         const data = event.data || {};
         const payload = data.payload || {};
 
@@ -182,7 +180,7 @@ export default class EventTransport {
         }
     }
 
-    _onConnect(from: string, payload: ConnectPayload): void {
+    _onConnect(from: string, payload: ConnectPayload) {
         if (!payload.inited) {
             this._handshake(true);
         }
@@ -203,7 +201,7 @@ export default class EventTransport {
         this.inited = true;
     }
 
-    _onData(from: string, payload: OnDataPayload): void {
+    _onData(from: string, payload: OnDataPayload) {
         if (DEBUG) {
             utils.log(DEBUG_PREFIX + 'receive from ' + this.connectTo, payload.type, payload);
         }
@@ -295,7 +293,7 @@ export default class EventTransport {
         };
     }
 
-    _send(to: string, payload: unknown): void {
+    _send(to: string, payload: unknown) {
         if (DEBUG) {
             utils.log(DEBUG_PREFIX + 'emit event', to, payload);
         }
@@ -312,14 +310,14 @@ export default class EventTransport {
         }
     }
 
-    subscribeToEndpoint(endpoint: string | null, fn: AnyFn): Unsubscribe {
+    subscribeToEndpoint(endpoint: string | null, fn: AnyFn) {
         return utils.subscribe(this.dataCallbacks, {
             endpoint: endpoint,
             fn: fn,
         });
     }
 
-    sendToEndpoint(endpoint: string | null, type: string, ...args: unknown[]): void {
+    sendToEndpoint(endpoint: string | null, type: string, ...args: unknown[]) {
         // if (endpoint !== this.remoteName && this.remoteEndpoints.value.indexOf(endpoint) === -1) {
         //     // console.warn(this.name, endpoint, this.remoteName, this.remoteEndpoints.value);
         //     if (1||DEBUG) {
@@ -343,7 +341,7 @@ export default class EventTransport {
         });
     }
 
-    send(payload: unknown): void {
+    send(payload: unknown) {
         // if (!this.inited) {
         //     utils.warn(DEBUG_PREFIX + 'send() call on init is prohibited');
         //     return;
@@ -354,14 +352,15 @@ export default class EventTransport {
         }
     }
 
-    onInit: OnInitFn<unknown> = (
+    onInit(
         endpoint: Endpoint<Namespace> & { getRemoteUI?: GetRemoteUIFn },
         callback: OnInitCallback
-    ): this => {
+    ) {
         const id = endpoint.id || null;
 
         if (id) {
             this.ownEndpoints.set(this.ownEndpoints.value.concat(id));
+
             if (typeof endpoint.getRemoteUI === 'function') {
                 this.endpointGetUI[id] = endpoint.getRemoteUI;
             }
@@ -379,9 +378,9 @@ export default class EventTransport {
         }
 
         return this;
-    };
+    }
 
-    sync(endpoint: Endpoint<Namespace>): this {
+    sync(endpoint: Endpoint<Namespace>) {
         const channel = utils.genUID(8) + ':' + this.connectTo;
         const remoteEndpoints = this.remoteEndpoints;
 

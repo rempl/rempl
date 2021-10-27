@@ -1,5 +1,5 @@
 import Publisher from '../classes/Publisher';
-import remplSource from '../source';
+import remplSource from '../utils/browser/source';
 import { createWsConnectionFactory } from './factory';
 import { GetRemoteUIHandler, Options, RequestClientHandler } from './types';
 

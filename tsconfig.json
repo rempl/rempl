@@ -4,19 +4,12 @@
         "declaration": true,
         "sourceMap": true,
         "outDir": "./dist",
-        "module": "commonjs",
+        "module": "ES2020",
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
         "target": "ES6",
-        "lib": [
-            "DOM",
-            "ESNext"
-        ],
-        "allowJs": true,
+        "lib": ["DOM", "ESNext"],
+        "allowJs": true
     },
-    "exclude": [
-        "node_modules",
-        "dist",
-        "test",
-        "server",
-        "example"
-    ]
+    "exclude": ["node_modules", "dist", "test", "server", "example"]
 }

@@ -1,6 +1,6 @@
 /* eslint-env browser */
 
-import { GetRemoteUIFn } from '../../transport/event';
+import { GetRemoteUIFn } from '../../transport/event.js';
 
 function fetchFile(filename: string, callback: (error: string | null, response?: string) => void) {
     const xhr = new XMLHttpRequest();
@@ -26,7 +26,7 @@ function fetchFile(filename: string, callback: (error: string | null, response?:
     xhr.send(null);
 }
 
-module.exports = function (filename: string): GetRemoteUIFn {
+export default function (filename: string): GetRemoteUIFn {
     let cache: string | null = null;
 
     // TODO: take in account settings.accept setting
@@ -44,4 +44,4 @@ module.exports = function (filename: string): GetRemoteUIFn {
             callback(null, 'script', cache);
         }
     };
-};
+}

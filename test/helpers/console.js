@@ -1,14 +1,15 @@
-var assert = require('assert');
-var methods = ['log', 'info', 'warn', 'error'];
+import { deepEqual } from 'assert';
 
-module.exports = function(fn, expected) {
-    var messages = [];
-    var original = methods.reduce(function(original, name) {
+const methods = ['log', 'info', 'warn', 'error'];
+
+export default function (fn, expected) {
+    const messages = [];
+    const original = methods.reduce(function (original, name) {
         original[name] = console[name];
-        console[name] = function() {
+        console[name] = function () {
             messages.push({
                 type: name,
-                args: Array.prototype.slice.call(arguments)
+                args: Array.prototype.slice.call(arguments),
             });
         };
         return original;
@@ -16,11 +17,11 @@ module.exports = function(fn, expected) {
 
     try {
         fn();
-        assert.deepEqual(messages, expected);
+        deepEqual(messages, expected);
     } finally {
         // restore
-        methods.forEach(function(name) {
+        methods.forEach(function (name) {
             console[name] = original[name];
         });
     }
-};
+}

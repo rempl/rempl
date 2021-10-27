@@ -10,13 +10,14 @@
         "Sergey Melyukov <s.melukov@gmail.com>",
         "Anastasia Goryacheva <a.e.goryacheva@gmail.com>"
     ],
+    "type": "module",
     "main": "src/index.js",
     "browser": "dist/rempl-new.js",
     "scripts": {
         "lint": "eslint scripts server src",
         "test": "mocha",
         "build": "npm run build:rempl",
-        "build:rempl": "node scripts/build",
+        "build:rempl": "node scripts/build.cjs",
         "build:rempl_": "browserify -t package-json-versionify --standalone rempl src/index.js | node scripts/process-rempl-bundle.js | uglifyjs --compress keep_fargs=false --mangle --output dist/rempl.js",
         "build:rempl-dev": "browserify -t package-json-versionify --standalone rempl src/index.js | node scripts/process-rempl-bundle.js > dist/rempl.js",
         "build:server-assets": "node node_modules/basisjs-tools-build/bin/build -c server/client/build.config",

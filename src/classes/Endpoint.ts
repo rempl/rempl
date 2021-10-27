@@ -1,9 +1,8 @@
-import Namespace from './Namespace';
-import Token from './Token';
-import * as utils from '../utils';
-import { AnyFn } from '../utils';
-import EndpointListSet from './EndpointListSet';
-import EndpointList from './EndpointList';
+import { AnyFn, warn } from '../utils/index.js';
+import Namespace from './Namespace.js';
+import Token from './Token.js';
+import EndpointListSet from './EndpointListSet.js';
+import EndpointList from './EndpointList.js';
 
 export type Channel = {
     type: string;
@@ -56,7 +55,7 @@ export default class Endpoint<TNamespace extends Namespace> {
         // TODO: rework
         const defaultNS = this.ns('*');
         const methodNames = [];
-        let cursor = defaultNS.constructor;
+
         for (
             let cursor = defaultNS;
             cursor && cursor != Object.prototype;
@@ -64,6 +63,7 @@ export default class Endpoint<TNamespace extends Namespace> {
         ) {
             methodNames.push(...Object.getOwnPropertyNames(cursor));
         }
+
         for (const method of methodNames) {
             // todo rework in the next version
             // @ts-ignore
@@ -165,7 +165,7 @@ export default class Endpoint<TNamespace extends Namespace> {
                 const ns = this.ns(thePacket.ns || '*');
 
                 if (!ns.isMethodProvided(thePacket.method)) {
-                    return utils.warn(
+                    return warn(
                         '[rempl][sync] ' +
                             this.getName() +
                             ' (namespace: ' +
@@ -190,7 +190,7 @@ export default class Endpoint<TNamespace extends Namespace> {
                 break;
 
             default:
-                utils.warn(
+                warn(
                     '[rempl][sync] ' + this.getName() + 'Unknown packet type:',
                     // @ts-ignore
                     packet.type

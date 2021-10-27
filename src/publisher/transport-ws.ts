@@ -1,7 +1,7 @@
-import fs from 'fs';
-import path from 'path';
-import WsTransport from '../../transport/ws.js';
-import { createWsConnectionFactory } from '../factory';
+import * as fs from 'fs';
+import * as path from 'path';
+import WsTransport from '../transport/ws.js';
+import { createWsConnectionFactory } from './factory';
 
 const CLIENT_ID_FILENAME = path.resolve('.rempl_endpoint_id'); // FIXME: dirty solution
 
@@ -10,20 +10,20 @@ function fetchWsSettings() {
         return process.env.REMPL_SERVER;
     }
 
-    var setup = fetchEnvVariable();
-    var implicitUri = 'ws://localhost:8177';
-    var explicitUri = undefined;
+    const setup: string | undefined = fetchEnvVariable();
+    const implicitUri = 'ws://localhost:8177';
+    let explicitUri = undefined;
 
     switch (setup) {
         case 'none':
+        case 'false':
         case undefined:
-        case false:
             // no explicit setting
             break;
 
         case 'implicit':
         case 'auto':
-        case true:
+        case 'true':
             explicitUri = implicitUri;
             break;
 
@@ -45,7 +45,7 @@ export class NodeWsTransport extends WsTransport {
         return 'node';
     }
 
-    constructor(uri) {
+    constructor(uri: string) {
         super(uri);
 
         // TODO make it through temp file
@@ -54,9 +54,9 @@ export class NodeWsTransport extends WsTransport {
         }
     }
 
-    setClientId(id) {
+    setClientId(id: string) {
         super.setClientId(id);
-        fs.writeFileSync(CLIENT_ID_FILENAME, this.id);
+        fs.writeFileSync(CLIENT_ID_FILENAME, String(this.id));
     }
 
     getInfo() {

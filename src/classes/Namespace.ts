@@ -1,5 +1,5 @@
-import { AnyFn, Fn, hasOwnProperty } from '../utils';
-import Endpoint, { CallPacket, Packet } from './Endpoint';
+import { AnyFn, Fn, hasOwnProperty } from '../utils/index.js';
+import Endpoint, { CallPacket, Packet } from './Endpoint.js';
 
 export type Method<TArgs extends unknown[]> = Fn<TArgs, unknown>;
 export type MethodsMap = Record<string, Method<unknown[]>>;

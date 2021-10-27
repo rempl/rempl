@@ -1,13 +1,12 @@
-import Token from '../classes/Token';
-import EndpointList from '../classes/EndpointList';
-import * as utils from '../utils';
-
 // @ts-ignore
 import socketIO from 'socket.io-client/dist/socket.io.slim.js';
-import Endpoint from '../classes/Endpoint';
-import Namespace from '../classes/Namespace';
-import { AnyFn, hasOwnProperty, TypeRecord, Unsubscribe } from '../utils';
-import { GetRemoteUICallback, GetRemoteUIFn, GetRemoteUISettings } from './event';
+import Token from '../classes/Token.js';
+import EndpointList from '../classes/EndpointList.js';
+import Endpoint from '../classes/Endpoint.js';
+import Namespace from '../classes/Namespace.js';
+import * as utils from '../utils/index.js';
+import { AnyFn, hasOwnProperty, TypeRecord, Unsubscribe } from '../utils/index.js';
+import { GetRemoteUICallback, GetRemoteUIFn, GetRemoteUISettings } from './event.js';
 
 const endpoints: Record<string, WSTransport> = Object.create(null);
 const INFO_UPDATE_TIME = 100;

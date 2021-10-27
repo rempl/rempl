@@ -24,7 +24,7 @@ function createSubscriber() {
     return subscriber;
 }
 
-export default function () {
+export default function getSubscriber() {
     if (subscriber === null) {
         subscriber = createSubscriber();
     }

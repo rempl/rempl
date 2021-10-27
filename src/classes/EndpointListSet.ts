@@ -1,4 +1,4 @@
-import EndpointList from './EndpointList';
+import EndpointList from './EndpointList.js';
 
 export default class EndpointListSet extends EndpointList {
     endpointLists = new Set<EndpointList>();

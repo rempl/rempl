@@ -1,4 +1,4 @@
-import { AnyFn, Fn } from '../utils';
+import { AnyFn, Fn } from '../utils/index.js';
 
 export type Handler = {
     fn: AnyFn;

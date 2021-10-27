@@ -1,4 +1,4 @@
-import Token from './Token';
+import Token from './Token.js';
 
 function normalize(oldList: string[], newList?: string[]) {
     const uniqueItems = [...new Set(Array.isArray(newList) ? newList : [])];

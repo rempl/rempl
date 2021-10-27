@@ -11,6 +11,7 @@ const resolvedGlobal =
     check(typeof self == 'object' && self) ||
     check(typeof global == 'object' && global) ||
     (function () {
+        // @ts-ignore
         return this;
     })() ||
     Function('return this')();
