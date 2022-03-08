@@ -8,17 +8,18 @@ export type DataPacket = {
     payload: unknown;
 };
 
-export class SubscriberNamespace extends Namespace {
-    subscribers: AnyFn[] = [];
+const subscribers = new Map<SubscriberNamespace, AnyFn[]>();
 
-    constructor(name: string, owner: Endpoint<Namespace>) {
-        super(name, owner);
+export class SubscriberNamespace extends Namespace {
+    constructor(name: string, endpoint: Endpoint<SubscriberNamespace>) {
+        super(name, endpoint);
+        subscribers.set(this, []);
     }
 
     subscribe(fn: AnyFn) {
         this.callRemote('init', fn);
 
-        return subscribe(this.subscribers, fn);
+        return subscribe(subscribers.get(this) || [], fn);
     }
 }
 
@@ -37,10 +38,11 @@ export default class Subscriber extends Endpoint<SubscriberNamespace> {
 
                 for (const name in this.namespaces) {
                     const ns = this.namespaces[name];
+                    const nsSubscribers = subscribers.get(ns) || [];
 
-                    if (ns.subscribers.length) {
+                    if (nsSubscribers.length) {
                         ns.callRemote('init', (data: unknown) => {
-                            for (const callback of ns.subscribers) {
+                            for (const callback of nsSubscribers) {
                                 callback(data);
                             }
                         });
@@ -56,15 +58,16 @@ export default class Subscriber extends Endpoint<SubscriberNamespace> {
         switch (packet.type) {
             case 'data': {
                 const { ns, payload } = packet as DataPacket;
+                const nsSubscribers = subscribers.get(this.ns(ns || '*'));
 
-                this.ns(ns || '*')
-                    .subscribers.slice()
-                    .forEach((callback) => callback(payload));
+                if (nsSubscribers) {
+                    nsSubscribers.slice().forEach((callback) => callback(payload));
+                }
                 break;
             }
 
             default:
-                Endpoint.prototype.processInput.call(this, packet, callback);
+                super.processInput(packet, callback);
         }
     };
 }

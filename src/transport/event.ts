@@ -40,7 +40,7 @@ export type GetRemoteUICallback = (
 ) => void;
 
 export type GetRemoteUISettings = {
-    dev: boolean;
+    dev?: boolean;
     [key: string]: unknown;
 };
 export type GetRemoteUIFnArgs = [settings: GetRemoteUISettings, callback: GetRemoteUICallback];
@@ -92,9 +92,9 @@ export default class EventTransport {
 
         const transport = EventTransport.all.find(
             (transport) =>
+                transport.name === name &&
                 transport.connectTo === connectTo &&
-                transport.window === win &&
-                transport.name === name
+                transport.realm === win
         );
 
         return transport || new EventTransport(name, connectTo, win);
@@ -102,7 +102,7 @@ export default class EventTransport {
 
     name: string;
     connectTo: string;
-    window: Window | typeof global;
+    realm: Window | typeof global;
     inputChannelId: string;
     connections: Record<string, Connection> = Object.create(null);
     connected = new Token(false);
@@ -121,20 +121,19 @@ export default class EventTransport {
         this.name = name;
         this.connectTo = connectTo;
         this.inputChannelId = name + ':' + utils.genUID();
+        this.realm = win || global;
 
-        this.ownEndpoints.on(function (endpoints) {
+        this.ownEndpoints.on((endpoints) => {
             if (this.connected.value) {
                 this.send({
                     type: 'endpoints',
                     data: [endpoints],
                 });
             }
-        }, this);
-
-        this.window = win || global;
+        });
 
         if (
-            typeof this.window.postMessage !== 'function' ||
+            typeof this.realm.postMessage !== 'function' ||
             typeof addEventListener !== 'function'
         ) {
             utils.warn(DEBUG_PREFIX + "Event (postMessage) transport isn't supported");
@@ -159,7 +158,7 @@ export default class EventTransport {
         const data = event.data || {};
         const payload = data.payload || {};
 
-        if (event.source !== this.window || event.target !== global) {
+        if (event.source !== this.realm || event.target !== global) {
             return;
         }
 
@@ -185,12 +184,13 @@ export default class EventTransport {
             this._handshake(true);
         }
 
-        if (!(from in this.connections)) {
+        if (from in this.connections === false) {
             const endpoints = new EndpointList(payload.endpoints);
+
             this.remoteEndpoints.add(endpoints);
             this.connections[from] = {
                 ttl: Date.now(),
-                endpoints: endpoints,
+                endpoints,
             };
             this._send(from, {
                 type: 'connect',
@@ -241,11 +241,11 @@ export default class EventTransport {
                     args = args.concat(this._wrapCallback(from, callback));
                 }
 
-                this.dataCallbacks.forEach(function (callback) {
-                    if (callback.endpoint === payload.endpoint) {
-                        callback.fn.apply(null, args);
+                for (const { endpoint, fn } of this.dataCallbacks) {
+                    if (endpoint === payload.endpoint) {
+                        fn(...args);
                     }
-                });
+                }
                 break;
             }
             case 'getRemoteUI': {
@@ -261,7 +261,7 @@ export default class EventTransport {
                     )('Wrong endpoint – ' + payload.endpoint);
                 } else {
                     this.endpointGetUI[payload.endpoint](
-                        payload.data[0] || false,
+                        payload.data[0] || {},
                         payload.callback ? this._wrapCallback(from, payload.callback) : () => void 0
                     );
                 }
@@ -283,10 +283,10 @@ export default class EventTransport {
     }
 
     _wrapCallback<TArgs extends unknown[]>(to: string, callback: Fn<TArgs, void>) {
-        return (...args: TArgs): void => {
+        return (...args: TArgs) => {
             const callbackPayload: CallbackPayload<TArgs> = {
                 type: 'callback',
-                callback: callback,
+                callback,
                 data: args,
             };
             this._send(to, callbackPayload);
@@ -298,12 +298,12 @@ export default class EventTransport {
             utils.log(DEBUG_PREFIX + 'emit event', to, payload);
         }
 
-        if (typeof this.window.postMessage === 'function') {
-            this.window.postMessage(
+        if (typeof this.realm.postMessage === 'function') {
+            this.realm.postMessage(
                 {
                     from: this.inputChannelId,
-                    to: to,
-                    payload: payload,
+                    to,
+                    payload,
                 },
                 '*'
             );
@@ -312,8 +312,8 @@ export default class EventTransport {
 
     subscribeToEndpoint(endpoint: string | null, fn: AnyFn) {
         return utils.subscribe(this.dataCallbacks, {
-            endpoint: endpoint,
-            fn: fn,
+            endpoint,
+            fn,
         });
     }
 
@@ -334,10 +334,10 @@ export default class EventTransport {
         }
 
         this.send({
-            type: type,
-            endpoint: endpoint,
+            type,
+            endpoint,
             data: args,
-            callback: callback,
+            callback,
         });
     }
 
@@ -369,8 +369,8 @@ export default class EventTransport {
         if (this.inited) {
             callback({
                 connected: this.connected,
-                getRemoteUI: this.sendToEndpoint.bind(this, id, 'getRemoteUI'),
                 subscribe: this.subscribeToEndpoint.bind(this, id),
+                getRemoteUI: this.sendToEndpoint.bind(this, id, 'getRemoteUI'),
                 send: this.sendToEndpoint.bind(this, id, 'data'),
             });
         } else {
@@ -384,7 +384,7 @@ export default class EventTransport {
         const channel = utils.genUID(8) + ':' + this.connectTo;
         const remoteEndpoints = this.remoteEndpoints;
 
-        this.onInit(endpoint, function (api) {
+        this.onInit(endpoint, (api) => {
             api.subscribe(endpoint.processInput);
             api.connected.link((connected) => {
                 endpoint.setupChannel(channel, api.send, remoteEndpoints, connected);

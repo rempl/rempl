@@ -24,21 +24,6 @@ export class PublisherNamespace extends Namespace {
             },
         ]);
     }
-
-    pipe(fn: PipeFn, init?: unknown): PipeFn {
-        const pipe = (...args: unknown[]) => this.publish(fn(...args));
-
-        if (!fn) {
-            init = false;
-            fn = (value: unknown) => value;
-        }
-
-        if (init || init === undefined) {
-            pipe();
-        }
-
-        return pipe;
-    }
 }
 
 export default class Publisher extends Endpoint<PublisherNamespace> {

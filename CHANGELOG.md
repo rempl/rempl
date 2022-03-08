@@ -1,6 +1,7 @@
 ## next
 
 - Removed callback support for `getSubscriber()` which was deprecated in `1.0.0-alpha14`
+- Removed `PublisherNamespace#pipe()` method
 
 ## 1.0.0-alpha.19 (November 10, 2017)
 
@@ -20,16 +21,16 @@
 - Added `Endpoint#getRemoteMethod()` method
 - Added `PublisherNamespace#pipe()` method
 - Rework publisher's behaviour for connection to WS server (implicit/explicit and more options)
-    - Browser's version
-        - Renamed attribute `value` to `content` in `<meta name="rempl:server">`
-        - Added `implicit` value support to `<meta name="rempl:server">`
-        - Added support for `REMPL_SERVER` non-global variable in scope (priority over `<meta>` when not an `undefined`). Can be `'none'`/`false`, `'implicit'`/`true` or any string (treat as url)
-        - no connection to ws server by default
-    - Node's version
-        - Added new values for `REMPL_SERVER`: `false` (equals to `'none'`), `'implicit'`, `true` (equals to `'implicit'`)
-    - Common
-        - Changed `ws` option on publisher creation to allow values: `'implicit'`/`true`, `'explicit'`/`undefined`, `false` or any string
-        - Changed `Publisher#connectWs()` to have a special meaning for `undefined`/`'implicit'` and `'explicit'`
+  - Browser's version
+    - Renamed attribute `value` to `content` in `<meta name="rempl:server">`
+    - Added `implicit` value support to `<meta name="rempl:server">`
+    - Added support for `REMPL_SERVER` non-global variable in scope (priority over `<meta>` when not an `undefined`). Can be `'none'`/`false`, `'implicit'`/`true` or any string (treat as url)
+    - no connection to ws server by default
+  - Node's version
+    - Added new values for `REMPL_SERVER`: `false` (equals to `'none'`), `'implicit'`, `true` (equals to `'implicit'`)
+  - Common
+    - Changed `ws` option on publisher creation to allow values: `'implicit'`/`true`, `'explicit'`/`undefined`, `false` or any string
+    - Changed `Publisher#connectWs()` to have a special meaning for `undefined`/`'implicit'` and `'explicit'`
 - Updated `socket.io-client` to `^2.0.2` and used its slim version (reduce dist size 115Kb -> 94Kb)
 - Fixed known issues with bundle working in various environments
 - Fixed bugs in Safari
@@ -37,10 +38,10 @@
 ## 1.0.0-alpha15 (April 11, 2017)
 
 - Improved WS transport setup
-    - Don't use WS transport for publisher when default URI is `none` and `options.ws` is not specified
-    - Don't use WS transport for publisher when `options.ws` is not a string or falsy
-    - Implemented `Publisher#connectWs()` method to connect publisher to specific WS origin
-    - Improved WS origin resolving to work better for https/wss
+  - Don't use WS transport for publisher when default URI is `none` and `options.ws` is not specified
+  - Don't use WS transport for publisher when `options.ws` is not a string or falsy
+  - Implemented `Publisher#connectWs()` method to connect publisher to specific WS origin
+  - Improved WS origin resolving to work better for https/wss
 - Reduced `connect` packets count on event transports connection
 - Implemented publisher auto-selection when in-page host activated with no specified publisher and no available publishers, first publisher will be selected when available
 - Fixed callback broadcasting for event transport, response is now sending to `callRemote` initiator only
@@ -67,7 +68,7 @@
 
 #### Subscriber
 
-- Changed `rempl.getSubscriber()` to return a subscriber, using a callback is deprecated now 
+- Changed `rempl.getSubscriber()` to return a subscriber, using a callback is deprecated now
 - Reworked `Subscriber` to be abstract, move all client specifics (like disconnection overlay) to subscriber factory
 - Removed `publisher:connect` and `publisher:disconnect` event handling by `Subscriber`, it became redundant due to `Enpoint#connected`
 
@@ -94,20 +95,20 @@
 
 ## 1.0.0-alpha13 (March 30, 2017)
 
-- Implemented `rempl.source` that contains source or rempl itself (like a [quine](https://en.wikipedia.org/wiki/Quine_(computing)))
+- Implemented `rempl.source` that contains source or rempl itself (like a [quine](<https://en.wikipedia.org/wiki/Quine_(computing)>))
 - Implemented `rempl.version`
 - Implemented in-page host. It may be activated via `rempl.getHost().activate(publisherId)` and deactivated via `rempl.getHost().deactivate(publisherId)` or `rempl.getHost().deactivate()`
 - Reworked `Sandbox`
-    - Removed `rempl.initSandbox()`
-    - Implemented `rempl.createSandbox(settings, onInit)`
-    - From now publisher's `rempl` version for `script` type subscribers is used instead of process that creates a sandbox
+  - Removed `rempl.initSandbox()`
+  - Implemented `rempl.createSandbox(settings, onInit)`
+  - From now publisher's `rempl` version for `script` type subscribers is used instead of process that creates a sandbox
 - Initial refactoring of `Env`
-    - Removed `rempl.createEnv()`
-    - Implemented `Subscriber#env` to provide an access to env interface
-    - Implemented `env.enabled` and link env with sandbox only when env is enabled
+  - Removed `rempl.createEnv()`
+  - Implemented `Subscriber#env` to provide an access to env interface
+  - Implemented `env.enabled` and link env with sandbox only when env is enabled
 - Reworked event transport to use own and remote endpoint lists. Currently it has a limited usage of these lists, in future it will be used for better traffic filter.
 - Fixed `Publisher`'s WS transport sync when multiple publishers is used
-- Excluded dev version of ws server UI from `npm` package, so `rempl-cli` is always use `prod` version when `rempl` installed from `npm` 
+- Excluded dev version of ws server UI from `npm` package, so `rempl-cli` is always use `prod` version when `rempl` installed from `npm`
 - Various small fixes and improvements
 
 ## 1.0.0-alpha12 (March 26, 2017)
@@ -119,7 +120,7 @@
 
 - Implemented basic integration with host environment
 - Implemented remote methods synchronization
-    - Added `SubscriberNamespace#onRemoteMethodsChanged()` method
+  - Added `SubscriberNamespace#onRemoteMethodsChanged()` method
 - Implemented `Subscriber#connected` property (a Token instance) to indicate publisher is connected
 - Implemented default subscriber overlay on publisher connection losing (set `subscriber.connected.defaultOverlay` to `false` to disable it)
 - Improved publisher connection tracking and reconnection in WS server
@@ -145,18 +146,18 @@
 
 - Implemented `Endpoint` class as base class for `Publisher` and `Subscriber`
 - Implemented `Namespace` class for channels and change RPC API
-    - Renamed `define()` method to `provide()`
-    - Implemented additional semantic for `provide()` method (i.e. `provide('name', function() { .. })`)
-    - Changed behaviour of `provide()` method to override already provided methods
-    - Implement `revoke()` method to revoke provided methods
-    - Renamed `hasMethod()` method to `isMethodProvided()`
-    - Renamed `invoke()` method to `callRemote()`
-    - Made callback call safe when callback is not pass to remote method
+  - Renamed `define()` method to `provide()`
+  - Implemented additional semantic for `provide()` method (i.e. `provide('name', function() { .. })`)
+  - Changed behaviour of `provide()` method to override already provided methods
+  - Implement `revoke()` method to revoke provided methods
+  - Renamed `hasMethod()` method to `isMethodProvided()`
+  - Renamed `invoke()` method to `callRemote()`
+  - Made callback call safe when callback is not pass to remote method
 - Changed `Token` API
-    - Implemented `get()` method
-    - Implemented `link()` method
-    - Renamed `attach()` method to `on()`
-    - Renamed `detach()` method to `off()`
+  - Implemented `get()` method
+  - Implemented `link()` method
+  - Renamed `attach()` method to `on()`
+  - Renamed `detach()` method to `off()`
 - Removed `features` feature
 
 ### WS Server

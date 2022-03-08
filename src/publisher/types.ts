@@ -1,7 +1,7 @@
 export type RequestClientHandler = (
     error: string | null,
     type: string,
-    response: Record<string, string> | null
+    response: Record<string, string> | string | null
 ) => void;
 export type GetRemoteUIHandler = (
     settings: unknown,

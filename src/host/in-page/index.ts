@@ -24,7 +24,7 @@ function cleanupSandbox() {
     }
 }
 
-function selectPublisher(publisherId?: string | null) {
+function selectPublisher(publisherId: string | null = null) {
     if (!publisherId) {
         publisherId = null;
     }

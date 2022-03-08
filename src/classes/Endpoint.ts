@@ -74,11 +74,11 @@ export default class Endpoint<TNamespace extends Namespace> {
         }
     }
 
-    getName(): string {
+    getName() {
         return this.type + (this.id ? '#' + this.id : '');
     }
 
-    ns(name: string): TNamespace {
+    ns(name: string) {
         if (!this.namespaces[name]) {
             this.namespaces[name] = new this.namespaceClass(name, this) as TNamespace;
         }
@@ -86,7 +86,7 @@ export default class Endpoint<TNamespace extends Namespace> {
         return this.namespaces[name];
     }
 
-    requestRemoteApi(): void {
+    requestRemoteApi() {
         const getProvidedMethodsPacket: GetProvidedMethodsPacket = {
             type: 'getProvidedMethods',
         };
@@ -99,7 +99,7 @@ export default class Endpoint<TNamespace extends Namespace> {
         ]);
     }
 
-    setRemoteApi(api?: API): void {
+    setRemoteApi(api?: API) {
         const changed = [];
 
         if (!api) {
@@ -135,7 +135,7 @@ export default class Endpoint<TNamespace extends Namespace> {
         changed.forEach((ns) => Namespace.notifyRemoteMethodsChanged(ns));
     }
 
-    getProvidedApi(): API {
+    getProvidedApi() {
         const api: API = {};
 
         for (const name in this.namespaces) {
@@ -145,7 +145,7 @@ export default class Endpoint<TNamespace extends Namespace> {
         return api;
     }
 
-    scheduleProvidedMethodsUpdate(): void {
+    scheduleProvidedMethodsUpdate() {
         if (!this.providedMethodsUpdateTimer) {
             this.providedMethodsUpdateTimer = setTimeout(() => {
                 this.providedMethodsUpdateTimer = null;
@@ -158,7 +158,7 @@ export default class Endpoint<TNamespace extends Namespace> {
         }
     }
 
-    processInput = (packet: Packet, callback: AnyFn): void => {
+    processInput = (packet: Packet, callback: AnyFn) => {
         switch (packet.type) {
             case 'call': {
                 const thePacket = packet as CallPacket;
@@ -166,11 +166,9 @@ export default class Endpoint<TNamespace extends Namespace> {
 
                 if (!ns.isMethodProvided(thePacket.method)) {
                     return warn(
-                        '[rempl][sync] ' +
-                            this.getName() +
-                            ' (namespace: ' +
-                            (thePacket.ns || 'default') +
-                            ') has no remote method:',
+                        `[rempl][sync] ${this.getName()} (namespace: ${
+                            thePacket.ns || 'default'
+                        }) has no remote method:`,
                         thePacket.method
                     );
                 }
@@ -198,12 +196,7 @@ export default class Endpoint<TNamespace extends Namespace> {
         }
     };
 
-    setupChannel(
-        type: string,
-        send: AnyFn,
-        remoteEndpoints: EndpointList,
-        available: boolean
-    ): void {
+    setupChannel(type: string, send: AnyFn, remoteEndpoints: EndpointList, available: boolean) {
         if (available) {
             this.channels.push({
                 type,

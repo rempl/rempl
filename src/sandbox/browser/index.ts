@@ -2,18 +2,33 @@
 import EventTransport from '../../transport/event.js';
 import { genUID } from '../../utils/index.js';
 
+type Settings =
+    | {
+          type: 'script';
+          content: Record<string, string>;
+          window?: Window;
+          container?: HTMLElement;
+      }
+    | {
+          type: 'url';
+          content: string;
+          window?: Window;
+          container?: HTMLElement;
+      };
+
 const initEnvSubscriberMessage = new WeakMap();
 
 if (parent !== self) {
     addEventListener('message', function (event: MessageEvent<any>) {
         const data = event.data || {};
-        if (data.to === 'rempl-env-publisher:connect') {
+
+        if (event.source && data.to === 'rempl-env-publisher:connect') {
             initEnvSubscriberMessage.set(event.source, data);
         }
     });
 }
 
-export default function createSandbox(settings, callback) {
+export default function createSandbox(settings: Settings, callback) {
     function initSandbox(sandboxWindow: Window | typeof global) {
         if (settings.type === 'script') {
             for (const name in settings.content) {
@@ -54,6 +69,7 @@ export default function createSandbox(settings, callback) {
 
             if (settings.type !== 'script') {
                 const initMessage = initEnvSubscriberMessage.get(sandboxWindow);
+
                 if (initMessage) {
                     toSandbox = initMessage.from;
                     parent.postMessage(initMessage, '*');

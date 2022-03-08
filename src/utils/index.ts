@@ -3,11 +3,6 @@ import global from './global';
 export { global };
 export type TODO = any;
 
-export const isNode =
-    typeof process !== 'undefined' &&
-    Object.prototype.toString.call(process) === '[object process]' &&
-    Object.prototype.toString.call(global.self) !== '[object Window]';
-
 export type Complete<TDest, TSource> = TDest & Omit<TSource, keyof TDest>;
 
 export type Fn<TArgs extends unknown[], TReturn, TThis = unknown> = (

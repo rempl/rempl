@@ -1,9 +1,9 @@
 /* eslint-env browser */
-/* global __INPAGE_CSS__ */
 
 import createElement from './createElement.js';
 import { AnyFn, global } from '../../utils/index.js';
 
+declare const __INPAGE_CSS__: string;
 type Side = 'left' | 'top' | 'bottom' | 'right' | 'fit the page';
 type View = {
     wrapper: HTMLDivElement;
@@ -74,7 +74,7 @@ function getView(): View {
                             ref: 'tabs',
                             style: {
                                 display: 'flex',
-                                flex: 1,
+                                flex: '1',
                             },
                         },
                         {
@@ -162,6 +162,7 @@ export default {
     selectPublisher(id: string): void {
         if (selectedPublisher !== id) {
             selectedPublisher = id;
+
             if (view) {
                 [...getView().tabs.children].forEach(updateTabSelectedState);
             }

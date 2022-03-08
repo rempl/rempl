@@ -1,37 +1,40 @@
-<!doctype html>
+<!DOCTYPE html>
 
 <html>
-<head>
-    <!-- uncomment next line to connect publisher to rempl server -->
-    <!-- <meta name="rempl:server" content="localhost:8177"> -->
-    <title>Rempl test</title>
-</head>
-<body>
-    <h3>Rempl browser-publisher test</h3>
-    <div>Enter some value to the input:</div>
+    <head>
+        <!-- uncomment next line to connect publisher to rempl server -->
+        <!-- <meta name="rempl:server" content="localhost:8177"> -->
+        <title>Rempl test</title>
+    </head>
+    <body>
+        <h3>Rempl browser-publisher test</h3>
+        <div>Enter some value to the input:</div>
 
-    <input type="text" id="theInput" value="some value"/>
+        <input type="text" id="theInput" value="some value" />
 
-    <script src="../../../dist/rempl.js"></script>
-    <script>
-        /* eslint-env browser */
-        /* global rempl */
+        <script src="../../../dist/rempl.js"></script>
+        <script>
+            /* eslint-env browser */
+            /* global rempl */
 
-        var publisher = rempl.createPublisher('web-input', rempl.scriptFromFile('browser-ui.js'));
-        var theInput = document.querySelector('#theInput');
+            var publisher = rempl.createPublisher(
+                'web-input',
+                rempl.scriptFromFile('browser-ui.js')
+            );
+            var theInput = document.querySelector('#theInput');
 
-        theInput.addEventListener('input', publisher.pipe(() => theInput.value));
-        // Line above is equivalent to:
-        //
-        //   publisher.publish(theInput.value);
-        //   theInput.addEventListener('input', () => publisher.publish(theInput.value));
-        //
+            theInput.addEventListener('input', () => publisher.publish(theInput.value));
+            // Line above is equivalent to:
+            //
+            //   publisher.publish(theInput.value);
+            //   theInput.addEventListener('input', () => publisher.publish(theInput.value));
+            //
 
-        // NOTE: That's not a part of demo, and helps to try Rempl in action with zero setup.
-        // Although host is running inside page (btw, it calls in-page host) it load subscriber's UI
-        // into <iframe>. So actually publisher and subcriber communicate cross origin through
-        // event-based transport.
-        rempl.getHost().activate();
-    </script>
-</body>
+            // NOTE: That's not a part of demo, and helps to try Rempl in action with zero setup.
+            // Although host is running inside page (btw, it calls in-page host) it load subscriber's UI
+            // into <iframe>. So actually publisher and subcriber communicate cross origin through
+            // event-based transport.
+            rempl.getHost().activate();
+        </script>
+    </body>
 </html>

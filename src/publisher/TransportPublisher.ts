@@ -67,7 +67,7 @@ export class TransportPublisher extends Publisher {
         this.getRemoteUI_(
             settings,
             (error: string | null, type: 'url' | 'script', content: string) => {
-                let response: Record<string, string> | null = null;
+                let response: Record<string, string> | string | null = content;
 
                 if (!error && type === 'script') {
                     // send with user script rempl source too
