@@ -1,4 +1,4 @@
-import { AnyFn, warn } from '../utils/index.js';
+import { AnyFn } from '../utils/index.js';
 import Namespace from './Namespace.js';
 import Token from './Token.js';
 import EndpointListSet from './EndpointListSet.js';
@@ -165,7 +165,7 @@ export default class Endpoint<TNamespace extends Namespace> {
                 const ns = this.ns(thePacket.ns || '*');
 
                 if (!ns.isMethodProvided(thePacket.method)) {
-                    return warn(
+                    return console.warn(
                         `[rempl][sync] ${this.getName()} (namespace: ${
                             thePacket.ns || 'default'
                         }) has no remote method:`,
@@ -188,7 +188,7 @@ export default class Endpoint<TNamespace extends Namespace> {
                 break;
 
             default:
-                warn(
+                console.warn(
                     '[rempl][sync] ' + this.getName() + 'Unknown packet type:',
                     // @ts-ignore
                     packet.type

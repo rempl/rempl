@@ -61,37 +61,6 @@ export function subscribe<TItem>(list: TItem[], item: TItem): Unsubscribe {
     };
 }
 
-const consoleMethods = (() => {
-    const console = global.console;
-    const methods: Pick<typeof console, 'log' | 'info' | 'warn' | 'error'> = {
-        log: () => {},
-        info: () => {},
-        warn: () => {},
-        error: () => {},
-    };
-
-    if (console) {
-        for (const key of Object.keys(methods)) {
-            const methodName = key as keyof typeof methods;
-            methods[methodName] =
-                'bind' in Function.prototype && typeof console[methodName] == 'function'
-                    ? Function.prototype.bind.call(console[methodName], console)
-                    : // IE8 and lower solution. It's also more safe when Function.prototype.bind
-                      // defines by other libraries (like es5-shim).
-                      function (...args) {
-                          Function.prototype.apply.call(console[methodName], console, args);
-                      };
-        }
-    }
-
-    return methods;
-})();
-
 export function hasOwnProperty(obj: TypeRecord, prop: string): boolean {
     return Object.prototype.hasOwnProperty.call(obj, prop);
 }
-
-export const log = consoleMethods.log;
-export const info = consoleMethods.info;
-export const warn = consoleMethods.warn;
-export const error = consoleMethods.error;

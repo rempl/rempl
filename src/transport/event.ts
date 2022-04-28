@@ -136,7 +136,7 @@ export default class EventTransport {
             typeof this.realm.postMessage !== 'function' ||
             typeof addEventListener !== 'function'
         ) {
-            utils.warn(DEBUG_PREFIX + "Event (postMessage) transport isn't supported");
+            console.warn(DEBUG_PREFIX + "Event (postMessage) transport isn't supported");
             return;
         }
 
@@ -173,7 +173,7 @@ export default class EventTransport {
                 if (data.from in this.connections) {
                     this._onData(data.from, payload);
                 } else {
-                    utils.warn(DEBUG_PREFIX + 'unknown incoming connection', data.from);
+                    console.warn(DEBUG_PREFIX + 'unknown incoming connection', data.from);
                 }
                 break;
         }
@@ -203,7 +203,7 @@ export default class EventTransport {
 
     _onData(from: string, payload: OnDataPayload) {
         if (DEBUG) {
-            utils.log(DEBUG_PREFIX + 'receive from ' + this.connectTo, payload.type, payload);
+            console.log(DEBUG_PREFIX + 'receive from ' + this.connectTo, payload.type, payload);
         }
 
         switch (payload.type) {
@@ -250,7 +250,7 @@ export default class EventTransport {
             }
             case 'getRemoteUI': {
                 if (!hasOwnProperty(this.endpointGetUI, payload.endpoint)) {
-                    utils.warn(
+                    console.warn(
                         DEBUG_PREFIX +
                             'receive unknown endpoint for getRemoteUI(): ' +
                             payload.endpoint
@@ -269,7 +269,7 @@ export default class EventTransport {
             }
 
             default:
-                utils.warn(
+                console.warn(
                     DEBUG_PREFIX +
                         'Unknown message type `' +
                         // @ts-ignore
@@ -295,7 +295,7 @@ export default class EventTransport {
 
     _send(to: string, payload: unknown) {
         if (DEBUG) {
-            utils.log(DEBUG_PREFIX + 'emit event', to, payload);
+            console.log(DEBUG_PREFIX + 'emit event', to, payload);
         }
 
         if (typeof this.realm.postMessage === 'function') {
@@ -321,7 +321,7 @@ export default class EventTransport {
         // if (endpoint !== this.remoteName && this.remoteEndpoints.value.indexOf(endpoint) === -1) {
         //     // console.warn(this.name, endpoint, this.remoteName, this.remoteEndpoints.value);
         //     if (1||DEBUG) {
-        //         utils.warn(DEBUG_PREFIX + '' + this.name + ' send({ type: `' + type + '` }) to endpoint is cancelled since no `' + endpoint + '` in remote endpoint list [' + this.remoteEndpoints.value.join(', ') + ']', arguments[2]);
+        //         console.warn(DEBUG_PREFIX + '' + this.name + ' send({ type: `' + type + '` }) to endpoint is cancelled since no `' + endpoint + '` in remote endpoint list [' + this.remoteEndpoints.value.join(', ') + ']', arguments[2]);
         //     }
         //     return;
         // }
@@ -343,7 +343,7 @@ export default class EventTransport {
 
     send(payload: unknown) {
         // if (!this.inited) {
-        //     utils.warn(DEBUG_PREFIX + 'send() call on init is prohibited');
+        //     console.warn(DEBUG_PREFIX + 'send() call on init is prohibited');
         //     return;
         // }
 
