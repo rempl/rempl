@@ -1,14 +1,12 @@
 import { equal } from 'assert';
 import EndpointList from '../src/classes/EndpointList.js';
 
-describe('EndpointList', function () {
-    it('should not update when content is the same', function () {
-        var list = new EndpointList();
-        var updates = 0;
+describe('EndpointList', () => {
+    it('should not update when content is the same', () => {
+        const list = new EndpointList();
+        let updates = 0;
 
-        list.on(function () {
-            updates++;
-        });
+        list.on(() => updates++);
 
         list.set(['foo']);
         equal(updates, 1);

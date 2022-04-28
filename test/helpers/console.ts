@@ -2,16 +2,16 @@ import { deepEqual } from 'assert';
 
 const methods = ['log', 'info', 'warn', 'error'];
 
-export default function (fn, expected) {
+export default function (fn: () => void, expected: any) {
     const messages = [];
-    const original = methods.reduce(function (original, name) {
+    const original = methods.reduce((original, name) => {
         original[name] = console[name];
-        console[name] = function () {
+        console[name] = (...args: any[]) =>
             messages.push({
                 type: name,
-                args: Array.prototype.slice.call(arguments),
+                args,
             });
-        };
+
         return original;
     }, {});
 

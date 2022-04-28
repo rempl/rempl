@@ -1,17 +1,16 @@
 import OriginalEventTransport from '../../src/transport/event.js';
 
-var transports;
-var callbacks;
+const replaceId = new WeakMap<OriginalEventTransport, number>();
+let transports;
+let callbacks;
 
-function EventTransport(from, to, win) {
-    const transport = new OriginalEventTransport(from, to, win);
+class EventTransport extends OriginalEventTransport {
+    constructor(from: string, to: string, win?: Window | typeof global) {
+        super(from, to, win);
 
-    transports.push(transport);
-    transport.replaceId = transports.filter(function (t) {
-        return t.name === from;
-    }).length;
-
-    return transport;
+        transports.push(this);
+        replaceId.set(this, transports.filter((t) => t.name === from).length); // ???
+    }
 }
 
 function createScope() {
@@ -23,11 +22,11 @@ function createScope() {
                         .replace(
                             new RegExp('"' + transport.inputChannelId + '"', 'g'),
                             function (m) {
-                                return m.replace(/:[^"]+/, ':' + transport.replaceId);
+                                return m.replace(/:[^"]+/, ':' + replaceId.get(transport));
                             }
                         )
-                        .replace(/"callback":\s*"([^"]+)"/g, function (m, id) {
-                            var idx = callbacks.indexOf(id);
+                        .replace(/"callback":\s*"([^"]+)"/g, function (m: string, id: string) {
+                            let idx = callbacks.indexOf(id);
                             if (idx === -1) {
                                 idx = callbacks.push(id) - 1;
                             }
@@ -40,14 +39,14 @@ function createScope() {
 
     function tick() {
         if (queue.length === 0) {
-            var offset = start;
+            const offset = start;
 
             start = messages.length;
             timer = null;
 
             done(processMessages(messages.slice(offset)));
         } else {
-            var message = queue.shift();
+            const message = queue.shift();
 
             listeners.slice().forEach(function (listener) {
                 listener(message);
@@ -57,12 +56,12 @@ function createScope() {
         }
     }
 
-    var timer = null;
-    var done = null;
-    var listeners = [];
-    var queue = [];
-    var messages = [];
-    var start = 0;
+    let listeners = [];
+    let queue = [];
+    let messages = [];
+    let timer = null;
+    let done = null;
+    let start = 0;
 
     global.addEventListener = function (event, fn, capture) {
         if (event !== 'message' || capture) {
@@ -72,12 +71,13 @@ function createScope() {
         listeners.push(fn);
     };
     global.postMessage = function (data, origin) {
-        var message = {
+        const message = {
             source: global,
             target: global,
             origin: origin,
             data: data,
         };
+
         messages.push(message);
         queue.push(message);
     };

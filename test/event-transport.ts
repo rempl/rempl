@@ -2,21 +2,21 @@ import { deepEqual } from 'assert';
 import Endpoint from '../src/classes/Endpoint.js';
 import { createScope, EventTransport } from './helpers/event-transport';
 
-describe('EventTransport', function () {
-    var scope;
+describe('EventTransport', () => {
+    let scope;
 
-    beforeEach(function () {
+    beforeEach(() => {
         scope = createScope();
     });
-    afterEach(function () {
+    afterEach(() => {
         scope.destroy();
         scope = null;
     });
 
-    it('create a transport with no pair', function (done) {
+    it('create a transport with no pair', (done) => {
         new EventTransport('foo', 'bar');
 
-        scope.await(function (messages) {
+        scope.await((messages) => {
             deepEqual(messages, [
                 {
                     from: 'foo:1',
@@ -28,11 +28,11 @@ describe('EventTransport', function () {
         });
     });
 
-    it('create transport pair in one frame', function (done) {
+    it('create transport pair in one frame', (done) => {
         new EventTransport('foo', 'bar');
         new EventTransport('bar', 'foo');
 
-        scope.await(function (messages) {
+        scope.await((messages) => {
             deepEqual(messages, [
                 {
                     from: 'foo:1',
@@ -61,10 +61,10 @@ describe('EventTransport', function () {
         });
     });
 
-    it('create transport pair in different frames', function (done) {
+    it('create transport pair in different frames', (done) => {
         new EventTransport('foo', 'bar');
 
-        scope.await(function (messages) {
+        scope.await((messages) => {
             deepEqual(messages, [
                 {
                     from: 'foo:1',
@@ -75,7 +75,7 @@ describe('EventTransport', function () {
 
             new EventTransport('bar', 'foo');
 
-            scope.await(function (messages) {
+            scope.await((messages) => {
                 deepEqual(messages, [
                     {
                         from: 'bar:1',
@@ -95,11 +95,11 @@ describe('EventTransport', function () {
         });
     });
 
-    it('transports created in one frame should not connect when no full match (foo->bar && bar->baz)', function (done) {
+    it('transports created in one frame should not connect when no full match (foo->bar && bar->baz)', (done) => {
         new EventTransport('foo', 'bar');
         new EventTransport('bar', 'baz');
 
-        scope.await(function (messages) {
+        scope.await((messages) => {
             deepEqual(messages, [
                 {
                     from: 'foo:1',
@@ -117,10 +117,10 @@ describe('EventTransport', function () {
         });
     });
 
-    it('transports created in different frames should not connect when no full match (foo->bar && bar->baz)', function (done) {
+    it('transports created in different frames should not connect when no full match (foo->bar && bar->baz)', (done) => {
         new EventTransport('foo', 'bar');
 
-        scope.await(function (messages) {
+        scope.await((messages) => {
             deepEqual(messages, [
                 {
                     from: 'foo:1',
@@ -130,7 +130,7 @@ describe('EventTransport', function () {
             ]);
 
             new EventTransport('bar', 'baz');
-            scope.await(function (messages) {
+            scope.await((messages) => {
                 deepEqual(messages, [
                     {
                         from: 'bar:1',
@@ -143,11 +143,11 @@ describe('EventTransport', function () {
         });
     });
 
-    it('transports created in one frame should not connect when no full match (foo->bar && baz->foo)', function (done) {
+    it('transports created in one frame should not connect when no full match (foo->bar && baz->foo)', (done) => {
         new EventTransport('foo', 'bar');
         new EventTransport('baz', 'foo');
 
-        scope.await(function (messages) {
+        scope.await((messages) => {
             deepEqual(messages, [
                 {
                     from: 'foo:1',
@@ -165,10 +165,10 @@ describe('EventTransport', function () {
         });
     });
 
-    it('transports created in different frames should not connect when no full match (foo->bar && baz->foo)', function (done) {
+    it('transports created in different frames should not connect when no full match (foo->bar && baz->foo)', (done) => {
         new EventTransport('foo', 'bar');
 
-        scope.await(function (messages) {
+        scope.await((messages) => {
             deepEqual(messages, [
                 {
                     from: 'foo:1',
@@ -178,7 +178,7 @@ describe('EventTransport', function () {
             ]);
 
             new EventTransport('baz', 'foo');
-            scope.await(function (messages) {
+            scope.await((messages) => {
                 deepEqual(messages, [
                     {
                         from: 'baz:1',
@@ -191,19 +191,16 @@ describe('EventTransport', function () {
         });
     });
 
-    it('connection with endpoints', function (done) {
-        var foo = new Endpoint('foo');
-        var bar1 = new Endpoint('bar1');
-        var bar2 = new Endpoint('bar2');
-
-        bar1.ret = [];
-        bar2.ret = [];
+    it('connection with endpoints', (done) => {
+        const foo = new Endpoint('foo');
+        const bar1 = new Endpoint('bar1');
+        const bar2 = new Endpoint('bar2');
 
         new EventTransport('foo', 'bar').sync(foo);
         new EventTransport('bar', 'foo').sync(bar1);
         new EventTransport('bar', 'foo').sync(bar2);
 
-        scope.await(function (messages) {
+        scope.await((messages) => {
             deepEqual(messages, [
                 {
                     from: 'foo:1',
@@ -249,13 +246,13 @@ describe('EventTransport', function () {
         });
     });
 
-    it('should send response for callRemote only to initiator', function (done) {
-        var foo = new Endpoint('foo');
-        var bar1 = new Endpoint('foo');
-        var bar2 = new Endpoint('foo');
+    it('should send response for callRemote only to initiator', (done) => {
+        const foo = new Endpoint('foo');
+        const bar1 = new Endpoint('foo');
+        const bar2 = new Endpoint('foo');
 
-        bar1.ret = [];
-        bar2.ret = [];
+        const bar1Ret = [];
+        const bar2Ret = [];
 
         new EventTransport('foo', 'bar').sync(foo);
         new EventTransport('bar', 'foo').sync(bar1);
@@ -265,15 +262,15 @@ describe('EventTransport', function () {
             callback(data);
         });
 
-        scope.await(function () {
+        scope.await(() => {
             bar1.callRemote('test', 'bar1-test', function (ret) {
-                bar1.ret.push(ret);
+                bar1Ret.push(ret);
             });
             bar2.callRemote('test', 'bar2-test', function (ret) {
-                bar2.ret.push(ret);
+                bar2Ret.push(ret);
             });
 
-            scope.await(function (messages) {
+            scope.await((messages) => {
                 deepEqual(messages, [
                     {
                         from: 'bar:1',
@@ -306,8 +303,8 @@ describe('EventTransport', function () {
                         payload: { type: 'callback', callback: 2, data: ['bar2-test'] },
                     },
                 ]);
-                deepEqual(bar1.ret, ['bar1-test']);
-                deepEqual(bar2.ret, ['bar2-test']);
+                deepEqual(bar1Ret, ['bar1-test']);
+                deepEqual(bar2Ret, ['bar2-test']);
                 done();
             });
         });
