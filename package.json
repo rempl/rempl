@@ -1,7 +1,7 @@
 {
     "name": "rempl",
     "version": "1.0.0-alpha.19",
-    "description": "Рlatform for moderated remote access to JavaScript runtime via custom UI",
+    "description": "Platform for moderated remote access to JavaScript runtime via custom UI",
     "repository": "rempl/rempl",
     "license": "MIT",
     "author": "Roman Dvornov",
@@ -13,6 +13,16 @@
     "type": "module",
     "main": "src/index.js",
     "browser": "dist/rempl-new.js",
+    "exports": {
+        ".": {
+            "require": "./cjs/index.cjs",
+            "import": "./esm/index.js"
+        },
+        "./browser": {
+            "require": "./cjs/browser.cjs",
+            "import": "./esm/browser.js"
+        }
+    },
     "scripts": {
         "lint": "eslint scripts src test && npm run ts-check",
         "ts-check": "tsc --noEmit",
@@ -24,7 +34,7 @@
         "build:bundle": "node scripts/build.cjs",
         "build:server-assets": "node node_modules/basisjs-tools-build/bin/build -c server/client/build.config",
         "build:transpile": "node scripts/transpile.cjs",
-        "coverage": "c8 --reporter=lcovonly npm test",
+        "coverage": "c8 --exclude cjs-test --exclude esm-test --reporter=lcovonly npm test",
         "watch": "npm run build:transpile -- --watch",
         "prepublishOnly": "npm run build"
     },
