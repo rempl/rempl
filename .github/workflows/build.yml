@@ -62,6 +62,7 @@ jobs:
                   node-version: ${{ matrix.node_version }}
                   cache: 'npm'
             - run: npm ci
+            - run: npm run build:transpile
             - run: npm run coverage
             - name: Coveralls parallel
               uses: coverallsapp/github-action@1.1.3
