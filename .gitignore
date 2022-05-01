@@ -4,3 +4,7 @@
 .rempl_endpoint_id
 *.log
 *.lock
+/esm/
+/esm-test/
+/cjs/
+/cjs-test/

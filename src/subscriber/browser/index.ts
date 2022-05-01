@@ -1,5 +1,5 @@
 /* eslint-env browser */
-import Subscriber from '../../classes/Subscriber.js';
+import { Subscriber } from '../../classes/Subscriber.js';
 import EventTransport from '../../transport/event.js';
 import setOverlayVisible from './disconnected-overlay.js';
 

@@ -25,6 +25,16 @@ async function buildMain(config, configCSS) {
         format: 'iife',
         write: false,
         ...config,
+        plugins: [
+            {
+                name: 'version',
+                setup({ onLoad }) {
+                    onLoad({ filter: /\/version\.ts$/ }, () => ({
+                        contents: 'export const version = "foo";',
+                    }));
+                },
+            },
+        ],
         define: {
             ...config.define,
             __INPAGE_CSS__: JSON.stringify(inpageCss.outputFiles[0].text),
@@ -50,6 +60,7 @@ if (require.main === module) {
                 },
             },
             {
+                logLevel: 'info',
                 minify: true,
                 sourcemap: false,
             }
@@ -77,6 +88,7 @@ if (require.main === module) {
                 contents: bundle,
             },
             format: 'esm',
+            logLevel: 'info',
             minify: true,
             write: false,
         }).outputFiles[0].text;

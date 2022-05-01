@@ -23,7 +23,7 @@ export class SubscriberNamespace extends Namespace {
     }
 }
 
-export default class Subscriber extends Endpoint<SubscriberNamespace> {
+export class Subscriber extends Endpoint<SubscriberNamespace> {
     type = 'Subscriber';
     get namespaceClass() {
         return SubscriberNamespace;

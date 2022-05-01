@@ -1,7 +1,7 @@
 /* eslint-env browser */
 import EventTransport from '../../transport/event.js';
 import createSandbox from '../../sandbox/browser/index.js';
-import Publisher from '../../classes/Publisher.js';
+import { Publisher } from '../../classes/Publisher.js';
 import view from './view.js';
 
 type Host = {

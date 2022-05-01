@@ -1,5 +1,5 @@
 /* eslint-env browser */
-import EventTransport from '../../transport/event.js';
+import EventTransport, { OnInitCallback } from '../../transport/event.js';
 import { genUID } from '../../utils/index.js';
 
 type Settings =
@@ -28,7 +28,7 @@ if (parent !== self) {
     });
 }
 
-export default function createSandbox(settings: Settings, callback) {
+export default function createSandbox(settings: Settings, callback: OnInitCallback) {
     function initSandbox(sandboxWindow: Window | typeof global) {
         if (settings.type === 'script') {
             for (const name in settings.content) {

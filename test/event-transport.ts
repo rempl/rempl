@@ -1,6 +1,6 @@
 import { deepEqual } from 'assert';
 import Endpoint from '../src/classes/Endpoint.js';
-import { createScope, EventTransport } from './helpers/event-transport';
+import { createScope, EventTransport } from './helpers/event-transport.js';
 
 describe('EventTransport', () => {
     let scope;

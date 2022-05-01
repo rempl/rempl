@@ -1,7 +1,7 @@
-import Publisher from '../classes/Publisher';
-import remplSource from '../utils/browser/source';
-import { createWsConnectionFactory } from './factory';
-import { GetRemoteUIHandler, Options, RequestClientHandler } from './types';
+import { Publisher } from '../classes/Publisher.js';
+import remplSource from '../utils/browser/source.js';
+import { createWsConnectionFactory } from './factory.js';
+import { GetRemoteUIHandler, Options, RequestClientHandler } from './types.js';
 
 function resolveWsUri(uri?: string | boolean) {
     let resolvedUri: string | boolean = false;

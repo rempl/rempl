@@ -11,5 +11,6 @@
         "lib": ["DOM", "ESNext"],
         "allowJs": true
     },
+    "include": ["src/**/*", "test/**/*"],
     "exclude": ["node_modules", "dist", "test", "server", "example"]
 }

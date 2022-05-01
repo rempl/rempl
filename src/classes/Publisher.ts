@@ -26,7 +26,7 @@ export class PublisherNamespace extends Namespace {
     }
 }
 
-export default class Publisher extends Endpoint<PublisherNamespace> {
+export class Publisher extends Endpoint<PublisherNamespace> {
     type = 'Publisher';
     get namespaceClass() {
         return PublisherNamespace;

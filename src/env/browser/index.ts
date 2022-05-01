@@ -1,7 +1,7 @@
 /* eslint-env browser */
 import EventTransport from '../../transport/event.js';
-import Publisher from '../../classes/Publisher.js';
-import Subscriber from '../../classes/Subscriber.js';
+import { Publisher } from '../../classes/Publisher.js';
+import { Subscriber } from '../../classes/Subscriber.js';
 
 const subscribers = new Map<string, Subscriber>();
 
