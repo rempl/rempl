@@ -11,6 +11,10 @@ import { global, AnyFn, Fn, hasOwnProperty, Unsubscribe } from '../utils/index.j
 const DEBUG = false;
 const DEBUG_PREFIX = '[rempl][event-transport] ';
 
+export type TransportEndpoint = (Endpoint<Namespace> | { id?: string }) & {
+    getRemoteUI?: GetRemoteUIFn;
+};
+
 export type ConnectPayload = {
     initiator: string;
     inited: boolean;
@@ -25,7 +29,7 @@ export type OnInitCallbackArg = {
 };
 
 export type OnInitCallback = (arg: OnInitCallbackArg) => void;
-export type OnInitFnArgs = [endpoint: Endpoint<Namespace>, callback: OnInitCallback];
+export type OnInitFnArgs = [endpoint: TransportEndpoint, callback: OnInitCallback];
 
 export type Connection = {
     ttl: number;
@@ -352,10 +356,7 @@ export default class EventTransport {
         }
     }
 
-    onInit(
-        endpoint: Endpoint<Namespace> & { getRemoteUI?: GetRemoteUIFn },
-        callback: OnInitCallback
-    ) {
+    onInit(endpoint: TransportEndpoint, callback: OnInitCallback) {
         const id = endpoint.id || null;
 
         if (id) {

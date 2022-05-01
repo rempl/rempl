@@ -2,6 +2,8 @@
 import EventTransport, { OnInitCallback } from '../../transport/event.js';
 import { genUID } from '../../utils/index.js';
 
+type Global = typeof global;
+type Sandbox = Window | Global;
 type Settings =
     | {
           type: 'script';
@@ -29,10 +31,10 @@ if (parent !== self) {
 }
 
 export default function createSandbox(settings: Settings, callback: OnInitCallback) {
-    function initSandbox(sandboxWindow: Window | typeof global) {
+    function initSandbox(sandboxWindow: Sandbox) {
         if (settings.type === 'script') {
             for (const name in settings.content) {
-                sandboxWindow.eval(settings.content[name] + '\n//# sourceURL=' + name);
+                (sandboxWindow as Global).eval(settings.content[name] + '\n//# sourceURL=' + name);
             }
         }
 

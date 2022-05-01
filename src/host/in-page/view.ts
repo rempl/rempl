@@ -164,7 +164,9 @@ export default {
             selectedPublisher = id;
 
             if (view) {
-                [...getView().tabs.children].forEach(updateTabSelectedState);
+                Array.from(getView().tabs.children).forEach((el) =>
+                    updateTabSelectedState(el as HTMLElement)
+                );
             }
         }
     },

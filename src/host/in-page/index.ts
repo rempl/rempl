@@ -35,8 +35,8 @@ function selectPublisher(publisherId: string | null = null) {
 
         if (selectedPublisherId) {
             view.selectPublisher(selectedPublisherId);
-            view.show(host.deactivate);
-            transport.onInit({ id: selectedPublisherId }, function (papi) {
+            view.show((host as Host).deactivate);
+            (transport as EventTransport).onInit({ id: selectedPublisherId }, function (papi) {
                 papi.getRemoteUI(function (error, type, content) {
                     cleanupSandbox();
                     sandbox = createSandbox(
@@ -84,7 +84,7 @@ export default function getHost() {
 
             clearTimeout(teardownTimer);
             selectPublisher(publisherId);
-            view.show(host?.deactivate);
+            view.show((host as Host).deactivate);
 
             if (!selectedPublisherId) {
                 autoSelectPublisher = true;
