@@ -23,8 +23,8 @@
         "build": "npm run build:rempl",
         "build:bundle": "node scripts/build.cjs",
         "build:server-assets": "node node_modules/basisjs-tools-build/bin/build -c server/client/build.config",
-        "travis": "npm run lint && npm run test",
         "build:transpile": "node scripts/transpile.cjs",
+        "coverage": "c8 --reporter=lcovonly npm test",
         "watch": "npm run build:transpile -- --watch",
         "prepublishOnly": "npm run build"
     },
@@ -38,6 +38,7 @@
         "@typescript-eslint/parser": "^5.21.0",
         "basisjs": "~1.11.1",
         "basisjs-tools-build": "^1.12.2",
+        "c8": "^7.11.2",
         "esbuild": "^0.14.38",
         "eslint": "^8.14.0",
         "eslint-plugin-prettier": "^4.0.0",
