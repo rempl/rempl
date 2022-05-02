@@ -1,4 +1,4 @@
-import Token from './Token.js';
+import ReactiveValue from './ReactiveValue.js';
 
 function normalize(oldList: string[], newList?: string[]) {
     const uniqueItems = [...new Set(Array.isArray(newList) ? newList : [])];
@@ -9,7 +9,7 @@ function normalize(oldList: string[], newList?: string[]) {
     return diff ? uniqueItems : oldList;
 }
 
-export default class EndpointList extends Token<string[]> {
+export default class EndpointList extends ReactiveValue<string[]> {
     constructor(list?: string[]) {
         super(normalize([], list));
     }

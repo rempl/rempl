@@ -1,6 +1,6 @@
 // @ts-ignore
 import socketIO from 'socket.io-client/dist/socket.io.slim.js';
-import Token from '../classes/Token.js';
+import ReactiveValue from '../classes/ReactiveValue.js';
 import EndpointList from '../classes/EndpointList.js';
 import Endpoint from '../classes/Endpoint.js';
 import Namespace from '../classes/Namespace.js';
@@ -16,7 +16,7 @@ const DEBUG_PREFIX = '[rempl][ws-transport] ';
 export type SelfInfo = Pick<WSTransport, 'id' | 'sessionId' | 'type' | 'publishers'>;
 
 export type API = {
-    connected: Token<boolean>;
+    connected: ReactiveValue<boolean>;
     send(...args: unknown[]): void;
     subscribe(fn: AnyFn): void;
 };
@@ -154,7 +154,7 @@ export default class WSTransport {
     publishersMap: Record<string, { getRemoteUI: GetRemoteUIFn }> = {};
     dataCallbacks: Array<{ endpoint: string | null; fn: AnyFn }> = [];
 
-    connected = new Token(false);
+    connected = new ReactiveValue(false);
     ownEndpoints = new EndpointList();
     remoteEndpoints = new EndpointList();
 

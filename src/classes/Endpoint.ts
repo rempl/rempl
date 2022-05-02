@@ -1,6 +1,6 @@
 import { AnyFn } from '../utils/index.js';
 import Namespace from './Namespace.js';
-import Token from './Token.js';
+import ReactiveValue from './ReactiveValue.js';
 import EndpointListSet from './EndpointListSet.js';
 import EndpointList from './EndpointList.js';
 
@@ -37,7 +37,7 @@ export default class Endpoint<TNamespace extends Namespace> {
     }
     type = 'Endpoint';
     channels: Channel[] = [];
-    connected = new Token(false);
+    connected = new ReactiveValue(false);
     remoteEndpoints = new EndpointListSet();
 
     providedMethodsUpdateTimer?: number | NodeJS.Timeout | null;

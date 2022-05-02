@@ -1,6 +1,6 @@
 /* eslint-env browser */
 
-import Token from '../classes/Token.js';
+import ReactiveValue from '../classes/ReactiveValue.js';
 import EndpointList from '../classes/EndpointList.js';
 import EndpointListSet from '../classes/EndpointListSet.js';
 import Endpoint from '../classes/Endpoint.js';
@@ -22,7 +22,7 @@ export type ConnectPayload = {
 };
 
 export type OnInitCallbackArg = {
-    connected: Token<boolean>;
+    connected: ReactiveValue<boolean>;
     getRemoteUI(callback?: AnyFn): void;
     subscribe(fn: AnyFn): Unsubscribe;
     send(...args: unknown[]): void;
@@ -109,7 +109,7 @@ export default class EventTransport {
     realm: Window | typeof global;
     inputChannelId: string;
     connections: Record<string, Connection> = Object.create(null);
-    connected = new Token(false);
+    connected = new ReactiveValue(false);
     endpointGetUI: Record<string, GetRemoteUIFn> = {};
     ownEndpoints = new EndpointList();
     remoteEndpoints = new EndpointListSet();
