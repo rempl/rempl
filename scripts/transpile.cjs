@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const sucrase = require('sucrase');
 const { rollup, watch } = require('rollup');
+const chalk = require('chalk');
 
 const external = ['fs', 'path', 'assert', 'module', 'socket.io-client/dist/socket.io.slim.js'];
 
@@ -53,6 +54,7 @@ function transpileTypeScript() {
                 const { code: output, sourceMap } = sucrase.transform(input, {
                     transforms: ['typescript'],
                 });
+
                 return {
                     code: output.replace(/\n{3,}/g, '\n\n'),
                     map: sourceMap,
@@ -69,20 +71,26 @@ function readDir(dir) {
         .map((fn) => `${dir}/${fn}`);
 }
 
-async function transpile(
+async function transpile({
+    entryPoints,
     outputDir,
-    { watch: watchMode = false, ts = false, format },
-    ...entryPoints
-) {
-    const startTime = Date.now();
+    format,
+    watch: watchMode = false,
+    ts = false,
+    onSuccess,
+}) {
     const outputExt = format === 'esm' ? '.js' : '.cjs';
+    const doneMessage = (duration) =>
+        `${
+            ts ? 'Compile TypeScript to JavaScript (ESM)' : 'Convert ESM to CommonJS'
+        } into "${outputDir}" done in ${duration}ms`;
 
     const inputOptions = {
         external,
         input: entryPoints,
         plugins: [
             resolvePath(ts, outputExt),
-            ts && transpileTypeScript(),
+            transpileTypeScript(),
             replaceContent({
                 'src/version.js': removeCreateRequire,
             }),
@@ -102,41 +110,63 @@ async function transpile(
     };
 
     if (!watchMode) {
-        console.log();
-        console.log(
-            `Convert ${
-                ts ? 'TypeScript to JavaScript (ESM)' : 'ESM to CommonJS'
-            } (output: ${outputDir})`
-        );
-
+        const startTime = Date.now();
         const bundle = await rollup(inputOptions);
         await bundle.write(outputOptions);
         await bundle.close();
 
-        console.log(`Done in ${Date.now() - startTime}ms`);
+        console.log(doneMessage(Date.now() - startTime));
+
+        if (typeof onSuccess === 'function') {
+            await onSuccess();
+        }
     } else {
         const watcher = watch({
             ...inputOptions,
             output: outputOptions,
         });
 
-        watcher.on('event', ({ code, duration }) => {
+        watcher.on('event', ({ code, duration, error }) => {
             if (code === 'BUNDLE_END') {
-                console.log(
-                    `Convert ${
-                        ts ? 'TypeScript to JavaScript (ESM)' : 'ESM to CommonJS'
-                    } into "${outputDir}" done in ${duration}ms`
-                );
+                console.log(doneMessage(duration));
+
+                if (typeof onSuccess === 'function') {
+                    onSuccess();
+                }
+            } else if (code === 'ERROR') {
+                console.error(chalk.bgRed.white('ERROR!'), chalk.red(error.message));
             }
         });
     }
 }
 
 async function transpileAll(watch = false) {
-    await transpile('./esm', { watch, ts: true, format: 'esm' }, 'src/index.ts', 'src/browser.ts');
-    await transpile('./esm-test', { watch, ts: true, format: 'esm' }, ...readDir('test'));
-    await transpile('./cjs', { watch, format: 'cjs' }, 'esm/index.js', 'esm/browser.js');
-    await transpile('./cjs-test', { watch, format: 'cjs' }, ...readDir('esm-test'));
+    await transpile({
+        entryPoints: ['src/index.ts', 'src/browser.ts'],
+        outputDir: './esm',
+        format: 'esm',
+        watch,
+        ts: true,
+        onSuccess: () =>
+            transpile({
+                entryPoints: ['esm/index.js', 'esm/browser.js'],
+                outputDir: './cjs',
+                format: 'cjs',
+            }),
+    });
+    await transpile({
+        entryPoints: readDir('test'),
+        outputDir: './esm-test',
+        format: 'esm',
+        watch,
+        ts: true,
+        onSuccess: () =>
+            transpile({
+                entryPoints: readDir('esm-test'),
+                outputDir: './cjs-test',
+                format: 'cjs',
+            }),
+    });
 }
 
 module.exports = transpileAll;
