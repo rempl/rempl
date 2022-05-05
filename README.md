@@ -1,5 +1,6 @@
 [![NPM version](https://img.shields.io/npm/v/rempl.svg)](https://www.npmjs.com/package/rempl)
-[![Build Status](https://travis-ci.org/rempl/rempl.svg?branch=master)](https://travis-ci.org/rempl/rempl)
+[![Build Status](https://github.com/rempl/rempl/actions/workflows/build.yml/badge.svg)](https://github.com/rempl/rempl/actions/workflows/build.yml)
+[![Coverage Status](https://coveralls.io/repos/github/rempl/rempl/badge.svg?branch=master)](https://coveralls.io/github/rempl/rempl?branch=master)
 [![Twitter](https://img.shields.io/badge/Twitter-@rempljs-blue.svg)](https://twitter.com/rempljs)
 
 The general idea behind `Rempl` is to simplify moderated remote access to JavaScript runtime. `Rempl` provides a transport between environments and a set of UI hosts.
@@ -24,38 +25,39 @@ npm install rempl
 ```html
 <script src="node_modules/rempl/dist/rempl.js"></script>
 <script>
-    var myTool = rempl.createPublisher('myTool', function(settings, callback) {
-        /* return a UI bundle or url */
-    });
+  var myTool = rempl.createPublisher('myTool', function (settings, callback) {
+    /* return a UI bundle or url */
+  });
 
-    // ...
+  // ...
 </script>
 ```
 
 By default publisher attempts to connect to WS server with the same `hostname` as page but `8177` as port. There are some options to specify rempl end point:
 
 - using `<meta name="rempl:server" content="{rempl server host}">`:
-    ```html
-    <meta name="rempl:server" content="//1.2.3.4:1234"> <!-- or content="none" to disable connection to WS server -->
-    ```
+  ```html
+  <meta name="rempl:server" content="//1.2.3.4:1234" />
+  <!-- or content="none" to disable connection to WS server -->
+  ```
 - using `ws` option on `Publisher` create:
-    ```js
-    new Publisher('name', function() { ... }, {
-        ws: '//1.2.3.4:1234' // set false to disable connection to WS server
-    });
-    ```
+  ```js
+  new Publisher('name', function() { ... }, {
+      ws: '//1.2.3.4:1234' // set false to disable connection to WS server
+  });
+  ```
 - using `connectWS()` method of `Pulisher`'s instance
-    ```js
-    var myPublisher = new Publisher('name', function() { ... });
-    myPublisher.connectWs('//1.2.3.4:1234')
-    ```
+  ```js
+  var myPublisher = new Publisher('name', function() { ... });
+  myPublisher.connectWs('//1.2.3.4:1234')
+  ```
 
 ### Node.js
 
 ```js
 var rempl = require('rempl');
-var myTool = rempl.createPublisher('myTool', function(settings, callback) {
-    /* return a UI bundle or url */
+var myTool = rempl.createPublisher('myTool', function (settings, callback) {
+  /* return a UI bundle or url */
 });
 
 // ...
@@ -64,24 +66,24 @@ var myTool = rempl.createPublisher('myTool', function(settings, callback) {
 When publisher is running on Node.js, it doesn't connect to WS server until WS server is not specified (there is no `location` object available like in browser's environment). There some options to specify server host:
 
 - using environment variable `REMPL_SERVER` when start a script or before rempl is required for a first time. Example for MacOS:
-    ```
-    > REMPL_SERVER=//1.2.3.4:1234 node my-script.js
-    ```
+  ```
+  > REMPL_SERVER=//1.2.3.4:1234 node my-script.js
+  ```
 - using `ws` option on `Publisher` create:
-    ```js
-    new Publisher('name', function() { ... }, {
-        ws: '//1.2.3.4:1234' // set false to disable connection to WS server
-    });
-    ```
+  ```js
+  new Publisher('name', function() { ... }, {
+      ws: '//1.2.3.4:1234' // set false to disable connection to WS server
+  });
+  ```
 - using `connectWS()` method of `Pulisher`'s instance
-    ```js
-    var myPublisher = new Publisher('name', function() { ... });
-    myPublisher.connectWs('//1.2.3.4:1234')
-    ```
+  ```js
+  var myPublisher = new Publisher('name', function() { ... });
+  myPublisher.connectWs('//1.2.3.4:1234')
+  ```
 
 ## Overview
 
-![\[ subject \] <--- \[ publisher (data) \] <--- rempl ---> \[ subscriber (UI) \]](https://cloud.githubusercontent.com/assets/270491/21329597/8e5786c2-c64a-11e6-912f-12d8e8827c71.png)
+![[ subject ] <--- [ publisher (data) ] <--- rempl ---> [ subscriber (UI) ]](https://cloud.githubusercontent.com/assets/270491/21329597/8e5786c2-c64a-11e6-912f-12d8e8827c71.png)
 
 - `Subject` – something to be inspected, i.e. app, page, environment etc.
 - `Publisher` – monitors a `subject`, collects data and publishes it for `subscribers`
@@ -137,18 +139,18 @@ For tools based on `rempl`, a publisher is a source of UI. When new sandbox for 
 
 ```js
 var rempl = require('rempl');
-var myTool = rempl.createPublisher('myTool', function(settings, callback) {
-    callback(null, 'script', 'alert("myTool UI inited")');
+var myTool = rempl.createPublisher('myTool', function (settings, callback) {
+  callback(null, 'script', 'alert("myTool UI inited")');
 });
 
-setInterval(function() {
-    myTool.publish(Date.now());
+setInterval(function () {
+  myTool.publish(Date.now());
 }, 1000);
 
 myTool.provide({
-    pong: function() {
-        console.log('Remote subscriber invoke `pong`');
-    }
+  pong: function () {
+    console.log('Remote subscriber invoke `pong`');
+  },
 });
 ```
 
@@ -166,10 +168,10 @@ myTool.provide({
 ```js
 var myTool = rempl.getSubscriber();
 
-myTool.subscribe(function(data) {
-    console.log('Receive data from publisher:', data);
+myTool.subscribe(function (data) {
+  console.log('Receive data from publisher:', data);
 
-    myTool.callRemote('pong');
+  myTool.callRemote('pong');
 });
 ```
 
@@ -214,12 +216,16 @@ Publishers and Subcribers can provide methods for remote side invocation and inv
 Method to provide a method(s) for remote side. It allows to provide a single method or batch of methods.
 
 ```js
-publisher.provide('foo', function() {
-    console.log('Method `foo` was invoked by subscriber');
+publisher.provide('foo', function () {
+  console.log('Method `foo` was invoked by subscriber');
 });
 publisher.ns('something').provide({
-    method1: function() { /* do something */ },
-    method2: function() { /* do something */ }
+  method1: function () {
+    /* do something */
+  },
+  method2: function () {
+    /* do something */
+  },
 });
 ```
 
@@ -237,8 +243,8 @@ publisher.ns('something').revoke(['method1', 'method2']);
 Invoke remote side method with given arguments. All arguments should be a transferable through JSON data types, i.e. `number`, `string`, `boolean`, `Array`, plain object or null. The last argument can be a function that remote side can use to send data back.
 
 ```js
-publisher.callRemote('methodName', 1, 2, function(res) {
-    console.log('response from subscriber');
+publisher.callRemote('methodName', 1, 2, function (res) {
+  console.log('response from subscriber');
 });
 ```
 
@@ -248,7 +254,7 @@ Returns `true` when own method is provided for remote side by `provide()` method
 
 ```js
 publisher.isMethodProvided('test'); // false
-publisher.provide('test', function() {});
+publisher.provide('test', function () {});
 publisher.isMethodProvided('test'); // true
 publisher.revoke('test');
 publisher.isMethodProvided('test'); // false
@@ -262,7 +268,7 @@ Returns `true` when remote method is available to be invoked.
 
 ```js
 if (subscriber.isRemoteMethodExists('test')) {
-    subscriber.callRemote('test');
+  subscriber.callRemote('test');
 }
 ```
 
@@ -273,8 +279,8 @@ Allows to subscribe to remote side API state of namespace. Method invoke passed 
 > Currently method doesn't work for publisher since there can be several subscribers with different method set provided.
 
 ```js
-var unsubscribeDefaultNsMethodsLogging = subscriber.onRemoteMethodsChanged(function(methods) {
-    console.log(methods);
+var unsubscribeDefaultNsMethodsLogging = subscriber.onRemoteMethodsChanged(function (methods) {
+  console.log(methods);
 });
 
 // call returned function when need to stop listen for API changes
@@ -292,7 +298,7 @@ var fooMethod = subscriber.getRemoteMethod('foo');
 var nsBarBazMethod = subscriber.ns('bar').getRemoteMethod('baz');
 
 if (fooMethod.available) {
-    fooMethod(1, 2, 3);
+  fooMethod(1, 2, 3);
 }
 
 nsBarBazMethod();
