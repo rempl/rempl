@@ -2,7 +2,6 @@
     "compilerOptions": {
         "strict": true,
         "declaration": true,
-        "emitDeclarationOnly": true,
         "declarationDir": "./lib",
         "sourceMap": true,
         "outDir": "./dist",

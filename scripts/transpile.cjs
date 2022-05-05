@@ -4,6 +4,7 @@ const { exec } = require('child_process');
 const sucrase = require('sucrase');
 const { rollup, watch } = require('rollup');
 const chalk = require('chalk');
+const { buildBundle } = require('./build.cjs');
 
 const external = [
     'fs',
@@ -169,7 +170,7 @@ async function generateTypes() {
 }
 
 async function transpileAll(options) {
-    const { watch = false, types = false } = options || {};
+    const { watch = false, types = false, bundle = false } = options || {};
 
     await transpile({
         entryPoints: ['src/node.ts', 'src/browser.ts'],
@@ -180,6 +181,10 @@ async function transpileAll(options) {
         onSuccess: async () => {
             if (types) {
                 generateTypes();
+            }
+
+            if (bundle) {
+                buildBundle();
             }
 
             await transpile({
@@ -210,5 +215,6 @@ if (require.main === module) {
     transpileAll({
         watch: process.argv.includes('--watch'),
         types: process.argv.includes('--types'),
+        bundle: process.argv.includes('--bundle'),
     });
 }

@@ -29,17 +29,18 @@
     "scripts": {
         "lint": "eslint scripts src test && npm run ts-check",
         "ts-check": "tsc --noEmit",
-        "ts-emit-types": "tsc",
+        "ts-emit-types": "tsc --emitDeclarationOnly",
         "test": "npm run test:esm && npm run test:cjs",
         "test:esm": "mocha lib-test/*.js",
         "test:cjs": "mocha lib-test/*.cjs",
         "build": "npm run build:transpile && npm run build:bundle",
+        "build:clean": "node scripts/clean.cjs",
         "build:bundle": "node scripts/build.cjs",
         "build:server-assets": "node node_modules/basisjs-tools-build/bin/build -c server/client/build.config",
         "build:transpile": "node scripts/transpile.cjs",
         "coverage": "c8 --exclude lib-test --reporter=lcovonly npm run test:esm",
-        "watch": "npm run build:transpile -- --watch --types",
-        "prepublishOnly": "npm run build"
+        "watch": "npm run build:transpile -- --watch --types --bundle",
+        "prepublishOnly": "npm run lint && npm run build:clean && npm run ts-emit-types && npm run build && npm run test"
     },
     "dependencies": {
         "chalk": "~4.1.2",
