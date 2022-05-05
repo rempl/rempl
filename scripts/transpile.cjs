@@ -4,10 +4,19 @@ const sucrase = require('sucrase');
 const { rollup, watch } = require('rollup');
 const chalk = require('chalk');
 
-const external = ['fs', 'path', 'assert', 'module', 'socket.io-client/dist/socket.io.slim.js'];
+const external = [
+    'fs',
+    'path',
+    'url',
+    'assert',
+    'module',
+    'socket.io-client/dist/socket.io.slim.js',
+];
 
 function removeCreateRequire(code) {
     return code
+        .replace("import { fileURLToPath } from 'url';\n", '')
+        .replace('path.dirname(fileURLToPath(import.meta.url))', '__dirname')
         .replace(/import { createRequire } from 'module';\n?/, '')
         .replace(/const require = createRequire\(.+?\);\n?/, '');
 }
@@ -19,6 +28,8 @@ function replaceContent(map) {
             const key = path.relative('', id);
 
             if (map.hasOwnProperty(key)) {
+                console.log(key);
+                console.log('replace');
                 return map[key](code, id);
             }
         },
@@ -92,7 +103,8 @@ async function transpile({
             resolvePath(ts, outputExt),
             transpileTypeScript(),
             replaceContent({
-                'src/version.js': removeCreateRequire,
+                'esm/utils/version.js': removeCreateRequire,
+                'esm/utils/source.js': removeCreateRequire,
             }),
         ],
     };
@@ -142,14 +154,14 @@ async function transpile({
 
 async function transpileAll(watch = false) {
     await transpile({
-        entryPoints: ['src/index.ts', 'src/browser.ts'],
+        entryPoints: ['src/node.ts', 'src/browser.ts'],
         outputDir: './esm',
         format: 'esm',
         watch,
         ts: true,
         onSuccess: () =>
             transpile({
-                entryPoints: ['esm/index.js', 'esm/browser.js'],
+                entryPoints: ['esm/node.js', 'esm/browser.js'],
                 outputDir: './cjs',
                 format: 'cjs',
             }),

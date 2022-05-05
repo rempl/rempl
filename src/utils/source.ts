@@ -1,4 +1,10 @@
-// please, make appropriate changes in scripts/process-rempl-bundle.js when update this assignment
+import * as path from 'path';
+import { fileURLToPath } from 'url';
 import { readFileSync } from 'fs';
 
-export default readFileSync(__dirname + '/../dist/rempl.js', 'utf8');
+const sourceFilePath = path.join(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '../../dist/rempl.js'
+);
+
+export default readFileSync(sourceFilePath, 'utf8');

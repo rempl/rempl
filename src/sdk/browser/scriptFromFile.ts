@@ -2,7 +2,7 @@
 
 import { GetRemoteUIFn } from '../../transport/event.js';
 
-export default function (filename: string): GetRemoteUIFn {
+export function scriptFromFile(filename: string): GetRemoteUIFn {
     let cache: string | null = null;
 
     // TODO: take in account settings.accept setting

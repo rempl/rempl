@@ -11,26 +11,29 @@
         "Anastasia Goryacheva <a.e.goryacheva@gmail.com>"
     ],
     "type": "module",
-    "main": "src/index.js",
-    "browser": "dist/rempl-new.js",
+    "main": "./cjs/browser.js",
+    "types": "./types/browser.d.ts",
+    "browser": "./dist/rempl.js",
     "exports": {
-        ".": {
-            "require": "./cjs/index.cjs",
-            "import": "./esm/index.js"
+        "node": {
+            "types": "./types/node.d.ts",
+            "require": "./cjs/node.cjs",
+            "import": "./esm/node.js"
         },
-        "./browser": {
-            "require": "./cjs/browser.cjs",
-            "import": "./esm/browser.js"
+        "default": {
+            "types": "./types/browser.d.ts",
+            "require": "./dist/rempl.cjs",
+            "import": "./dist/rempl.js"
         }
     },
     "scripts": {
         "lint": "eslint scripts src test && npm run ts-check",
         "ts-check": "tsc --noEmit",
+        "ts-emit-types": "tsc",
         "test": "npm run test:esm && npm run test:cjs",
         "test:esm": "mocha esm-test",
         "test:cjs": "mocha cjs-test",
-        "buildx": "tsc src/*.ts test/*.ts --outDir esm -m es2020 -t es2021",
-        "build": "npm run build:rempl",
+        "build": "npm run build:transpile && npm run build:bundle",
         "build:bundle": "node scripts/build.cjs",
         "build:server-assets": "node node_modules/basisjs-tools-build/bin/build -c server/client/build.config",
         "build:transpile": "node scripts/transpile.cjs",
@@ -62,6 +65,7 @@
         "cjs",
         "esm",
         "dist",
-        "server/*.js"
+        "server/*.js",
+        "types"
     ]
 }

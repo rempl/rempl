@@ -1,5 +1,4 @@
 import { Publisher } from '../classes/Publisher.js';
-import remplSource from '../utils/browser/source.js';
 import { createWsConnectionFactory } from './factory.js';
 import { GetRemoteUIHandler, Options, RequestClientHandler } from './types.js';
 
@@ -37,17 +36,20 @@ function resolveWsUri(uri?: string | boolean) {
 }
 
 export class TransportPublisher extends Publisher {
-    getRemoteUI_: GetRemoteUIHandler;
+    remplSource: string;
     establishWsConnection: ReturnType<typeof createWsConnectionFactory>;
+    getRemoteUI_: GetRemoteUIHandler;
     options: Options;
 
     constructor(
         id: string,
+        remplSource: string,
         establishWsConnection: ReturnType<typeof createWsConnectionFactory>,
         getRemoteUI: GetRemoteUIHandler,
         options?: Options
     ) {
         super(id);
+        this.remplSource = remplSource;
         this.establishWsConnection = establishWsConnection;
         this.getRemoteUI_ = getRemoteUI;
         this.getRemoteUI = this.getRemoteUI.bind(this);
@@ -72,7 +74,7 @@ export class TransportPublisher extends Publisher {
                 if (!error && type === 'script') {
                     // send with user script rempl source too
                     response = {
-                        'rempl.js': remplSource,
+                        'rempl.js': this.remplSource,
                         'publisher-ui.js': content,
                     };
                 }

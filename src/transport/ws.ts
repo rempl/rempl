@@ -148,7 +148,7 @@ export default class WSTransport {
     sessionId = utils.genUID();
     id: string | null = null;
     sendInfoTimer: number | NodeJS.Timeout | null = null;
-    info = {};
+    info = this.getInfo();
 
     publishers: Array<string | null> = [];
     publishersMap: Record<string, { getRemoteUI: GetRemoteUIFn }> = {};

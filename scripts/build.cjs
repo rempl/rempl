@@ -94,6 +94,6 @@ if (require.main === module) {
         }).outputFiles[0].text;
         // console.log(Object.keys(bundle));
 
-        fs.writeFileSync('./dist/rempl-new.js', bundle);
+        fs.writeFileSync('./dist/rempl.js', bundle);
     })();
 }

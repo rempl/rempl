@@ -2,6 +2,8 @@
     "compilerOptions": {
         "strict": true,
         "declaration": true,
+        "emitDeclarationOnly": true,
+        "declarationDir": "./types",
         "sourceMap": true,
         "outDir": "./dist",
         "module": "ES2020",
@@ -11,6 +13,6 @@
         "lib": ["DOM", "ESNext"],
         "allowJs": true
     },
-    "include": ["src/**/*", "test/**/*"],
+    "include": ["src/*.ts"],
     "exclude": ["node_modules", "dist", "test", "server", "example"]
 }

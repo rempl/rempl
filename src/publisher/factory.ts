@@ -5,10 +5,11 @@ import { GetRemoteUIHandler, Options } from './types.js';
 const publishers = new Map<string, TransportPublisher>();
 
 export function createPublisherFactory(
+    remplSource: string,
     establishWsConnection: (publisher: TransportPublisher, uri?: string) => void,
     setupPublisher?: (publisher: TransportPublisher) => void
 ) {
-    return function getPublisher(id: string, getRemoteUI: GetRemoteUIHandler, options: Options) {
+    return function getPublisher(id: string, getRemoteUI: GetRemoteUIHandler, options?: Options) {
         let publisher = publishers.get(id);
 
         if (publisher) {
@@ -16,7 +17,13 @@ export function createPublisherFactory(
             return null;
         }
 
-        publisher = new TransportPublisher(id, establishWsConnection, getRemoteUI, options);
+        publisher = new TransportPublisher(
+            id,
+            remplSource,
+            establishWsConnection,
+            getRemoteUI,
+            options
+        );
         publishers.set(id, publisher);
 
         if (typeof setupPublisher === 'function') {
