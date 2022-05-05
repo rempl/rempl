@@ -3,7 +3,7 @@
         "strict": true,
         "declaration": true,
         "emitDeclarationOnly": true,
-        "declarationDir": "./types",
+        "declarationDir": "./lib",
         "sourceMap": true,
         "outDir": "./dist",
         "module": "ES2020",
@@ -14,5 +14,5 @@
         "allowJs": true
     },
     "include": ["src/*.ts"],
-    "exclude": ["node_modules", "dist", "test", "server", "example"]
+    "exclude": ["node_modules", "lib", "lib-test", "dist", "test", "server", "example"]
 }

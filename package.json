@@ -11,17 +11,17 @@
         "Anastasia Goryacheva <a.e.goryacheva@gmail.com>"
     ],
     "type": "module",
-    "main": "./cjs/browser.js",
-    "types": "./types/browser.d.ts",
+    "main": "./lib/browser.js",
+    "types": "./lib/browser.d.ts",
     "browser": "./dist/rempl.js",
     "exports": {
         "node": {
-            "types": "./types/node.d.ts",
-            "require": "./cjs/node.cjs",
-            "import": "./esm/node.js"
+            "types": "./lib/node.d.ts",
+            "require": "./lib/node.cjs",
+            "import": "./lib/node.js"
         },
         "default": {
-            "types": "./types/browser.d.ts",
+            "types": "./lib/browser.d.ts",
             "require": "./dist/rempl.cjs",
             "import": "./dist/rempl.js"
         }
@@ -31,14 +31,14 @@
         "ts-check": "tsc --noEmit",
         "ts-emit-types": "tsc",
         "test": "npm run test:esm && npm run test:cjs",
-        "test:esm": "mocha esm-test",
-        "test:cjs": "mocha cjs-test",
+        "test:esm": "mocha lib-test/*.js",
+        "test:cjs": "mocha lib-test/*.cjs",
         "build": "npm run build:transpile && npm run build:bundle",
         "build:bundle": "node scripts/build.cjs",
         "build:server-assets": "node node_modules/basisjs-tools-build/bin/build -c server/client/build.config",
         "build:transpile": "node scripts/transpile.cjs",
-        "coverage": "c8 --exclude cjs-test --exclude esm-test --reporter=lcovonly npm test",
-        "watch": "npm run build:transpile -- --watch",
+        "coverage": "c8 --exclude lib-test --reporter=lcovonly npm run test:esm",
+        "watch": "npm run build:transpile -- --watch --types",
         "prepublishOnly": "npm run build"
     },
     "dependencies": {
@@ -62,10 +62,8 @@
         "typescript": "^4.6.4"
     },
     "files": [
-        "cjs",
-        "esm",
+        "lib",
         "dist",
-        "server/*.js",
-        "types"
+        "server/*.js"
     ]
 }

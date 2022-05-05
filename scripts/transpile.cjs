@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { exec } = require('child_process');
 const sucrase = require('sucrase');
 const { rollup, watch } = require('rollup');
 const chalk = require('chalk');
@@ -28,8 +29,6 @@ function replaceContent(map) {
             const key = path.relative('', id);
 
             if (map.hasOwnProperty(key)) {
-                console.log(key);
-                console.log('replace');
                 return map[key](code, id);
             }
         },
@@ -40,11 +39,11 @@ function resolvePath(ts = false, ext) {
     return {
         name: 'transpile-ts',
         resolveId(source, parent) {
-            if (parent && !/\/(src|esm)\//.test(parent) && /\/(src|esm)\//.test(source)) {
+            if (parent && !/\/(src|lib)\//.test(parent) && /\/(src|lib)\//.test(source)) {
                 return {
                     id: source
-                        .replace(/\/esm\//, '/cjs/')
-                        .replace(/\/src\//, '/esm/')
+                        // .replace(/\/lib\//, '/cjs/')
+                        .replace(/\/src\//, '/lib/')
                         .replace(/\.js$/, ext),
                     external: true,
                 };
@@ -103,8 +102,8 @@ async function transpile({
             resolvePath(ts, outputExt),
             transpileTypeScript(),
             replaceContent({
-                'esm/utils/version.js': removeCreateRequire,
-                'esm/utils/source.js': removeCreateRequire,
+                'lib/utils/version.js': removeCreateRequire,
+                'lib/utils/source.js': removeCreateRequire,
             }),
         ],
     };
@@ -152,30 +151,54 @@ async function transpile({
     }
 }
 
-async function transpileAll(watch = false) {
+async function generateTypes() {
+    const doneMessage = (duration) => `Generate .d.ts files into "lib" done in ${duration}ms`;
+
+    return new Promise((resolve, reject) => {
+        const startTime = Date.now();
+        exec('npm run ts-emit-types', (error) => {
+            if (error) {
+                console.error(chalk.bgRed.white('ERROR!'), chalk.red(error.message));
+                reject(error);
+            } else {
+                console.log(doneMessage(Date.now() - startTime));
+                resolve();
+            }
+        });
+    });
+}
+
+async function transpileAll(options) {
+    const { watch = false, types = false } = options || {};
+
     await transpile({
         entryPoints: ['src/node.ts', 'src/browser.ts'],
-        outputDir: './esm',
+        outputDir: './lib',
         format: 'esm',
         watch,
         ts: true,
-        onSuccess: () =>
-            transpile({
-                entryPoints: ['esm/node.js', 'esm/browser.js'],
-                outputDir: './cjs',
+        onSuccess: async () => {
+            if (types) {
+                generateTypes();
+            }
+
+            await transpile({
+                entryPoints: ['lib/node.js', 'lib/browser.js'],
+                outputDir: './lib',
                 format: 'cjs',
-            }),
+            });
+        },
     });
     await transpile({
         entryPoints: readDir('test'),
-        outputDir: './esm-test',
+        outputDir: './lib-test',
         format: 'esm',
         watch,
         ts: true,
         onSuccess: () =>
             transpile({
-                entryPoints: readDir('esm-test'),
-                outputDir: './cjs-test',
+                entryPoints: readDir('lib-test'),
+                outputDir: './lib-test',
                 format: 'cjs',
             }),
     });
@@ -184,7 +207,8 @@ async function transpileAll(watch = false) {
 module.exports = transpileAll;
 
 if (require.main === module) {
-    const watchMode = process.argv.includes('--watch');
-
-    transpileAll(watchMode);
+    transpileAll({
+        watch: process.argv.includes('--watch'),
+        types: process.argv.includes('--types'),
+    });
 }
