@@ -40,7 +40,7 @@
         "build:transpile": "node scripts/transpile.cjs",
         "coverage": "c8 --exclude lib-test --reporter=lcovonly npm run test:esm",
         "watch": "npm run build:transpile -- --watch --types --bundle",
-        "prepublishOnly": "npm run lint && npm run build:clean && npm run ts-emit-types && npm run build && npm run test"
+        "prepublishOnly": "npm run lint && npm run build:clean && npm run ts-emit-types && npm run build && npm run build:server-assets && npm run test"
     },
     "dependencies": {
         "chalk": "~4.1.2",
