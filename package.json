@@ -27,7 +27,7 @@
         }
     },
     "scripts": {
-        "lint": "eslint scripts src test && npm run ts-check",
+        "lint": "eslint scripts/*.cjs src test && npm run ts-check",
         "ts-check": "tsc --noEmit",
         "ts-emit-types": "tsc --emitDeclarationOnly",
         "test": "npm run test:esm && npm run test:cjs",
@@ -64,6 +64,7 @@
     },
     "files": [
         "lib",
+        "!lib/**/*.map",
         "dist",
         "server/*.js"
     ]

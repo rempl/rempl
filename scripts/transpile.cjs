@@ -17,10 +17,10 @@ const external = [
 
 function removeCreateRequire(code) {
     return code
-        .replace("import { fileURLToPath } from 'url';\n", '')
+        .replace("import { fileURLToPath } from 'url';", '')
         .replace('path.dirname(fileURLToPath(import.meta.url))', '__dirname')
-        .replace(/import { createRequire } from 'module';\n?/, '')
-        .replace(/const require = createRequire\(.+?\);\n?/, '');
+        .replace(/import { createRequire } from 'module';/, '')
+        .replace(/const require = createRequire\(.+?\);/, '');
 }
 
 function replaceContent(map) {
@@ -63,11 +63,15 @@ function transpileTypeScript() {
         transform(input, id) {
             if (id.endsWith('.ts')) {
                 const { code: output, sourceMap } = sucrase.transform(input, {
+                    filePath: id,
                     transforms: ['typescript'],
+                    sourceMapOptions: {
+                        compiledFilename: id,
+                    },
                 });
 
                 return {
-                    code: output.replace(/\n{3,}/g, '\n\n'),
+                    code: output,
                     map: sourceMap,
                 };
             }
@@ -111,6 +115,7 @@ async function transpile({
     const outputOptions = {
         dir: outputDir,
         entryFileNames: `[name]${outputExt}`,
+        sourcemap: ts,
         format,
         exports: 'auto',
         preserveModules: true,
