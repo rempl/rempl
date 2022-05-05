@@ -13,8 +13,8 @@ export function createPublisherFactory(
         let publisher = publishers.get(id);
 
         if (publisher) {
-            console.error(`Publisher with ID "${id}" has been already created`);
-            return null;
+            console.warn(`[rempl] Publisher with ID "${id}" has been already created`);
+            return publisher;
         }
 
         publisher = new TransportPublisher(

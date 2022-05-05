@@ -2,6 +2,7 @@
 
 - Removed callback support for `getSubscriber()` which was deprecated in `1.0.0-alpha14`
 - Removed `PublisherNamespace#pipe()` method
+- Changed `createPublisher()` to return an existing publisher instead of `null` when a publisher with provided id is already exist
 
 ## 1.0.0-alpha.19 (November 10, 2017)
 
