@@ -158,7 +158,7 @@ export default class Endpoint<TNamespace extends Namespace> {
         }
     }
 
-    processInput = (packet: Packet, callback: AnyFn) => {
+    processInput(packet: Packet, callback: AnyFn) {
         switch (packet.type) {
             case 'call': {
                 const thePacket = packet as CallPacket;
@@ -194,7 +194,7 @@ export default class Endpoint<TNamespace extends Namespace> {
                     packet.type
                 );
         }
-    };
+    }
 
     setupChannel(type: string, send: AnyFn, remoteEndpoints: EndpointList, available: boolean) {
         if (available) {

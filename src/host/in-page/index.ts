@@ -42,8 +42,8 @@ function selectPublisher(publisherId: string | null = null) {
                     sandbox = createSandbox(
                         {
                             container: view.getSandboxContainer(),
-                            type: type,
-                            content: content,
+                            type,
+                            content,
                         },
                         (api) => {
                             papi.subscribe(api.send);
@@ -65,7 +65,7 @@ export default function getHost() {
         return host;
     }
 
-    transport = new EventTransport('rempl-inpage-host', 'rempl-inpage-publisher');
+    transport = EventTransport.get('rempl-inpage-host', 'rempl-inpage-publisher');
     transport.remoteEndpoints.on((endpoints) => {
         publishers = endpoints;
         view.setPublisherList(publishers, selectPublisher);

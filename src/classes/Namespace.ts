@@ -1,4 +1,4 @@
-import { AnyFn, Fn, hasOwnProperty } from '../utils/index.js';
+import { AnyFn, Fn } from '../utils/index.js';
 import Endpoint, { CallPacket, Packet } from './Endpoint.js';
 
 export type Method<TArgs extends unknown[]> = Fn<TArgs, unknown>;
@@ -41,12 +41,9 @@ export default class Namespace {
         } else {
             const methods = methodName;
 
-            for (methodName in methods) {
-                if (
-                    hasOwnProperty(methods, methodName) &&
-                    typeof methods[methodName] === 'function'
-                ) {
-                    this.methods[methodName] = methods[methodName];
+            for (const [methodName, fn] of Object.entries(methods)) {
+                if (typeof fn === 'function') {
+                    this.methods[methodName] = fn;
                     this.owner.scheduleProvidedMethodsUpdate();
                 }
             }
@@ -78,8 +75,8 @@ export default class Namespace {
         const callPacket: CallPacket = {
             type: 'call',
             ns: this.name,
-            method: method,
-            args: args,
+            method,
+            args,
         };
 
         Namespace.send(this.owner, [callPacket, callback]);
@@ -113,7 +110,7 @@ export default class Namespace {
     onRemoteMethodsChanged(callback: ListenerCallback): AnyFn {
         const listener: Listener = {
             event: 'remoteMethodsChanged',
-            callback: callback,
+            callback,
             listeners: this.listeners,
         };
 
@@ -123,7 +120,6 @@ export default class Namespace {
 
         return () => {
             let cursor = this.listeners;
-            // eslint-disable-next-line @typescript-eslint/no-this-alias
             let prev: { listeners: Listener | null } = this;
 
             while (cursor !== null) {

@@ -54,7 +54,7 @@ export class Subscriber extends Endpoint<SubscriberNamespace> {
         });
     }
 
-    processInput = (packet: Packet, callback: AnyFn) => {
+    processInput(packet: Packet, callback: AnyFn) {
         switch (packet.type) {
             case 'data': {
                 const { ns, payload } = packet as DataPacket;
@@ -69,5 +69,5 @@ export class Subscriber extends Endpoint<SubscriberNamespace> {
             default:
                 super.processInput(packet, callback);
         }
-    };
+    }
 }

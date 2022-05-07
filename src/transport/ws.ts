@@ -65,8 +65,8 @@ function normalizeUri(uri: string) {
 
 function subscribe(this: WSTransport, endpoint: string | null, fn: AnyFn): Unsubscribe {
     return utils.subscribe(this.dataCallbacks, {
-        endpoint: endpoint,
-        fn: fn,
+        endpoint,
+        fn,
     });
 }
 
@@ -242,10 +242,10 @@ export default class WSTransport {
         const api = this.createApi(endpoint);
 
         if (api) {
-            api.subscribe(endpoint.processInput);
-            api.connected.link(function (connected) {
+            api.subscribe(endpoint.processInput.bind(endpoint));
+            api.connected.link((connected) => {
                 endpoint.setupChannel('ws', api.send, this.remoteEndpoints, connected);
-            }, this);
+            });
         }
     }
 }

@@ -86,6 +86,18 @@ export type OnDataPayload =
           callback: AnyFn;
       };
 
+const allTransports: EventTransport[] = [];
+
+addEventListener(
+    'message',
+    (e: MessageEvent) => {
+        for (const transport of allTransports) {
+            transport._onMessage(e);
+        }
+    },
+    false
+);
+
 export default class EventTransport {
     static all: EventTransport[] = [];
 
@@ -94,7 +106,7 @@ export default class EventTransport {
             win = global;
         }
 
-        const transport = EventTransport.all.find(
+        const transport = allTransports.find(
             (transport) =>
                 transport.name === name &&
                 transport.connectTo === connectTo &&
@@ -120,7 +132,7 @@ export default class EventTransport {
     inited = false;
 
     constructor(name: string, connectTo: string, win?: Window | typeof global) {
-        EventTransport.all.push(this);
+        allTransports.push(this);
 
         this.name = name;
         this.connectTo = connectTo;
@@ -144,7 +156,6 @@ export default class EventTransport {
             return;
         }
 
-        addEventListener('message', (e: MessageEvent) => this._onMessage(e), false);
         this._handshake(false);
     }
 
@@ -383,12 +394,11 @@ export default class EventTransport {
 
     sync(endpoint: Endpoint<Namespace>) {
         const channel = utils.genUID(8) + ':' + this.connectTo;
-        const remoteEndpoints = this.remoteEndpoints;
 
         this.onInit(endpoint, (api) => {
-            api.subscribe(endpoint.processInput);
+            api.subscribe(endpoint.processInput.bind(endpoint));
             api.connected.link((connected) => {
-                endpoint.setupChannel(channel, api.send, remoteEndpoints, connected);
+                endpoint.setupChannel(channel, api.send, this.remoteEndpoints, connected);
             });
         });
 
