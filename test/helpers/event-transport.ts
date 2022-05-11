@@ -1,19 +1,17 @@
 import OriginalEventTransport from '../../src/transport/event.js';
 
-const replaceId = new WeakMap<OriginalEventTransport, number>();
-let transports;
-let callbacks;
-
-class EventTransport extends OriginalEventTransport {
-    constructor(from: string, to: string, win?: Window | typeof global) {
-        super(from, to, win);
-
-        transports.push(this);
-        replaceId.set(this, transports.filter((t) => t.name === from).length); // ???
-    }
-}
+global.addEventListener = () => {};
 
 function createScope() {
+    class EventTransport extends OriginalEventTransport {
+        constructor(from: string, to: string) {
+            super(from, to, realm);
+
+            transports.push(this);
+            replaceId.set(this, transports.filter((t) => t.name === from).length); // ???
+        }
+    }
+
     function processMessages(list) {
         return list.map(function (message) {
             return JSON.parse(
@@ -38,6 +36,8 @@ function createScope() {
     }
 
     function tick() {
+        clearTimeout(timer);
+
         if (queue.length === 0) {
             const offset = start;
 
@@ -48,53 +48,49 @@ function createScope() {
         } else {
             const message = queue.shift();
 
-            listeners.slice().forEach(function (listener) {
-                listener(message);
-            });
+            for (const transport of transports) {
+                transport._onMessage(message);
+            }
 
             timer = setTimeout(tick, 0);
         }
     }
 
-    let listeners = [];
+    const transports = [];
+    const callbacks = [];
+    const replaceId = new WeakMap<OriginalEventTransport, number>();
     let queue = [];
     let messages = [];
     let timer = null;
     let done = null;
     let start = 0;
 
-    global.addEventListener = function (event, fn, capture) {
-        if (event !== 'message' || capture) {
-            throw new Error('Bad argument(s) for addEventListener');
-        }
+    const realm = {
+        postMessage(data, origin) {
+            const message = {
+                source: realm,
+                target: global,
+                origin,
+                data,
+            };
 
-        listeners.push(fn);
-    };
-    global.postMessage = function (data, origin) {
-        const message = {
-            source: global,
-            target: global,
-            origin: origin,
-            data: data,
-        };
-
-        messages.push(message);
-        queue.push(message);
+            messages.push(message);
+            queue.push(message);
+        },
     };
 
-    transports = [];
-    callbacks = [];
-    timer = setTimeout(tick, 0);
+    // timer = setTimeout(tick, 0);
 
     return {
-        messages: messages,
-        await: function (fn) {
+        EventTransport,
+        messages,
+        await(fn) {
             done = fn;
             if (!timer) {
                 timer = setTimeout(tick, 0);
             }
         },
-        dump: function (array) {
+        dump(array) {
             console.log(
                 (array || messages)
                     .map((x) =>
@@ -108,15 +104,12 @@ function createScope() {
                     .join(',\n')
             );
         },
-        destroy: function () {
+        destroy() {
             clearTimeout(timer);
-            listeners = null;
             queue = null;
             messages = null;
-            delete global.postMessage;
-            delete global.addEventListener;
         },
     };
 }
 
-export { EventTransport, createScope };
+export { createScope };

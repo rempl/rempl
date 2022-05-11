@@ -54,19 +54,18 @@ export default class Endpoint<TNamespace extends Namespace> {
 
         // TODO: rework
         const defaultNS = this.ns('*');
-        const methodNames = [];
+        const methodNames: (keyof TNamespace)[] = [];
 
         for (
             let cursor = defaultNS;
             cursor && cursor != Object.prototype;
             cursor = Object.getPrototypeOf(cursor)
         ) {
-            methodNames.push(...Object.getOwnPropertyNames(cursor));
+            methodNames.push(...(Object.getOwnPropertyNames(cursor) as (keyof TNamespace)[]));
         }
 
         for (const method of methodNames) {
             // todo rework in the next version
-            // @ts-ignore
             if (typeof defaultNS[method] === 'function') {
                 // @ts-ignore
                 this[method] = defaultNS[method].bind(defaultNS);

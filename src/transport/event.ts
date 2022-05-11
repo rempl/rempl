@@ -88,16 +88,6 @@ export type OnDataPayload =
 
 const allTransports: EventTransport[] = [];
 
-addEventListener(
-    'message',
-    (e: MessageEvent) => {
-        for (const transport of allTransports) {
-            transport._onMessage(e);
-        }
-    },
-    false
-);
-
 export default class EventTransport {
     static all: EventTransport[] = [];
 
@@ -132,6 +122,18 @@ export default class EventTransport {
     inited = false;
 
     constructor(name: string, connectTo: string, win?: Window | typeof global) {
+        if (allTransports.length === 0 && typeof addEventListener === 'function') {
+            addEventListener(
+                'message',
+                (e: MessageEvent) => {
+                    for (const transport of allTransports) {
+                        transport._onMessage(e);
+                    }
+                },
+                false
+            );
+        }
+
         allTransports.push(this);
 
         this.name = name;

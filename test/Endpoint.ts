@@ -1,5 +1,4 @@
-import { equal, deepEqual } from 'assert';
-import assertConsole from './helpers/console.js';
+import { equal, deepEqual, rejects } from 'assert';
 import Endpoint from '../src/classes/Endpoint.js';
 
 describe('Endpoint', () => {
@@ -29,21 +28,11 @@ describe('Endpoint', () => {
         it('should warn when invoke callRemote and remote method is not available', () => {
             const endpoint = new Endpoint('test');
             const method = endpoint.getRemoteMethod('foo');
-            let callRemoteArgs = null;
 
-            endpoint.callRemote = (...args) => {
-                callRemoteArgs = args;
-            };
-
-            assertConsole(() => {
-                method(1, 2);
-            }, [
-                {
-                    type: 'warn',
-                    args: ['[rempl] Endpoint#test ns(*) has no available remote method `foo`'],
-                },
-            ]);
-            equal(callRemoteArgs, null);
+            return rejects(
+                () => method(1, 2),
+                '[rempl] Endpoint#test ns(*) has no available remote method `foo`'
+            );
         });
 
         it('should update available property on remote API changes', () => {
