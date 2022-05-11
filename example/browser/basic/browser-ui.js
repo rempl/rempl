@@ -1,19 +1,24 @@
 /* eslint-env browser */
 /* global rempl */
 
-rempl.getSubscriber(function(api) {
-    var output = document.body.appendChild(document.createElement('div'));
-    var providedMethods = document.body.appendChild(document.createElement('div'));
+const subscriber = rempl.getSubscriber();
+const output = document.createElement('div');
+const providedMethods = document.createElement('div');
 
-    api.subscribe(function(data) {
-        output.innerHTML = new Date(data).toTimeString();
-    });
+document.body.append(output, providedMethods);
 
-    api.onRemoteMethodsChanged(function(methods) {
-        providedMethods.innerHTML = '<ul>' + methods.map(x => '<li>' + x + '</li>').join('') + '</ul>';
-    });
+subscriber.subscribe((data) => {
+    output.innerHTML = new Date(data).toTimeString();
+});
 
-    api.connected.link(function(state) {
-        console.log('publisher connected:', state);
-    });
+subscriber.onRemoteMethodsChanged((methods) => {
+    providedMethods.innerHTML =
+        '<h3>Publisher methods:</h3>' +
+        '<ul>' +
+        methods.map((methodName) => '<li>' + methodName + '</li>').join('') +
+        '</ul>';
+});
+
+subscriber.connected.link((state) => {
+    console.log('publisher connected:', state);
 });

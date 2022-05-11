@@ -11,23 +11,18 @@
 
         <label> <input type="checkbox" id="provide-test" /> Provide `test` method </label>
 
-        <script src="../../../dist/rempl.js"></script>
-        <script>
+        <script type="module">
             /* eslint-env browser */
-            /* global rempl */
+            import rempl from '../../../dist/rempl.js';
 
-            var publisher = rempl.createPublisher('example-basic', rempl.scriptFromFile('browser-ui.js'));
+            const publisher = rempl.createPublisher('example-basic', rempl.scriptFromFile('browser-ui.js'));
 
-            setInterval(() => publisher.publish(Date.now(), 1000);
-            // Line above is equivalent to:
-            //
-            //   publisher.publish(Date.now());
-            //   setInterval(() => publisher.publish(Date.now()), 1000);
-            //
+            publisher.publish(Date.now());
+            setInterval(() => publisher.publish(Date.now()), 1000);
 
             document.getElementById('provide-test').addEventListener('change', function() {
                 if (this.checked) {
-                    publisher.provide('test', function() {
+                    publisher.provide('test', () => {
                         console.info('test invoked');
                     });
                 } else {

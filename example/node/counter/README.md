@@ -3,7 +3,8 @@
 ### Usage
 
 Start publisher:
-> node index.js
+
+> node index.cjs
 
 Open rempl-server page in you browser ([http://localhost:8177/](http://localhost:8177/) by default) and choose `counter`-publisher.
 
