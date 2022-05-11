@@ -15,7 +15,7 @@
             /* eslint-env browser */
             import rempl from '../../../dist/rempl.js';
 
-            const publisher = rempl.createPublisher('example-basic', rempl.scriptFromFile('browser-ui.js'));
+            const publisher = rempl.createPublisher('example-basic', rempl.scriptFromFile('browser-ui.js', true));
 
             publisher.publish(Date.now());
             setInterval(() => publisher.publish(Date.now()), 1000);

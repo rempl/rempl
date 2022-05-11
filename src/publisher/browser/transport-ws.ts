@@ -57,11 +57,10 @@ function fetchWsSettings() {
 }
 
 export class BrowserWsTransport extends WsTransport {
-    socketIO = socketIO;
     static settings = fetchWsSettings();
 
     constructor(uri: string) {
-        super(uri);
+        super(uri, socketIO);
 
         this.id = sessionStorage[STORAGE_KEY];
         this.socket
@@ -89,6 +88,7 @@ export class BrowserWsTransport extends WsTransport {
 }
 
 export const establishWsConnection = createWsConnectionFactory(
+    socketIO,
     BrowserWsTransport,
     BrowserWsTransport.settings
 );

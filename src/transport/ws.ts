@@ -134,12 +134,12 @@ function onDisconnect(this: WSTransport) {
 }
 
 export default class WSTransport {
-    static get(endpoint: string): WSTransport {
+    static get(endpoint: string, socketIO: any): WSTransport {
         if (endpoint in endpoints) {
             return endpoints[endpoint];
         }
 
-        return (endpoints[endpoint] = new this(endpoint));
+        return (endpoints[endpoint] = new this(endpoint, socketIO));
     }
 
     publishers: Array<string | null> = [];
@@ -150,7 +150,6 @@ export default class WSTransport {
     ownEndpoints = new EndpointList();
     remoteEndpoints = new EndpointList();
 
-    socketIO: any;
     socket: Socket;
 
     sessionId = utils.genUID();
@@ -158,12 +157,12 @@ export default class WSTransport {
     sendInfoTimer: number | NodeJS.Timeout | null = null;
     info = this.getInfo();
 
-    constructor(uri: string) {
+    constructor(uri: string, socketIO: any) {
         if (DEBUG) {
             console.log(DEBUG_PREFIX + 'connecting to ' + normalizeUri(uri));
         }
 
-        this.socket = this.socketIO
+        this.socket = socketIO
             .connect(normalizeUri(uri))
             .on('connect', onConnect.bind(this))
             .on('disconnect', onDisconnect.bind(this))

@@ -41,14 +41,13 @@ function fetchWsSettings() {
 }
 
 export class NodeWsTransport extends WsTransport {
-    socketIO = socketIO;
     static settings = fetchWsSettings();
     get type() {
         return 'node';
     }
 
     constructor(uri: string) {
-        super(uri);
+        super(uri, socketIO);
 
         // TODO make it through temp file
         if (fs.existsSync(CLIENT_ID_FILENAME)) {
@@ -71,6 +70,7 @@ export class NodeWsTransport extends WsTransport {
 }
 
 export const establishWsConnection = createWsConnectionFactory(
+    socketIO,
     NodeWsTransport,
     NodeWsTransport.settings
 );

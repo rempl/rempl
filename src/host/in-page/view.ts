@@ -2,8 +2,8 @@
 
 import createElement from './createElement.js';
 import { AnyFn, global } from '../../utils/index.js';
+import styles from './style.js';
 
-declare const __INPAGE_CSS__: string;
 type Side = 'left' | 'top' | 'bottom' | 'right' | 'fit the page';
 type View = {
     wrapper: HTMLDivElement;
@@ -114,7 +114,7 @@ function getView(): View {
         });
 
         wrapperEl.setAttribute('side', settings['host-dock'] || 'bottom');
-        styleEl.append(document.createTextNode(__INPAGE_CSS__));
+        styleEl.append(document.createTextNode(styles));
         shadow.append(styleEl);
         shadow.append(content.element);
 

@@ -160,7 +160,9 @@ myTool.provide('pong', () => {
 ### Subscriber
 
 ```js
-const myTool = rempl.getSubscriber();
+import { getSubscriber } from 'rempl';
+
+const myTool = getSubscriber();
 
 myTool.subscribe((data) => {
   console.log('Receive data from publisher:', data);

@@ -5,7 +5,6 @@ import { GetRemoteUIHandler, Options } from './types.js';
 const publishers = new Map<string, TransportPublisher>();
 
 export function createPublisherFactory(
-    remplSource: string,
     establishWsConnection: (publisher: TransportPublisher, uri?: string) => void,
     setupPublisher?: (publisher: TransportPublisher) => void
 ) {
@@ -17,13 +16,7 @@ export function createPublisherFactory(
             return publisher;
         }
 
-        publisher = new TransportPublisher(
-            id,
-            remplSource,
-            establishWsConnection,
-            getRemoteUI,
-            options
-        );
+        publisher = new TransportPublisher(id, establishWsConnection, getRemoteUI, options);
         publishers.set(id, publisher);
 
         if (typeof setupPublisher === 'function') {
@@ -35,6 +28,7 @@ export function createPublisherFactory(
 }
 
 export function createWsConnectionFactory(
+    socketIO: any,
     WsTransport: typeof WSTransport,
     settings: { explicit: string | undefined; implicit: string }
 ) {
@@ -57,7 +51,7 @@ export function createWsConnectionFactory(
         }
 
         if (typeof uri === 'string') {
-            WsTransport.get(uri).sync(publisher);
+            WsTransport.get(uri, socketIO).sync(publisher);
         } else {
             console.warn(
                 "[rempl] Connection to WS server doesn't established since bad value for URI",

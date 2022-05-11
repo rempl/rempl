@@ -1,5 +1,6 @@
 const fs = require('fs');
 const esbuild = require('esbuild');
+const { buildCssModule } = require('./utils.cjs');
 
 module.exports = {
     buildMain,
@@ -33,6 +34,11 @@ async function buildMain(config, configCSS) {
                     onLoad({ filter: /\/version\.ts$/ }, () => ({
                         contents: 'export const version = "foo";',
                     }));
+                    onLoad({ filter: /\/style\.ts$/ }, ({ path }) =>
+                        buildCssModule(path, { sourcemap: true, minify: false, ...configCSS }).then(
+                            (contents) => ({ contents })
+                        )
+                    );
                 },
             },
         ],
@@ -66,6 +72,13 @@ async function buildBundle(outfile = './dist/rempl.js') {
             sourcemap: false,
         }
     );
+
+    if (outfile) {
+        fs.writeFileSync(
+            outfile.replace(/\.[^.]+$/, '.node$&'),
+            ';window.rempl=(function rempl(){' + bundle.replace(/\bexport\b/, 'return') + '})();'
+        );
+    }
 
     let exportDef = '';
     bundle = bundle.replace(/export\s*\{((?:.|\s)+)\}/, (_, e) => {

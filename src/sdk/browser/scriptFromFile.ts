@@ -2,7 +2,9 @@
 
 import { GetRemoteUIFn } from '../../transport/event.js';
 
-export function scriptFromFile(filename: string): GetRemoteUIFn {
+declare const rempl: () => void;
+
+export function scriptFromFile(filename: string, includeRempl = false): GetRemoteUIFn {
     let cache: string | null = null;
 
     // TODO: take in account settings.accept setting
@@ -19,7 +21,15 @@ export function scriptFromFile(filename: string): GetRemoteUIFn {
                     return response.text();
                 })
                 .then(
-                    (response) => callback(null, 'script', (cache = response)),
+                    (response) =>
+                        callback(
+                            null,
+                            'script',
+                            (cache =
+                                (includeRempl && typeof rempl === 'function'
+                                    ? 'var rempl = (' + rempl.toString() + ')();'
+                                    : '') + response)
+                        ),
                     (error) => callback(error.message)
                 );
         } else {

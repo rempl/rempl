@@ -5,6 +5,8 @@ const sucrase = require('sucrase');
 const { rollup, watch } = require('rollup');
 const chalk = require('chalk');
 const { buildBundle } = require('./build.cjs');
+const { version } = require('../package.json');
+const { buildCssModule } = require('./utils.cjs');
 
 const external = [
     'fs',
@@ -15,14 +17,6 @@ const external = [
     'socket.io-client',
     'socket.io-client/dist/socket.io.slim.js',
 ];
-
-function removeCreateRequire(code) {
-    return code
-        .replace("import { fileURLToPath } from 'url';", '')
-        .replace('path.dirname(fileURLToPath(import.meta.url))', '__dirname')
-        .replace(/import { createRequire } from 'module';/, '')
-        .replace(/const require = createRequire\(.+?\);/, '');
-}
 
 function replaceContent(map) {
     return {
@@ -108,8 +102,8 @@ async function transpile({
             resolvePath(ts, outputExt),
             transpileTypeScript(),
             replaceContent({
-                'lib/utils/version.js': removeCreateRequire,
-                'lib/utils/source.js': removeCreateRequire,
+                'src/utils/version.ts': () => `export const version = "${version}";`,
+                'src/host/in-page/style.ts': (code, id) => buildCssModule(id),
             }),
         ],
     };
