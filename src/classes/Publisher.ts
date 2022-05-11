@@ -9,9 +9,7 @@ export class PublisherNamespace extends Namespace {
     constructor(name: string, owner: Endpoint<Namespace>) {
         super(name, owner);
 
-        this.provide('init', (callback: (data: unknown) => void) => {
-            callback(this._lastData);
-        });
+        this.provide('init', () => this._lastData);
     }
 
     publish(payload: unknown): void {

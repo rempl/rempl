@@ -17,7 +17,7 @@ export class SubscriberNamespace extends Namespace {
     }
 
     subscribe(fn: AnyFn) {
-        this.callRemote('init', fn);
+        this.callRemote('init').then(fn);
 
         return subscribe(subscribers.get(this) || [], fn);
     }
@@ -41,7 +41,7 @@ export class Subscriber extends Endpoint<SubscriberNamespace> {
                     const nsSubscribers = subscribers.get(ns) || [];
 
                     if (nsSubscribers.length) {
-                        ns.callRemote('init', (data: unknown) => {
+                        ns.callRemote('init').then((data: unknown) => {
                             for (const callback of nsSubscribers) {
                                 callback(data);
                             }

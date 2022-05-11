@@ -3,6 +3,9 @@
 - Removed callback support for `getSubscriber()` which was deprecated in `1.0.0-alpha14`
 - Removed `PublisherNamespace#pipe()` method
 - Changed `createPublisher()` to return an existing publisher instead of `null` when a publisher with provided id is already exist
+- Added support for promise based API in `Namespace#provide()` and `Namespace#callRemote()` methods, using callbacks is deprecated:
+  - `ns.provide('method', callback => callback(value))` -> `ns.provide('method', () => value)` or `ns.provide('method', () => Promise.resolve(value))`
+  - `ns.callRemote('method', value => console.log(value))` -> `ns.callRemote('method').then(value => console.log(value))`
 
 ## 1.0.0-alpha.19 (November 10, 2017)
 

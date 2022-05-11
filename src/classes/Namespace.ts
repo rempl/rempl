@@ -3,7 +3,7 @@ import Endpoint, { CallPacket, Packet } from './Endpoint.js';
 
 export type Method<TArgs extends unknown[]> = Fn<TArgs, unknown>;
 export type MethodsMap = Record<string, Method<unknown[]>>;
-export type Wrapper = Fn<unknown[], void, Namespace> & { available: boolean };
+export type Wrapper = ((...args: unknown[]) => Promise<unknown>) & { available: boolean };
 export type ListenerCallback = (methods: string[]) => void;
 export type Listener = {
     event: string;
@@ -65,11 +65,14 @@ export default class Namespace {
         return this.remoteMethods.includes(methodName);
     }
 
-    callRemote(method: string, ...args: unknown[]): void {
+    callRemote(method: string, ...args: unknown[]): Promise<unknown> {
         let callback: AnyFn | null = null;
 
         if (args.length && typeof args[args.length - 1] === 'function') {
             callback = args.pop() as AnyFn;
+            console.warn(
+                '[rempl] Using a callback for Namespace#callMethod() is deprecated, use returned promise value instead'
+            );
         }
 
         const callPacket: CallPacket = {
@@ -79,29 +82,39 @@ export default class Namespace {
             args,
         };
 
-        Namespace.send(this.owner, [callPacket, callback]);
+        return new Promise((resolve) => {
+            Namespace.send(this.owner, [
+                callPacket,
+                (...args: unknown[]) => {
+                    resolve(args[0]);
+                    callback?.(...args);
+                },
+            ]);
+        });
     }
 
     getRemoteMethod(methodName: string): Wrapper {
         let methodWrapper = this.remoteMethodWrappers[methodName];
 
         if (typeof methodWrapper !== 'function') {
-            methodWrapper = this.remoteMethodWrappers[methodName] = ((...args: unknown[]) => {
-                if (methodWrapper.available) {
-                    this.callRemote(methodName, ...args);
-                } else {
-                    console.warn(
-                        '[rempl] ' +
-                            this.owner.getName() +
-                            ' ns(' +
-                            this.name +
-                            ') has no available remote method `' +
-                            methodName +
-                            '`'
+            methodWrapper = this.remoteMethodWrappers[methodName] = Object.assign(
+                (...args: unknown[]) => {
+                    if (methodWrapper.available) {
+                        return this.callRemote(methodName, ...args);
+                    }
+
+                    return Promise.reject(
+                        new Error(
+                            `[rempl] ${this.owner.getName()} ns("${
+                                this.name
+                            }") has no available remote method "${methodName}`
+                        )
                     );
+                },
+                {
+                    available: this.remoteMethods.indexOf(methodName) !== -1,
                 }
-            }) as Wrapper;
-            methodWrapper.available = this.remoteMethods.indexOf(methodName) !== -1;
+            );
         }
 
         return methodWrapper;
@@ -137,10 +150,21 @@ export default class Namespace {
     static invoke(namespace: Namespace, method: string, args: unknown[], callback: AnyFn): void {
         // add a callback to args even if no callback, to avoid extra checking
         // that callback is passed by remote side
-        args = args.concat(typeof callback === 'function' ? callback : () => {});
+        let callbackCalled = false;
+        args = args.concat((...args: unknown[]) => {
+            callbackCalled = true;
+            callback(...args);
+            console.warn(
+                '[rempl] Using a callback in provided methods has been deprecated, just return a value or promise instead'
+            );
+        });
 
         // invoke the provided remote method
-        namespace.methods[method].apply(null, args);
+        Promise.resolve(namespace.methods[method].apply(null, args)).then((value) => {
+            if (!callbackCalled) {
+                callback(value);
+            }
+        });
     }
 
     static notifyRemoteMethodsChanged(namespace: Namespace): void {
