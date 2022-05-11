@@ -1,5 +1,6 @@
 /* eslint-env browser */
 
+import socketIO from 'socket.io-client/dist/socket.io.slim.js';
 import WsTransport from '../../transport/ws.js';
 import { startIdentify, stopIdentify } from './identify.js';
 import { global } from '../../utils/index.js';
@@ -56,6 +57,7 @@ function fetchWsSettings() {
 }
 
 export class BrowserWsTransport extends WsTransport {
+    socketIO = socketIO;
     static settings = fetchWsSettings();
 
     constructor(uri: string) {

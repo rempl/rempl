@@ -1,11 +1,10 @@
 // @ts-ignore
-import socketIO from 'socket.io-client/dist/socket.io.slim.js';
 import ReactiveValue from '../classes/ReactiveValue.js';
 import EndpointList from '../classes/EndpointList.js';
 import Endpoint from '../classes/Endpoint.js';
 import Namespace from '../classes/Namespace.js';
 import * as utils from '../utils/index.js';
-import { AnyFn, hasOwnProperty, TypeRecord, Unsubscribe } from '../utils/index.js';
+import { AnyFn, hasOwnProperty, Unsubscribe } from '../utils/index.js';
 import { GetRemoteUICallback, GetRemoteUIFn, GetRemoteUISettings } from './event.js';
 
 const endpoints: Record<string, WSTransport> = Object.create(null);
@@ -26,11 +25,9 @@ interface Socket {
     on(event: string, callback: AnyFn): this;
 }
 
-function valuesChanged(a: TypeRecord | unknown[], b: TypeRecord | unknown[]) {
-    for (const key in a) {
-        // @ts-ignore
+function valuesChanged(a: any, b: any) {
+    for (const key of Object.keys(a)) {
         const value1 = a[key];
-        // @ts-ignore
         const value2 = b[key];
 
         if (Array.isArray(value1)) {
@@ -145,11 +142,6 @@ export default class WSTransport {
         return (endpoints[endpoint] = new this(endpoint));
     }
 
-    sessionId = utils.genUID();
-    id: string | null = null;
-    sendInfoTimer: number | NodeJS.Timeout | null = null;
-    info = this.getInfo();
-
     publishers: Array<string | null> = [];
     publishersMap: Record<string, { getRemoteUI: GetRemoteUIFn }> = {};
     dataCallbacks: Array<{ endpoint: string | null; fn: AnyFn }> = [];
@@ -158,14 +150,20 @@ export default class WSTransport {
     ownEndpoints = new EndpointList();
     remoteEndpoints = new EndpointList();
 
+    socketIO: any;
     socket: Socket;
+
+    sessionId = utils.genUID();
+    id: string | null = null;
+    sendInfoTimer: number | NodeJS.Timeout | null = null;
+    info = this.getInfo();
 
     constructor(uri: string) {
         if (DEBUG) {
             console.log(DEBUG_PREFIX + 'connecting to ' + normalizeUri(uri));
         }
 
-        this.socket = socketIO
+        this.socket = this.socketIO
             .connect(normalizeUri(uri))
             .on('connect', onConnect.bind(this))
             .on('disconnect', onDisconnect.bind(this))
