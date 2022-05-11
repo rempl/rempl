@@ -12,6 +12,7 @@ const external = [
     'url',
     'assert',
     'module',
+    'socket.io-client',
     'socket.io-client/dist/socket.io.slim.js',
 ];
 
