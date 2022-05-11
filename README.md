@@ -9,8 +9,7 @@ The general idea behind `Rempl` is to simplify moderated remote access to JavaSc
 
 Built on `Rempl`:
 
-- [shower-remote-control](https://github.com/lahmatiy/shower-remote-control) – [Shower](https://github.com/shower/shower) plugin for remote controlling of presentation
-- [webpack-runtime-analyzer](https://github.com/smelukov/webpack-runtime-analyzer) – [Webpack](https://github.com/webpack/webpack) plugin for analyzing internal processes, state and structure of bundles
+- [React Render Tracker](https://github.com/lahmatiy/react-render-tracker) – a tool to discover performance issues related to unintentional re-renders and unmounts
 
 ## Install
 
@@ -25,7 +24,7 @@ npm install rempl
 ```html
 <script src="node_modules/rempl/dist/rempl.js"></script>
 <script>
-  var myTool = rempl.createPublisher('myTool', function (settings, callback) {
+  const myTool = rempl.createPublisher('myTool', function (settings, callback) {
     /* return a UI bundle or url */
   });
 
@@ -42,21 +41,21 @@ By default publisher attempts to connect to WS server with the same `hostname` a
   ```
 - using `ws` option on `Publisher` create:
   ```js
-  new Publisher('name', function() { ... }, {
+  createPublisher('name', function() { ... }, {
       ws: '//1.2.3.4:1234' // set false to disable connection to WS server
   });
   ```
 - using `connectWS()` method of `Pulisher`'s instance
   ```js
-  var myPublisher = new Publisher('name', function() { ... });
+  const myPublisher = createPublisher('name', function() { ... });
   myPublisher.connectWs('//1.2.3.4:1234')
   ```
 
 ### Node.js
 
 ```js
-var rempl = require('rempl');
-var myTool = rempl.createPublisher('myTool', function (settings, callback) {
+const rempl = require('rempl');
+const myTool = rempl.createPublisher('myTool', function (settings, callback) {
   /* return a UI bundle or url */
 });
 
@@ -71,13 +70,13 @@ When publisher is running on Node.js, it doesn't connect to WS server until WS s
   ```
 - using `ws` option on `Publisher` create:
   ```js
-  new Publisher('name', function() { ... }, {
+  createPublisher('name', function() { ... }, {
       ws: '//1.2.3.4:1234' // set false to disable connection to WS server
   });
   ```
 - using `connectWS()` method of `Pulisher`'s instance
   ```js
-  var myPublisher = new Publisher('name', function() { ... });
+  const myPublisher = createPublisher('name', function() { ... });
   myPublisher.connectWs('//1.2.3.4:1234')
   ```
 
@@ -96,18 +95,15 @@ Publisher and subscriber are two parts of single app (tool). Transports, hosts a
 
 ### Server
 
-For most cases you need a WebSocket transport. In this case a WS server is required. Rempl provides
-
-- [rempl-cli](https://github.com/rempl/rempl-cli) – command line app to launch a server
-- [menubar-server](https://github.com/rempl/menubar-server) – an Electron app that launchs an `rempl` server instance and provide easy control over it; allows forget about command line
+For most cases you need a WebSocket transport. In this case a WS server is required. Rempl provides [rempl-cli](https://github.com/rempl/rempl-cli) package – a command line app to launch a server.
 
 ### Host
 
 `Rempl` server provides web interface to monitor list of publishers and to launch selected publisher's UI in sandbox. Just open server's origin (by default `http://localhost:8177`) in your browser.
 
-- Browsers
-  - [Google Chrome](https://chrome.google.com/webstore/detail/rempl/hcikjlholajopgbgfmmlbmifdfbkijdj) [[repo](https://github.com/rempl/host-chromium-extension)]
-  - Firefox (planned)
+- Browsers [[repo](https://github.com/rempl/host-chromium-extension)]
+  - [Chromium based browsers](https://chrome.google.com/webstore/detail/rempl/hcikjlholajopgbgfmmlbmifdfbkijdj) (Google Chrome, Edge, Opera)
+  - [Firefox](https://addons.mozilla.org/af/firefox/addon/rempl/)
 - Editors
   - [Atom](https://atom.io/packages/rempl) [[repo](https://github.com/rempl/host-atom)]
   - VS Code (planned)
@@ -138,37 +134,35 @@ For tools based on `rempl`, a publisher is a source of UI. When new sandbox for 
 ### Publisher
 
 ```js
-var rempl = require('rempl');
-var myTool = rempl.createPublisher('myTool', function (settings, callback) {
+const rempl = require('rempl');
+const myTool = rempl.createPublisher('myTool', function (settings, callback) {
   callback(null, 'script', 'alert("myTool UI inited")');
 });
 
-setInterval(function () {
+setInterval(() => {
   myTool.publish(Date.now());
 }, 1000);
 
-myTool.provide({
-  pong: function () {
-    console.log('Remote subscriber invoke `pong`');
-  },
+myTool.provide('pong', () => {
+  console.log('Remote subscriber invoke `pong`');
 });
 ```
 
-- `publish(data)`
+- `publish(data: any)`
 - `pipe(fn[, init])`
 - `provide(methodName, fn)` or `provide(methods)`
 - `isMethodProvided(method)`
 - `revoke(methodName)` or `revoke(methodNamesArray)`
-- `callRemote(method, ...args, callback)`
-- `ns(namespace)`
+- `callRemote(method, ...args): Promise<any>`
+- `ns(namespaceName)`
   - publish/pipe/provide/revoke/isMethodProvided/callRemote
 
 ### Subscriber
 
 ```js
-var myTool = rempl.getSubscriber();
+const myTool = rempl.getSubscriber();
 
-myTool.subscribe(function (data) {
+myTool.subscribe((data) => {
   console.log('Receive data from publisher:', data);
 
   myTool.callRemote('pong');
@@ -191,7 +185,7 @@ myTool.subscribe(function (data) {
 Rempl provides a host that can be injected right in the inspecting page, so called `in-page` host. To get that host use `rempl.getHost()` method.
 
 ```js
-var inpageHost = rempl.getHost();
+const inpageHost = rempl.getHost();
 
 inpageHost.activate();
 inpageHost.activate(publisherName);
@@ -216,14 +210,21 @@ Publishers and Subcribers can provide methods for remote side invocation and inv
 Method to provide a method(s) for remote side. It allows to provide a single method or batch of methods.
 
 ```js
-publisher.provide('foo', function () {
+publisher.provide('foo', () => {
   console.log('Method `foo` was invoked by subscriber');
 });
+publisher.provide('syncMethod', () => {
+  return 'result';
+});
+publisher.provide('asyncMethod', async () => {
+  const value = await doSomething();
+  return value;
+});
 publisher.ns('something').provide({
-  method1: function () {
+  method1() {
     /* do something */
   },
-  method2: function () {
+  method2() {
     /* do something */
   },
 });
@@ -243,7 +244,7 @@ publisher.ns('something').revoke(['method1', 'method2']);
 Invoke remote side method with given arguments. All arguments should be a transferable through JSON data types, i.e. `number`, `string`, `boolean`, `Array`, plain object or null. The last argument can be a function that remote side can use to send data back.
 
 ```js
-publisher.callRemote('methodName', 1, 2, function (res) {
+publisher.callRemote('methodName', 1, 2).then((res) => {
   console.log('response from subscriber');
 });
 ```
@@ -254,7 +255,7 @@ Returns `true` when own method is provided for remote side by `provide()` method
 
 ```js
 publisher.isMethodProvided('test'); // false
-publisher.provide('test', function () {});
+publisher.provide('test', () => {});
 publisher.isMethodProvided('test'); // true
 publisher.revoke('test');
 publisher.isMethodProvided('test'); // false
@@ -279,7 +280,7 @@ Allows to subscribe to remote side API state of namespace. Method invoke passed 
 > Currently method doesn't work for publisher since there can be several subscribers with different method set provided.
 
 ```js
-var unsubscribeDefaultNsMethodsLogging = subscriber.onRemoteMethodsChanged(function (methods) {
+const unsubscribeDefaultNsMethodsLogging = subscriber.onRemoteMethodsChanged((methods) => {
   console.log(methods);
 });
 
@@ -294,13 +295,17 @@ Returns a function that invokes `callRemote` with specified `methodName`. This f
 > Currently method doesn't work for publisher since there can be several subscribers with different method set provided.
 
 ```js
-var fooMethod = subscriber.getRemoteMethod('foo');
-var nsBarBazMethod = subscriber.ns('bar').getRemoteMethod('baz');
+const fooMethod = subscriber.getRemoteMethod('foo');
+const nsBarBazMethod = subscriber.ns('bar').getRemoteMethod('baz');
 
 if (fooMethod.available) {
-  fooMethod(1, 2, 3);
+  fooMethod(1, 2, 3).then((result) => console.log('Result:', result));
 }
 
 nsBarBazMethod();
 // with no check a warning message might to be outputed
 ```
+
+## License
+
+MIT
