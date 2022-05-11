@@ -31,3 +31,11 @@ export function getSubscriber() {
 
     return subscriber;
 }
+
+export function getSelfSubscriber(id: string) {
+    const subscriber = new Subscriber(id);
+
+    EventTransport.get('rempl-self-subscriber', 'rempl-self-publisher').sync(subscriber);
+
+    return subscriber;
+}

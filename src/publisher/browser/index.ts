@@ -22,5 +22,8 @@ export const createPublisher = createPublisherFactory(
 
         // in page
         EventTransport.get('rempl-inpage-publisher', 'rempl-inpage-host').sync(publisher);
+
+        // self subscriber
+        EventTransport.get('rempl-self-publisher', 'rempl-self-subscriber').sync(publisher);
     }
 );

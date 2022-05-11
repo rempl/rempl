@@ -6,6 +6,7 @@
 - Added support for promise based API in `Namespace#provide()` and `Namespace#callRemote()` methods, using callbacks is deprecated:
   - `ns.provide('method', callback => callback(value))` -> `ns.provide('method', () => value)` or `ns.provide('method', () => Promise.resolve(value))`
   - `ns.callRemote('method', value => console.log(value))` -> `ns.callRemote('method').then(value => console.log(value))`
+- Added `getSelfSubscriber(id)`
 
 ## 1.0.0-alpha.19 (November 10, 2017)
 
