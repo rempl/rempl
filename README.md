@@ -54,7 +54,8 @@ By default publisher attempts to connect to WS server with the same `hostname` a
 ### Node.js
 
 ```js
-const rempl = require('rempl');
+import * as rempl from 'rempl';
+
 const myTool = rempl.createPublisher('myTool', function (settings, callback) {
   /* return a UI bundle or url */
 });
@@ -134,7 +135,8 @@ For tools based on `rempl`, a publisher is a source of UI. When new sandbox for 
 ### Publisher
 
 ```js
-const rempl = require('rempl');
+import * as rempl from 'rempl';
+
 const myTool = rempl.createPublisher('myTool', function (settings, callback) {
   callback(null, 'script', 'alert("myTool UI inited")');
 });
