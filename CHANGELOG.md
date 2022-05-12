@@ -1,4 +1,4 @@
-## next
+## 1.0.0-alpha.20 (May 12, 2022)
 
 - Rewitten into TypeScript and related refactoring
 - Converted into dual package, i.e. ESM and CommonJS are supported

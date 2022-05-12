@@ -1,6 +1,6 @@
 {
     "name": "rempl",
-    "version": "1.0.0-alpha.19",
+    "version": "1.0.0-alpha.20",
     "description": "Platform for moderated remote access to JavaScript runtime via custom UI",
     "repository": "rempl/rempl",
     "license": "MIT",
@@ -68,7 +68,6 @@
     },
     "files": [
         "lib",
-        "!lib/**/*.map",
         "dist",
         "server/*.js"
     ]
