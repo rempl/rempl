@@ -1,7 +1,9 @@
-process.env.REMPL_SERVER = 'localhost:8177';
-
+// process.env.REMPL_SERVER = 'localhost:8177';
 const rempl = require('rempl');
-const publisher = rempl.createPublisher('counter', rempl.scriptFromFile(__dirname + '/ui.js'));
+const publisher = rempl.createPublisher(
+    'counter',
+    rempl.scriptFromFile(__dirname + '/ui.js', true)
+);
 
 // ----
 

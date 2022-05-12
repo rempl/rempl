@@ -8,18 +8,6 @@ module.exports = {
 };
 
 async function buildMain(config, configCSS) {
-    const inpageCss = await esbuild.build({
-        entryPoints: ['src/host/in-page/style.css'],
-        bundle: true,
-        loader: {
-            '.png': 'dataurl',
-            '.svg': 'dataurl',
-        },
-        sourcemap: true,
-        ...configCSS,
-        write: false,
-    });
-
     const result = await esbuild.build({
         entryPoints: ['src/browser.ts'],
         bundle: true,
@@ -44,7 +32,6 @@ async function buildMain(config, configCSS) {
         ],
         define: {
             ...config.define,
-            __INPAGE_CSS__: JSON.stringify(inpageCss.outputFiles[0].text),
         },
     });
 
@@ -53,33 +40,34 @@ async function buildMain(config, configCSS) {
     }
 }
 
-async function buildBundle(outfile = './dist/rempl.js') {
+async function buildBundle(options) {
+    const {
+        outfile = './dist/rempl.js',
+        outfileEsm = typeof outfile === 'string' ? outfile.replace(/\.[^.]+$/, '.esm$&') : false,
+    } = options || {};
+
     const startTime = Date.now();
     let bundle = await buildMain(
         {
+            legalComments: 'none',
             // write: true,
             // outfile: 'dist/rempl-new.js',
             format: 'esm',
-            // minify: true,
+            minify: true,
             // sourcemap: false,
             define: {
                 __DEV__: false,
             },
         },
         {
+            legalComments: 'none',
             logLevel: 'info',
             minify: true,
             sourcemap: false,
         }
     );
 
-    if (outfile) {
-        fs.writeFileSync(
-            outfile.replace(/\.[^.]+$/, '.node$&'),
-            ';window.rempl=(function rempl(){' + bundle.replace(/\bexport\b/, 'return') + '})();'
-        );
-    }
-
+    // capture exports
     let exportDef = '';
     bundle = bundle.replace(/export\s*\{((?:.|\s)+)\}/, (_, e) => {
         exportDef = e.trim();
@@ -91,29 +79,49 @@ async function buildBundle(outfile = './dist/rempl.js') {
         return { name, alias };
     });
 
-    bundle = `const {${names.map((n) => n.alias)}} = (function rempl() {\n${bundle}\nreturn {${names
-        .map((n) => `${n.alias}: ${n.name}`)
-        .join(',\n')}}\n})();\n\nexport default {${names.map((n) => n.alias)}}`;
+    const [bundleEsm, bundleIife] = (
+        await Promise.all(
+            [
+                // ESM
+                `const {${names.map(
+                    (n) => n.alias
+                )}} = (function rempl() {\n${bundle}\nreturn {${names
+                    .map((n) => (n.alias === n.name ? n.name : `${n.alias}: ${n.name}`))
+                    .join(',\n')}}\n})();\n\nexport{${names.map((n) => n.alias)}}`,
 
-    bundle = esbuild.buildSync({
-        stdin: {
-            contents: bundle,
-        },
-        format: 'esm',
-        logLevel: 'info',
-        minify: true,
-        write: false,
-    }).outputFiles[0].text;
-    // console.log(Object.keys(bundle));
+                // IIFE
+                `window.rempl = (function rempl() {\n${bundle}\nreturn {${names
+                    .map((n) => (n.alias === n.name ? n.name : `${n.alias}: ${n.name}`))
+                    .join(',\n')}}\n})();`,
+            ].map((contents) =>
+                esbuild.build({
+                    stdin: {
+                        contents,
+                    },
+                    format: 'esm',
+                    logLevel: 'info',
+                    minify: true,
+                    write: false,
+                })
+            )
+        )
+    ).map((bundle) => bundle.outputFiles[0].text);
 
     if (outfile) {
-        fs.writeFileSync(outfile, bundle);
+        fs.writeFileSync(outfile, bundleIife);
+    }
+
+    if (outfileEsm) {
+        fs.writeFileSync(outfileEsm, bundleEsm);
     }
 
     console.log(`Bundle ${outfile || '<output>'} built in ${Date.now() - startTime}`);
 
     if (!outfile) {
-        return bundle;
+        return {
+            iife: bundleIife,
+            esm: bundleEsm,
+        };
     }
 }
 

@@ -1,7 +1,13 @@
 import * as fs from 'fs';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
 import { GetRemoteUIFn } from '../transport/event.js';
 
-export function scriptFromFile(filename: string): GetRemoteUIFn {
+export function scriptFromFile(filename: string, includeRempl = false): GetRemoteUIFn {
+    const remplPath = path.join(
+        path.dirname(fileURLToPath(import.meta.url)),
+        '../../dist/rempl.js'
+    );
     let cache: string | null = null;
 
     // TODO: take in account settings.accept setting
@@ -12,7 +18,7 @@ export function scriptFromFile(filename: string): GetRemoteUIFn {
                     return callback(err);
                 }
 
-                cache = content;
+                cache = (includeRempl ? fs.readFileSync(remplPath, 'utf8') : '') + content;
                 callback(null, 'script', content);
             });
         } else {

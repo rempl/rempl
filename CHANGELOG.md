@@ -1,8 +1,14 @@
 ## next
 
+- Rewitten into TypeScript and related refactoring
+- Converted into dual package, i.e. ESM and CommonJS are supported
+- Changed dist:
+  - `/dist/rempl.js` – IIFE bundle that's adding `rempl` to global
+  - `/dist/rempl.esm.js` – ESM bundle
 - Removed callback support for `getSubscriber()` which was deprecated in `1.0.0-alpha14`
 - Removed `PublisherNamespace#pipe()` method
 - Changed `createPublisher()` to return an existing publisher instead of `null` when a publisher with provided id is already exist
+- Added second argument `includeRempl` to `scriptFromFile()` to prepend rempl source to file's content
 - Added support for promise based API in `Namespace#provide()` and `Namespace#callRemote()` methods, using callbacks is deprecated:
   - `ns.provide('method', callback => callback(value))` -> `ns.provide('method', () => value)` or `ns.provide('method', () => Promise.resolve(value))`
   - `ns.callRemote('method', value => console.log(value))` -> `ns.callRemote('method').then(value => console.log(value))`
