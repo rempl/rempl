@@ -11,9 +11,9 @@
         "Anastasia Goryacheva <a.e.goryacheva@gmail.com>"
     ],
     "type": "module",
-    "main": "./lib/browser.js",
+    "main": "./lib/node.js",
     "types": "./lib/browser.d.ts",
-    "browser": "./dist/rempl.js",
+    "browser": "./lib/browser.js",
     "exports": {
         ".": {
             "node": {
