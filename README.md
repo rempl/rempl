@@ -22,13 +22,23 @@ npm install rempl
 ### Browser
 
 ```html
-<script src="node_modules/rempl/dist/rempl.js"></script>
-<script>
+<script type="module">
+  import * as rempl from 'rempl/dist/rempl.esm.js';
+
   const myTool = rempl.createPublisher('myTool', function (settings, callback) {
     /* return a UI bundle or url */
   });
 
   // ...
+</script>
+```
+
+or
+
+```html
+<script src="rempl/dist/rempl.js"></script>
+<script>
+  const myTool = rempl.createPublisher('myTool', ...);
 </script>
 ```
 
@@ -151,13 +161,12 @@ myTool.provide('pong', () => {
 ```
 
 - `publish(data: any)`
-- `pipe(fn[, init])`
 - `provide(methodName, fn)` or `provide(methods)`
 - `isMethodProvided(method)`
 - `revoke(methodName)` or `revoke(methodNamesArray)`
 - `callRemote(method, ...args): Promise<any>`
 - `ns(namespaceName)`
-  - publish/pipe/provide/revoke/isMethodProvided/callRemote
+  - `publish()`/`provide()`/`revoke()`/`isMethodProvided()`/`callRemote()`
 
 ### Subscriber
 
