@@ -15,16 +15,20 @@
     "types": "./lib/browser.d.ts",
     "browser": "./dist/rempl.js",
     "exports": {
-        "node": {
-            "types": "./lib/node.d.ts",
-            "require": "./lib/node.cjs",
-            "import": "./lib/node.js"
+        ".": {
+            "node": {
+                "types": "./lib/node.d.ts",
+                "require": "./lib/node.cjs",
+                "import": "./lib/node.js"
+            },
+            "default": {
+                "types": "./lib/browser.d.ts",
+                "require": "./lib/browser.cjs",
+                "import": "./lib/browser.js"
+            }
         },
-        "default": {
-            "types": "./lib/browser.d.ts",
-            "require": "./dist/rempl.cjs",
-            "import": "./dist/rempl.js"
-        }
+        "./dist/*": "./dist/*.js",
+        "./package.json": "./package.json"
     },
     "scripts": {
         "lint": "eslint scripts/*.cjs src test && npm run ts-check",
