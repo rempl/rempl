@@ -104,6 +104,7 @@ async function transpile({
             replaceContent({
                 'src/utils/version.ts': () => `export const version = "${version}";`,
                 'src/host/in-page/style.ts': (code, id) => buildCssModule(id),
+                'src/publisher/browser/identify/style.ts': (code, id) => buildCssModule(id),
             }),
         ],
     };

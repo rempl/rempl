@@ -2,7 +2,7 @@
 
 import socketIO from 'socket.io-client/dist/socket.io.slim.js';
 import WsTransport from '../../transport/ws.js';
-import { startIdentify, stopIdentify } from './identify.js';
+import { postIdentifyMessage, startIdentify, stopIdentify } from './identify/index.js';
 import { globalThis, top } from '../../utils/index.js';
 import { createWsConnectionFactory } from '../factory.js';
 
@@ -62,9 +62,24 @@ export class BrowserWsTransport extends WsTransport {
     constructor(uri: string) {
         super(uri, socketIO);
 
+        const self = this;
+
         this.id = sessionStorage[STORAGE_KEY];
         this.socket
-            .on('rempl:identify', startIdentify)
+            .on(
+                'rempl:identify',
+                function (num: string | number, callback: (publisherId: string) => void) {
+                    startIdentify((this as any).io.uri, num, callback);
+
+                    for (const publisherId of self.publishers) {
+                        postIdentifyMessage({
+                            op: 'add-publisher',
+                            id: publisherId,
+                            name: publisherId,
+                        });
+                    }
+                }
+            )
             .on('rempl:stop identify', stopIdentify)
             .on('disconnect', stopIdentify);
     }
@@ -82,7 +97,7 @@ export class BrowserWsTransport extends WsTransport {
         return {
             ...super.getInfo(),
             location: String(location),
-            title: top.document.title,
+            title: top?.document?.title || top?.location?.href || 'Unknown',
         };
     }
 }

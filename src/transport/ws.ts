@@ -1,11 +1,10 @@
 // @ts-ignore
 import ReactiveValue from '../classes/ReactiveValue.js';
 import EndpointList from '../classes/EndpointList.js';
-import Endpoint from '../classes/Endpoint.js';
-import Namespace from '../classes/Namespace.js';
 import * as utils from '../utils/index.js';
 import { AnyFn, hasOwnProperty, Unsubscribe } from '../utils/index.js';
 import { GetRemoteUICallback, GetRemoteUIFn, GetRemoteUISettings } from './event.js';
+import { TransportPublisher } from '../publisher/TransportPublisher.js';
 
 const endpoints: Record<string, WSTransport> = Object.create(null);
 const INFO_UPDATE_TIME = 100;
@@ -142,7 +141,7 @@ export default class WSTransport {
         return (endpoints[endpoint] = new this(endpoint, socketIO));
     }
 
-    publishers: Array<string | null> = [];
+    publishers: string[] = [];
     publishersMap: Record<string, { getRemoteUI: GetRemoteUIFn }> = {};
     dataCallbacks: Array<{ endpoint: string | null; fn: AnyFn }> = [];
 
@@ -209,39 +208,41 @@ export default class WSTransport {
         }
     }
 
-    createApi(endpoint: Endpoint<Namespace> & { getRemoteUI?: GetRemoteUIFn }): API | undefined {
-        if (hasOwnProperty(this.publishersMap, endpoint.id as string)) {
+    createApi(publisher: TransportPublisher): API | undefined {
+        if (hasOwnProperty(this.publishersMap, publisher.id as string)) {
             if (DEBUG) {
                 console.error(
-                    DEBUG_PREFIX + 'Publisher `' + endpoint.id + '` is already registered'
+                    DEBUG_PREFIX + 'Publisher `' + publisher.id + '` is already registered'
                 );
             }
 
             return;
         }
 
-        this.publishers.push(endpoint.id);
-        // todo точно всегда есть getRemoteUI
-        this.publishersMap[endpoint.id as string] = {
-            getRemoteUI: endpoint.getRemoteUI as GetRemoteUIFn,
-        };
+        if (publisher.id) {
+            this.publishers.push(publisher.id);
+            // todo точно всегда есть getRemoteUI
+            this.publishersMap[publisher.id] = {
+                getRemoteUI: publisher.getRemoteUI as GetRemoteUIFn,
+            };
+        }
 
         this.sendInfo();
 
         return {
             connected: this.connected,
-            send: send.bind(this, endpoint.id),
-            subscribe: subscribe.bind(this, endpoint.id),
+            send: send.bind(this, publisher.id),
+            subscribe: subscribe.bind(this, publisher.id),
         };
     }
 
-    sync(endpoint: Endpoint<Namespace>) {
-        const api = this.createApi(endpoint);
+    sync(publisher: TransportPublisher) {
+        const api = this.createApi(publisher);
 
         if (api) {
-            api.subscribe(endpoint.processInput.bind(endpoint));
+            api.subscribe(publisher.processInput.bind(publisher));
             api.connected.link((connected) => {
-                endpoint.setupChannel('ws', api.send, this.remoteEndpoints, connected);
+                publisher.setupChannel('ws', api.send, this.remoteEndpoints, connected);
             });
         }
     }

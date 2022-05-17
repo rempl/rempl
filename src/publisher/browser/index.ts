@@ -2,16 +2,10 @@ import EventTransport from '../../transport/event.js';
 import { createPublisherFactory } from '../factory.js';
 import { establishWsConnection } from './transport-ws.js';
 import { TransportPublisher } from '../TransportPublisher.js';
-import { setPublisherList } from './identify.js';
-
-const publishers = new Set<string>();
 
 export const createPublisher = createPublisherFactory(
     establishWsConnection,
     (publisher: TransportPublisher) => {
-        publishers.add(publisher.id as string);
-        setPublisherList([...publishers]);
-
         // browser extension
         EventTransport.get(
             'rempl-browser-extension-publisher',
