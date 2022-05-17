@@ -3,16 +3,16 @@
 import socketIO from 'socket.io-client/dist/socket.io.slim.js';
 import WsTransport from '../../transport/ws.js';
 import { startIdentify, stopIdentify } from './identify.js';
-import { global } from '../../utils/index.js';
+import { globalThis, top } from '../../utils/index.js';
 import { createWsConnectionFactory } from '../factory.js';
 
 const STORAGE_KEY = 'rempl:id';
-const sessionStorage = global.sessionStorage || {};
+const sessionStorage = globalThis.sessionStorage || {};
 declare let REMPL_SERVER: string | boolean;
 
 function fetchWsSettings() {
     function fetchEnvVariable() {
-        if (typeof REMPL_SERVER !== 'undefined' && REMPL_SERVER !== global.REMPL_SERVER) {
+        if (typeof REMPL_SERVER !== 'undefined' && REMPL_SERVER !== globalThis.REMPL_SERVER) {
             return REMPL_SERVER;
         }
     }
@@ -82,7 +82,7 @@ export class BrowserWsTransport extends WsTransport {
         return {
             ...super.getInfo(),
             location: String(location),
-            title: global.top.document.title,
+            title: top.document.title,
         };
     }
 }

@@ -6,7 +6,7 @@ import EndpointListSet from '../classes/EndpointListSet.js';
 import Endpoint from '../classes/Endpoint.js';
 import Namespace from '../classes/Namespace.js';
 import * as utils from '../utils/index.js';
-import { global, AnyFn, Fn, hasOwnProperty, Unsubscribe } from '../utils/index.js';
+import { globalThis, AnyFn, Fn, hasOwnProperty, Unsubscribe } from '../utils/index.js';
 
 const DEBUG = false;
 const DEBUG_PREFIX = '[rempl][event-transport] ';
@@ -91,9 +91,9 @@ const allTransports: EventTransport[] = [];
 export default class EventTransport {
     static all: EventTransport[] = [];
 
-    static get(name: string, connectTo: string, win?: Window | typeof global): EventTransport {
+    static get(name: string, connectTo: string, win?: Window | typeof globalThis): EventTransport {
         if (!win) {
-            win = global;
+            win = globalThis;
         }
 
         const transport = allTransports.find(
@@ -108,7 +108,7 @@ export default class EventTransport {
 
     name: string;
     connectTo: string;
-    realm: Window | typeof global;
+    realm: Window | typeof globalThis;
     inputChannelId: string;
     connections: Record<string, Connection> = Object.create(null);
     connected = new ReactiveValue(false);
@@ -121,7 +121,7 @@ export default class EventTransport {
     sendCallbacks: Record<string, AnyFn> = {};
     inited = false;
 
-    constructor(name: string, connectTo: string, win?: Window | typeof global) {
+    constructor(name: string, connectTo: string, win?: Window | typeof globalThis) {
         if (allTransports.length === 0 && typeof addEventListener === 'function') {
             addEventListener(
                 'message',
@@ -139,7 +139,7 @@ export default class EventTransport {
         this.name = name;
         this.connectTo = connectTo;
         this.inputChannelId = name + ':' + utils.genUID();
-        this.realm = win || global;
+        this.realm = win || globalThis;
 
         this.ownEndpoints.on((endpoints) => {
             if (this.connected.value) {
@@ -175,7 +175,7 @@ export default class EventTransport {
         const data = event.data || {};
         const payload = data.payload || {};
 
-        if (event.source !== this.realm || event.target !== global) {
+        if (event.source !== this.realm || event.target !== globalThis) {
             return;
         }
 

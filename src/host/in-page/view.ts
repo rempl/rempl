@@ -1,7 +1,7 @@
 /* eslint-env browser */
 
 import createElement from './createElement.js';
-import { AnyFn, global } from '../../utils/index.js';
+import { AnyFn, globalThis } from '../../utils/index.js';
 import styles from './style.js';
 
 type Side = 'left' | 'top' | 'bottom' | 'right' | 'fit the page';
@@ -20,7 +20,7 @@ let view: View | null = null;
 let onClose: AnyFn;
 
 // settings persistance
-const settingsStorage = global.localStorage || {};
+const settingsStorage = globalThis.localStorage || {};
 let settings: Record<string, any> = {};
 try {
     settings = JSON.parse(settingsStorage.rempl || '{}');

@@ -1,8 +1,9 @@
 /* eslint-env browser */
 import EventTransport, { OnInitCallback } from '../../transport/event.js';
 import { genUID } from '../../utils/index.js';
+import { globalThis, parent } from '../../utils/global.js';
 
-type Global = typeof global;
+type Global = typeof globalThis;
 type Sandbox = Window | Global;
 type Settings =
     | {
@@ -20,7 +21,7 @@ type Settings =
 
 const initEnvSubscriberMessage = new WeakMap();
 
-if (parent !== self) {
+if (parent !== globalThis) {
     addEventListener('message', function (event: MessageEvent<any>) {
         const data = event.data || {};
 
@@ -38,7 +39,7 @@ export default function createSandbox(settings: Settings, callback: OnInitCallba
             }
         }
 
-        if (parent !== self && sandboxWindow !== self) {
+        if (parent !== globalThis && sandboxWindow !== globalThis) {
             let toSandbox = NaN;
             let toEnv = NaN;
 

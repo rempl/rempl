@@ -36,6 +36,7 @@
                 "args": "after-used"
             }
         ],
+        "no-restricted-globals": [2, "global", "globalThis", "self", "parent", "top", "opener"],
         "no-prototype-builtins": "off",
         "no-duplicate-case": "error",
         "no-empty": [

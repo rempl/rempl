@@ -1,6 +1,5 @@
-import global from './global.js';
+export * from './global.js';
 
-export { global };
 export type TODO = any;
 
 export type Complete<TDest, TSource> = TDest & Omit<TSource, keyof TDest>;

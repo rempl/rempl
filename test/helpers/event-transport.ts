@@ -1,6 +1,7 @@
 import OriginalEventTransport from '../../src/transport/event.js';
+import { globalThis } from '../../src/utils/global.js';
 
-global.addEventListener = () => {};
+globalThis.addEventListener = () => {};
 
 function createScope() {
     class EventTransport extends OriginalEventTransport {
@@ -69,7 +70,7 @@ function createScope() {
         postMessage(data, origin) {
             const message = {
                 source: realm,
-                target: global,
+                target: globalThis,
                 origin,
                 data,
             };
