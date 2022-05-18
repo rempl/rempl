@@ -1,6 +1,5 @@
 /* eslint-env browser */
 
-import { globalThis } from '../../../utils/global.js';
 import __CSS__ from './style.js';
 
 type StopIdentifyMessage = { op: 'stop-identify' };
@@ -39,7 +38,7 @@ function createOverlay(origin: string, num: string) {
 }
 
 export function postIdentifyMessage(params: Message) {
-    globalThis.postMessage({ to: identifyWidgetId, ...params });
+    postMessage({ to: identifyWidgetId, ...params });
 }
 
 export function startIdentify(

@@ -319,14 +319,11 @@ export default class EventTransport {
         }
 
         if (typeof this.realm.postMessage === 'function') {
-            this.realm.postMessage(
-                {
-                    from: this.inputChannelId,
-                    to,
-                    payload,
-                },
-                '*'
-            );
+            this.realm.postMessage({
+                from: this.inputChannelId,
+                to,
+                payload,
+            });
         }
     }
 

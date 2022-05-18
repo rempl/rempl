@@ -58,13 +58,13 @@ export default function createSandbox(settings: Settings, callback: OnInitCallba
                         case 'rempl-env-subscriber:connect':
                         case toSandbox:
                             toEnv = data.from;
-                            sandboxWindow.postMessage(data, '*');
+                            sandboxWindow.postMessage(data);
                             break;
 
                         case 'rempl-env-publisher:connect':
                         case toEnv:
                             toSandbox = data.from;
-                            parent.postMessage(data, '*');
+                            parent.postMessage(data);
                             break;
                     }
                 }),
@@ -76,7 +76,7 @@ export default function createSandbox(settings: Settings, callback: OnInitCallba
 
                 if (initMessage) {
                     toSandbox = initMessage.from;
-                    parent.postMessage(initMessage, '*');
+                    parent.postMessage(initMessage);
                 }
             }
         }
