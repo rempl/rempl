@@ -17,7 +17,10 @@ export function fetchWsSettings() {
     }
 
     function fetchMeta() {
-        const meta = document.querySelector('meta[name="rempl:server"]');
+        const meta =
+            typeof document !== 'undefined'
+                ? document.querySelector('meta[name="rempl:server"]')
+                : undefined;
 
         return (meta && meta.getAttribute('content')) || undefined;
     }
