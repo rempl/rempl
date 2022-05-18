@@ -1,32 +1,11 @@
 export * from './global.js';
 
-export type TODO = any;
-
-export type Complete<TDest, TSource> = TDest & Omit<TSource, keyof TDest>;
-
 export type Fn<TArgs extends unknown[], TReturn, TThis = unknown> = (
     this: TThis,
     ...args: TArgs
 ) => TReturn;
 
 export type AnyFn = Fn<any[], any>;
-
-export type TypeRecord = Record<string, unknown>;
-
-export function complete<
-    TDest extends TypeRecord,
-    TSource extends TypeRecord,
-    TComplete = Complete<TDest, TSource>
->(dest: TDest, source: TSource): TComplete {
-    for (const key in source) {
-        if (!(key in dest)) {
-            // @ts-ignore
-            dest[key] = source[key];
-        }
-    }
-
-    return dest as TComplete;
-}
 
 export function genUID(len?: number): string {
     function base36(val: number) {
@@ -54,12 +33,9 @@ export function subscribe<TItem>(list: TItem[], item: TItem): Unsubscribe {
 
     return () => {
         const idx = list.indexOf(item);
+
         if (idx !== -1) {
             list.splice(idx, 1);
         }
     };
-}
-
-export function hasOwnProperty(obj: TypeRecord, prop: string): boolean {
-    return Object.prototype.hasOwnProperty.call(obj, prop);
 }

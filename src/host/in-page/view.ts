@@ -1,7 +1,7 @@
 /* eslint-env browser */
 
 import createElement from './createElement.js';
-import { AnyFn, globalThis } from '../../utils/index.js';
+import { AnyFn } from '../../utils/index.js';
 import styles from './style.js';
 
 type Side = 'left' | 'top' | 'bottom' | 'right' | 'fit the page';

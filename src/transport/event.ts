@@ -6,7 +6,7 @@ import EndpointListSet from '../classes/EndpointListSet.js';
 import Endpoint from '../classes/Endpoint.js';
 import Namespace from '../classes/Namespace.js';
 import * as utils from '../utils/index.js';
-import { globalThis, AnyFn, Fn, hasOwnProperty, Unsubscribe } from '../utils/index.js';
+import { globalThis, AnyFn, Unsubscribe } from '../utils/index.js';
 
 const DEBUG = false;
 const DEBUG_PREFIX = '[rempl][event-transport] ';
@@ -52,7 +52,7 @@ export type GetRemoteUIFn = (...args: GetRemoteUIFnArgs) => void;
 
 export type CallbackPayload<TArgs extends unknown[]> = {
     type: 'callback';
-    callback: Fn<TArgs, void>;
+    callback(...args: TArgs): void;
     data: TArgs;
 };
 
@@ -110,13 +110,13 @@ export default class EventTransport {
     inputChannelId: string;
     connections: Record<string, Connection> = Object.create(null);
     connected = new ReactiveValue(false);
-    endpointGetUI: Record<string, GetRemoteUIFn> = {};
+    endpointGetUI = new Map<string, GetRemoteUIFn>();
     ownEndpoints = new EndpointList();
     remoteEndpoints = new EndpointListSet();
 
     initCallbacks: OnInitFnArgs[] = [];
     dataCallbacks: Array<{ endpoint: string; fn: AnyFn }> = [];
-    sendCallbacks: Record<string, AnyFn> = {};
+    sendCallbacks = new Map<string, AnyFn>();
     inited = false;
 
     constructor(name: string, connectTo: string, win?: Window | typeof globalThis) {
@@ -241,9 +241,11 @@ export default class EventTransport {
             }
 
             case 'callback': {
-                if (hasOwnProperty(this.sendCallbacks, payload.callback)) {
-                    this.sendCallbacks[payload.callback].apply(null, payload.data);
-                    delete this.sendCallbacks[payload.callback];
+                const callback = this.sendCallbacks.get(payload.callback);
+
+                if (typeof callback === 'function') {
+                    callback(...payload.data);
+                    this.sendCallbacks.delete(payload.callback);
                 }
                 break;
             }
@@ -264,18 +266,21 @@ export default class EventTransport {
                 break;
             }
             case 'getRemoteUI': {
-                if (!hasOwnProperty(this.endpointGetUI, payload.endpoint)) {
+                const getUI = this.endpointGetUI.get(payload.endpoint);
+
+                if (typeof getUI !== 'function') {
                     console.warn(
                         DEBUG_PREFIX +
                             'receive unknown endpoint for getRemoteUI(): ' +
                             payload.endpoint
                     );
+
                     this._wrapCallback(
                         from,
                         payload.callback
                     )('Wrong endpoint – ' + payload.endpoint);
                 } else {
-                    this.endpointGetUI[payload.endpoint](
+                    getUI(
                         payload.data[0] || {},
                         payload.callback ? this._wrapCallback(from, payload.callback) : () => void 0
                     );
@@ -297,7 +302,7 @@ export default class EventTransport {
         }
     }
 
-    _wrapCallback<TArgs extends unknown[]>(to: string, callback: Fn<TArgs, void>) {
+    _wrapCallback<TArgs extends unknown[]>(to: string, callback: (...args: TArgs) => void) {
         return (...args: TArgs) => {
             const callbackPayload: CallbackPayload<TArgs> = {
                 type: 'callback',
@@ -345,7 +350,7 @@ export default class EventTransport {
 
         if (args.length && typeof args[args.length - 1] === 'function') {
             callback = utils.genUID();
-            this.sendCallbacks[callback] = args.pop() as AnyFn;
+            this.sendCallbacks.set(callback, args.pop() as AnyFn);
         }
 
         this.send({
@@ -374,7 +379,7 @@ export default class EventTransport {
             this.ownEndpoints.set(this.ownEndpoints.value.concat(id));
 
             if (typeof endpoint.getRemoteUI === 'function') {
-                this.endpointGetUI[id] = endpoint.getRemoteUI;
+                this.endpointGetUI.set(id, endpoint.getRemoteUI);
             }
         }
 

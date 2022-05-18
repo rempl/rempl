@@ -1,7 +1,7 @@
-import { AnyFn, Fn } from '../utils/index.js';
+import { AnyFn } from '../utils/index.js';
 import Endpoint, { CallPacket, Packet } from './Endpoint.js';
 
-export type Method<TArgs extends unknown[]> = Fn<TArgs, unknown>;
+export type Method<T extends unknown[]> = (...args: T) => unknown;
 export type MethodsMap = Record<string, Method<unknown[]>>;
 export type Wrapper = ((...args: unknown[]) => Promise<unknown>) & { available: boolean };
 export type ListenerCallback = (methods: string[]) => void;

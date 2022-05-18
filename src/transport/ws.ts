@@ -2,7 +2,7 @@
 import ReactiveValue from '../classes/ReactiveValue.js';
 import EndpointList from '../classes/EndpointList.js';
 import * as utils from '../utils/index.js';
-import { AnyFn, hasOwnProperty, Unsubscribe } from '../utils/index.js';
+import { AnyFn, Unsubscribe } from '../utils/index.js';
 import { GetRemoteUICallback, GetRemoteUIFn, GetRemoteUISettings } from './event.js';
 import { TransportPublisher } from '../publisher/TransportPublisher.js';
 
@@ -95,7 +95,9 @@ function onGetUI(
     settings: GetRemoteUISettings,
     callback: GetRemoteUICallback
 ) {
-    if (!hasOwnProperty(this.publishersMap, id as string)) {
+    const publisherMeta = this.publishersMap.get(id as string);
+
+    if (!publisherMeta) {
         if (DEBUG) {
             console.error(DEBUG_PREFIX + 'Publisher `' + id + "` isn't registered");
         }
@@ -104,11 +106,11 @@ function onGetUI(
         return;
     }
 
-    this.publishersMap[id as string].getRemoteUI.call(null, settings || {}, callback);
+    publisherMeta.getRemoteUI.call(null, settings || {}, callback);
 }
 
 function onData(this: WSTransport, id: string | null, ...args: unknown[]) {
-    if (!hasOwnProperty(this.publishersMap, id as string)) {
+    if (!this.publishersMap.has(id as string)) {
         if (DEBUG) {
             console.error(DEBUG_PREFIX + 'Publisher `' + id + "` isn't registered");
         }
@@ -142,7 +144,7 @@ export default class WSTransport {
     }
 
     publishers: string[] = [];
-    publishersMap: Record<string, { getRemoteUI: GetRemoteUIFn }> = {};
+    publishersMap = new Map<string, { getRemoteUI: GetRemoteUIFn }>();
     dataCallbacks: Array<{ endpoint: string | null; fn: AnyFn }> = [];
 
     connected = new ReactiveValue(false);
@@ -209,7 +211,7 @@ export default class WSTransport {
     }
 
     createApi(publisher: TransportPublisher): API | undefined {
-        if (hasOwnProperty(this.publishersMap, publisher.id as string)) {
+        if (this.publishersMap.has(publisher.id as string)) {
             if (DEBUG) {
                 console.error(
                     DEBUG_PREFIX + 'Publisher `' + publisher.id + '` is already registered'
@@ -222,9 +224,9 @@ export default class WSTransport {
         if (publisher.id) {
             this.publishers.push(publisher.id);
             // todo точно всегда есть getRemoteUI
-            this.publishersMap[publisher.id] = {
+            this.publishersMap.set(publisher.id, {
                 getRemoteUI: publisher.getRemoteUI as GetRemoteUIFn,
-            };
+            });
         }
 
         this.sendInfo();
