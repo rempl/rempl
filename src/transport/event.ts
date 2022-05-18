@@ -89,8 +89,6 @@ export type OnDataPayload =
 const allTransports: EventTransport[] = [];
 
 export default class EventTransport {
-    static all: EventTransport[] = [];
-
     static get(name: string, connectTo: string, win?: Window | typeof globalThis): EventTransport {
         if (!win) {
             win = globalThis;
