@@ -47,6 +47,10 @@ export function startIdentify(
     num: number | string,
     callback: (publisherId: string) => void
 ) {
+    if (typeof document === 'undefined') {
+        return;
+    }
+
     const existingWidget = document.querySelector('#' + identifyWidgetId);
 
     if (!existingWidget || (existingWidget as HTMLElement).dataset.origin !== origin) {
