@@ -20,13 +20,12 @@ let view: View | null = null;
 let onClose: AnyFn;
 
 // settings persistance
-const settingsStorage = globalThis.localStorage || {};
 const settings: Record<string, any> = {};
 
 function setSetting(name: string, value: any) {
     settings[name] = value;
     try {
-        settingsStorage.rempl = JSON.stringify(settings);
+        localStorage.rempl = JSON.stringify(settings);
     } catch (e) {}
 }
 
@@ -111,7 +110,7 @@ function getView(): View {
         });
 
         try {
-            Object.assign(settings, JSON.parse(settingsStorage.rempl || '{}'));
+            Object.assign(settings, JSON.parse(localStorage.rempl || '{}'));
         } catch (e) {}
 
         wrapperEl.setAttribute('side', settings['host-dock'] || 'bottom');
