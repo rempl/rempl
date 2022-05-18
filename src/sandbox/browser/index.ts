@@ -21,6 +21,7 @@ type Settings =
 
 const initEnvSubscriberMessage = new WeakMap();
 
+// TODO: make tree-shaking friendly
 if (parent !== globalThis) {
     addEventListener('message', function (event: MessageEvent<any>) {
         const data = event.data || {};
