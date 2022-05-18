@@ -18,6 +18,18 @@ const external = [
     'socket.io-client/dist/socket.io.slim.js',
 ];
 
+function buildCss() {
+    return {
+        name: 'build-css',
+        transform(code, id) {
+            if (path.basename(id) === 'style.ts') {
+                this.addWatchFile(id.replace(/\.ts$/, '.css'));
+                return buildCssModule(id);
+            }
+        },
+    };
+}
+
 function replaceContent(map) {
     return {
         name: 'file-content-replacement',
@@ -101,10 +113,9 @@ async function transpile({
         plugins: [
             resolvePath(ts, outputExt),
             transpileTypeScript(),
+            buildCss(),
             replaceContent({
                 'src/utils/version.ts': () => `export const version = "${version}";`,
-                'src/host/in-page/style.ts': (code, id) => buildCssModule(id),
-                'src/publisher/browser/identify/style.ts': (code, id) => buildCssModule(id),
             }),
         ],
     };
