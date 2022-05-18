@@ -8,3 +8,7 @@ export type GetRemoteUIHandler = (
     callback: (error: string | null, type: 'url' | 'script', content: string) => void
 ) => void;
 export type Options = { ws?: string };
+export type WsSettings = {
+    explicit: string | undefined;
+    implicit: string;
+};

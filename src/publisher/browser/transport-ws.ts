@@ -4,13 +4,12 @@ import socketIO from 'socket.io-client/dist/socket.io.slim.js';
 import WsTransport from '../../transport/ws.js';
 import { postIdentifyMessage, startIdentify, stopIdentify } from './identify/index.js';
 import { globalThis, top } from '../../utils/index.js';
-import { createWsConnectionFactory } from '../factory.js';
 
 const STORAGE_KEY = 'rempl:id';
 const sessionStorage = globalThis.sessionStorage || {};
 declare let REMPL_SERVER: string | boolean;
 
-function fetchWsSettings() {
+export function fetchWsSettings() {
     function fetchEnvVariable() {
         if (typeof REMPL_SERVER !== 'undefined' && REMPL_SERVER !== globalThis.REMPL_SERVER) {
             return REMPL_SERVER;
@@ -57,8 +56,6 @@ function fetchWsSettings() {
 }
 
 export class BrowserWsTransport extends WsTransport {
-    static settings = fetchWsSettings();
-
     constructor(uri: string) {
         super(uri, socketIO);
 
@@ -102,8 +99,6 @@ export class BrowserWsTransport extends WsTransport {
     }
 }
 
-export const establishWsConnection = createWsConnectionFactory(
-    socketIO,
-    BrowserWsTransport,
-    BrowserWsTransport.settings
-);
+export function createBrowserWsTransport(uri: string) {
+    return new BrowserWsTransport(uri);
+}

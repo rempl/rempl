@@ -2,11 +2,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import socketIO from 'socket.io-client';
 import WsTransport from '../transport/ws.js';
-import { createWsConnectionFactory } from './factory.js';
 
 const CLIENT_ID_FILENAME = path.resolve('.rempl_endpoint_id'); // FIXME: dirty solution
 
-function fetchWsSettings() {
+export function fetchWsSettings() {
     function fetchEnvVariable() {
         return process.env.REMPL_SERVER;
     }
@@ -41,7 +40,6 @@ function fetchWsSettings() {
 }
 
 export class NodeWsTransport extends WsTransport {
-    static settings = fetchWsSettings();
     get type() {
         return 'node';
     }
@@ -69,8 +67,6 @@ export class NodeWsTransport extends WsTransport {
     }
 }
 
-export const establishWsConnection = createWsConnectionFactory(
-    socketIO,
-    NodeWsTransport,
-    NodeWsTransport.settings
-);
+export function createNodeWsTransport(uri: string) {
+    return new NodeWsTransport(uri);
+}

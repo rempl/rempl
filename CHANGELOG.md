@@ -1,3 +1,8 @@
+## next
+
+- Added `connectPublisherWs(uri?: string)` function
+- Removed `Publisher#connectWs()` method, use `connectPublisherWs()` instead
+
 ## 1.0.0-alpha.20 (May 12, 2022)
 
 - Rewitten into TypeScript and related refactoring

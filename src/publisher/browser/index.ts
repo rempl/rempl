@@ -1,21 +1,25 @@
+import { GetRemoteUIHandler, Options } from '../types.js';
 import EventTransport from '../../transport/event.js';
-import { createPublisherFactory } from '../factory.js';
-import { establishWsConnection } from './transport-ws.js';
-import { TransportPublisher } from '../TransportPublisher.js';
+import { getPublisher, connect } from '../factory.js';
+import { createBrowserWsTransport, fetchWsSettings } from './transport-ws.js';
 
-export const createPublisher = createPublisherFactory(
-    establishWsConnection,
-    (publisher: TransportPublisher) => {
-        // browser extension
-        EventTransport.get(
-            'rempl-browser-extension-publisher',
-            'rempl-browser-extension-host'
-        ).sync(publisher);
+export function createPublisher(id: string, getRemoteUI: GetRemoteUIHandler, options?: Options) {
+    const publisher = getPublisher(id, getRemoteUI, options);
 
-        // in page
-        EventTransport.get('rempl-inpage-publisher', 'rempl-inpage-host').sync(publisher);
+    // browser extension
+    EventTransport.get('rempl-browser-extension-publisher', 'rempl-browser-extension-host').sync(
+        publisher
+    );
 
-        // self subscriber
-        EventTransport.get('rempl-self-publisher', 'rempl-self-subscriber').sync(publisher);
-    }
-);
+    // in page
+    EventTransport.get('rempl-inpage-publisher', 'rempl-inpage-host').sync(publisher);
+
+    // self subscriber
+    EventTransport.get('rempl-self-publisher', 'rempl-self-subscriber').sync(publisher);
+
+    return publisher;
+}
+
+export function connectPublisherWs(uri?: string) {
+    connect(createBrowserWsTransport, fetchWsSettings, uri);
+}

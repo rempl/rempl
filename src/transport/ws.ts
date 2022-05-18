@@ -162,7 +162,7 @@ export default class WSTransport {
         }
 
         this.socket = socketIO
-            .connect(normalizeUri(uri))
+            .connect(normalizeUri(uri), { transports: ['websocket'] })
             .on('connect', onConnect.bind(this))
             .on('disconnect', onDisconnect.bind(this))
             .on('rempl:get ui', onGetUI.bind(this))
