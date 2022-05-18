@@ -21,16 +21,13 @@ let onClose: AnyFn;
 
 // settings persistance
 const settingsStorage = globalThis.localStorage || {};
-let settings: Record<string, any> = {};
-try {
-    settings = JSON.parse(settingsStorage.rempl || '{}');
-} catch (e) {
-    // ignore
-}
+const settings: Record<string, any> = {};
 
 function setSetting(name: string, value: any) {
     settings[name] = value;
-    settingsStorage.rempl = JSON.stringify(settings);
+    try {
+        settingsStorage.rempl = JSON.stringify(settings);
+    } catch (e) {}
 }
 
 function updateTabSelectedState(tabEl: HTMLElement) {
@@ -112,6 +109,10 @@ function getView(): View {
                 },
             ],
         });
+
+        try {
+            Object.assign(settings, JSON.parse(settingsStorage.rempl || '{}'));
+        } catch (e) {}
 
         wrapperEl.setAttribute('side', settings['host-dock'] || 'bottom');
         styleEl.append(document.createTextNode(styles));
