@@ -48,6 +48,7 @@ export function resolveWsUri(
 }
 
 export function connect(
+    auto: boolean,
     createWsTransport: (uri: string) => WSTransport,
     fetchWsSettings: () => WsSettings,
     uri?: string
@@ -61,7 +62,7 @@ export function connect(
             for (const publisher of publishers.values()) {
                 ws.sync(publisher);
             }
-        } else {
+        } else if (!auto) {
             console.warn(
                 "[rempl] Connection to WS server doesn't established since bad value for URI",
                 uri

@@ -4,6 +4,8 @@ import { getPublisher, connect } from '../factory.js';
 import { createBrowserWsTransport, fetchWsSettings } from './transport-ws.js';
 
 export function createPublisher(id: string, getRemoteUI: GetRemoteUIHandler, options?: Options) {
+    connect(true, createBrowserWsTransport, fetchWsSettings);
+
     const publisher = getPublisher(id, getRemoteUI, options);
 
     // browser extension
@@ -21,5 +23,5 @@ export function createPublisher(id: string, getRemoteUI: GetRemoteUIHandler, opt
 }
 
 export function connectPublisherWs(uri?: string) {
-    connect(createBrowserWsTransport, fetchWsSettings, uri);
+    connect(false, createBrowserWsTransport, fetchWsSettings, uri);
 }

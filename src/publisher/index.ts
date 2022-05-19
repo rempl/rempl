@@ -1,8 +1,13 @@
+import { GetRemoteUIHandler, Options } from './types.js';
 import { getPublisher, connect } from './factory.js';
 import { createNodeWsTransport, fetchWsSettings } from './transport-ws.js';
 
-export const createPublisher = getPublisher;
+export function createPublisher(id: string, getRemoteUI: GetRemoteUIHandler, options?: Options) {
+    connect(true, createNodeWsTransport, fetchWsSettings);
+
+    return getPublisher(id, getRemoteUI, options);
+}
 
 export function connectPublisherWs(uri?: string) {
-    connect(createNodeWsTransport, fetchWsSettings, uri);
+    connect(false, createNodeWsTransport, fetchWsSettings, uri);
 }
