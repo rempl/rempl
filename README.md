@@ -23,9 +23,9 @@ npm install rempl
 
 ```html
 <script type="module">
-  import * as rempl from 'rempl/dist/rempl.esm.js';
+  import { createPublisher } from 'rempl/dist/rempl.esm.js';
 
-  const myTool = rempl.createPublisher('myTool', function (settings, callback) {
+  const myTool = createPublisher('myTool', function (settings, callback) {
     /* return a UI bundle or url */
   });
 
@@ -49,24 +49,22 @@ By default publisher attempts to connect to WS server with the same `hostname` a
   <meta name="rempl:server" content="//1.2.3.4:1234" />
   <!-- or content="none" to disable connection to WS server -->
   ```
-- using `ws` option on `Publisher` create:
+- using `connectPublisherWs()` function
+
   ```js
-  createPublisher('name', function() { ... }, {
-      ws: '//1.2.3.4:1234' // set false to disable connection to WS server
-  });
-  ```
-- using `connectWS()` method of `Pulisher`'s instance
-  ```js
+  import { connectPublisherWs, createPublisher } from 'rempl';
+
   const myPublisher = createPublisher('name', function() { ... });
-  myPublisher.connectWs('//1.2.3.4:1234')
+
+  connectPublisherWs('//1.2.3.4:1234')
   ```
 
 ### Node.js
 
 ```js
-import * as rempl from 'rempl';
+import { createPublisher } from 'rempl';
 
-const myTool = rempl.createPublisher('myTool', function (settings, callback) {
+const myTool = createPublisher('myTool', function (settings, callback) {
   /* return a UI bundle or url */
 });
 
@@ -79,16 +77,14 @@ When publisher is running on Node.js, it doesn't connect to WS server until WS s
   ```
   > REMPL_SERVER=//1.2.3.4:1234 node my-script.js
   ```
-- using `ws` option on `Publisher` create:
-  ```js
-  createPublisher('name', function() { ... }, {
-      ws: '//1.2.3.4:1234' // set false to disable connection to WS server
-  });
-  ```
 - using `connectWS()` method of `Pulisher`'s instance
+
   ```js
+  import { connectPublisherWs, createPublisher } from 'rempl';
+
   const myPublisher = createPublisher('name', function() { ... });
-  myPublisher.connectWs('//1.2.3.4:1234')
+
+  connectPublisherWs('//1.2.3.4:1234')
   ```
 
 ## Overview
@@ -123,13 +119,8 @@ For most cases you need a WebSocket transport. In this case a WS server is requi
 
 Publisher doesn't depends hard on environment. It's mostly limited by transports allowed to process. Currently `rempl` publisher works well in:
 
-- Browser's regular page
+- Browser's page
 - Node.js process
-
-Planned (not tested yet):
-
-- WebWorker
-- ServiceWorker
 
 > Publisher can theoretically be created in non-JavaScript environment. In this case [publisher](https://github.com/rempl/rempl/blob/master/src/publisher/Publisher.js) interface and socket.io client should be implemented in language you use.
 
@@ -145,9 +136,9 @@ For tools based on `rempl`, a publisher is a source of UI. When new sandbox for 
 ### Publisher
 
 ```js
-import * as rempl from 'rempl';
+import { createPublisher } from 'rempl';
 
-const myTool = rempl.createPublisher('myTool', function (settings, callback) {
+const myTool = createPublisher('myTool', function (settings, callback) {
   callback(null, 'script', 'alert("myTool UI inited")');
 });
 
