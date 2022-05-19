@@ -165,15 +165,22 @@ async function transpile({
     }
 }
 
-async function generateTypes() {
+async function generateTypes(fatal = true) {
     const doneMessage = (duration) => `Generate .d.ts files into "lib" done in ${duration}ms`;
 
     return new Promise((resolve, reject) => {
         const startTime = Date.now();
-        exec('npm run ts-emit-types', (error) => {
+        exec('npm run ts-emit-types', (error, stdout, stderr) => {
             if (error) {
                 console.error(chalk.bgRed.white('ERROR!'), chalk.red(error.message));
-                reject(error);
+                stdout && console.error(chalk.red(stdout));
+                stderr && console.error(chalk.red(stderr));
+
+                if (fatal) {
+                    reject(error);
+                } else {
+                    resolve();
+                }
             } else {
                 console.log(doneMessage(Date.now() - startTime));
                 resolve();
@@ -193,7 +200,7 @@ async function transpileAll(options) {
         ts: true,
         onSuccess: async () => {
             if (types) {
-                generateTypes();
+                generateTypes(!watch);
             }
 
             if (bundle) {
