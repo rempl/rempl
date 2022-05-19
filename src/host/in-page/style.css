@@ -85,7 +85,8 @@
     flex: 0 0 auto;
     width: 28px;
     height: 24px;
-    color: rgb(90, 90, 90);
+    color: rgb(100, 100, 100);
+    cursor: pointer;
 }
 
 .layout-button:hover {
@@ -108,6 +109,7 @@
 :host([side='fit the page']) .layout-button[side='fit the page'] {
     color: rgb(66, 128, 236);
     background: none;
+    cursor: default;
 }
 
 .layout-button[side='external']:before {
@@ -149,6 +151,7 @@
     text-align: center;
     font: 20px Arial, sans-serif;
     color: rgb(90, 90, 90);
+    cursor: pointer;
 }
 
 .close-button:hover {
