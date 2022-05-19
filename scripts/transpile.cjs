@@ -72,6 +72,7 @@ function transpileTypeScript() {
                 const { code: output, sourceMap } = sucrase.transform(input, {
                     filePath: id,
                     transforms: ['typescript'],
+                    disableESTransforms: true,
                     sourceMapOptions: {
                         compiledFilename: id,
                     },
