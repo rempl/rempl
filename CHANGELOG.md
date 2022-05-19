@@ -2,6 +2,7 @@
 
 - Added `connectPublisherWs(uri?: string)` function
 - Removed `Publisher#connectWs()` method, use `connectPublisherWs()` instead
+- Fixes crash on library load when some globals are not available, like `document`, `localStorage`, `parent` etc.
 
 ## 1.0.0-alpha.20 (May 12, 2022)
 

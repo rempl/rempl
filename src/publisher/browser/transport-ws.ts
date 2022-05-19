@@ -6,7 +6,6 @@ import { postIdentifyMessage, startIdentify, stopIdentify } from './identify/ind
 import { globalThis, top } from '../../utils/index.js';
 
 const STORAGE_KEY = 'rempl:id';
-const sessionStorage = globalThis.sessionStorage || {};
 declare let REMPL_SERVER: string | boolean;
 
 export function fetchWsSettings() {
@@ -64,7 +63,10 @@ export class BrowserWsTransport extends WsTransport {
 
         const self = this;
 
-        this.id = sessionStorage[STORAGE_KEY];
+        try {
+            this.id = sessionStorage[STORAGE_KEY];
+        } catch (e) {}
+
         this.socket
             .on(
                 'rempl:identify',
@@ -90,7 +92,9 @@ export class BrowserWsTransport extends WsTransport {
 
     setClientId(id: string) {
         super.setClientId(id);
-        sessionStorage[STORAGE_KEY] = this.id;
+        try {
+            sessionStorage[STORAGE_KEY] = this.id;
+        } catch (e) {}
     }
 
     getInfo() {
