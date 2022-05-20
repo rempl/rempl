@@ -1,4 +1,4 @@
-## next
+## 1.0.0-alpha.21 (May 20, 2022)
 
 - Added `connectPublisherWs(uri?: string)` function for manual connection to a WebSocket server
 - Removed `Publisher#connectWs()` method, use `connectPublisherWs()` instead

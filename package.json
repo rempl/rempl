@@ -1,7 +1,7 @@
 {
     "name": "rempl",
-    "version": "1.0.0-alpha.20",
-    "description": "Platform for moderated remote access to JavaScript runtime via custom UI",
+    "version": "1.0.0-alpha.21",
+    "description": "Framework for moderated access with custom UI to remote JavaScript runtime",
     "repository": "rempl/rempl",
     "license": "MIT",
     "author": "Roman Dvornov",
