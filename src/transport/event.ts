@@ -7,12 +7,13 @@ import Endpoint from '../classes/Endpoint.js';
 import Namespace from '../classes/Namespace.js';
 import * as utils from '../utils/index.js';
 import { globalThis, AnyFn, Unsubscribe } from '../utils/index.js';
+import { GetRemoteUIInternalHandler, GetRemoteUISettings } from './types.js';
 
 const DEBUG = false;
 const DEBUG_PREFIX = '[rempl][event-transport] ';
 
 export type TransportEndpoint = (Endpoint<Namespace> | { id?: string }) & {
-    getRemoteUI?: GetRemoteUIFn;
+    getRemoteUI?: GetRemoteUIInternalHandler;
 };
 
 export type ConnectPayload = {
@@ -35,20 +36,6 @@ export type Connection = {
     ttl: number;
     endpoints: EndpointList;
 };
-
-export type GetRemoteUICallback = (
-    // todo should not be string
-    error: string | Error | null,
-    type?: 'script',
-    content?: string
-) => void;
-
-export type GetRemoteUISettings = {
-    dev?: boolean;
-    [key: string]: unknown;
-};
-export type GetRemoteUIFnArgs = [settings: GetRemoteUISettings, callback: GetRemoteUICallback];
-export type GetRemoteUIFn = (...args: GetRemoteUIFnArgs) => void;
 
 export type CallbackPayload<TArgs extends unknown[]> = {
     type: 'callback';
@@ -110,7 +97,7 @@ export default class EventTransport {
     inputChannelId: string;
     connections: Record<string, Connection> = Object.create(null);
     connected = new ReactiveValue(false);
-    endpointGetUI = new Map<string, GetRemoteUIFn>();
+    endpointGetUI = new Map<string, GetRemoteUIInternalHandler>();
     ownEndpoints = new EndpointList();
     remoteEndpoints = new EndpointListSet();
 
@@ -280,10 +267,19 @@ export default class EventTransport {
                         payload.callback
                     )('Wrong endpoint – ' + payload.endpoint);
                 } else {
-                    getUI(
-                        payload.data[0] || {},
-                        payload.callback ? this._wrapCallback(from, payload.callback) : () => void 0
-                    );
+                    if (payload.callback) {
+                        const callback = this._wrapCallback(from, payload.callback);
+
+                        getUI(payload.data[0] || {})
+                            .catch((error) => ({ error: String(error?.message) }))
+                            .then((res) => {
+                                if ('error' in res) {
+                                    callback(res.error);
+                                } else {
+                                    callback(null, res.type, res.value);
+                                }
+                            });
+                    }
                 }
                 break;
             }

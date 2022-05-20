@@ -25,7 +25,7 @@ npm install rempl
 <script type="module">
   import { createPublisher } from 'rempl/dist/rempl.esm.js';
 
-  const myTool = createPublisher('myTool', function (settings, callback) {
+  const myTool = createPublisher('myTool', function (settings) {
     /* return a UI bundle or url */
   });
 
@@ -64,7 +64,7 @@ By default publisher attempts to connect to WS server with the same `hostname` a
 ```js
 import { createPublisher } from 'rempl';
 
-const myTool = createPublisher('myTool', function (settings, callback) {
+const myTool = createPublisher('myTool', function (settings) {
   /* return a UI bundle or url */
 });
 
@@ -131,6 +131,25 @@ For tools based on `rempl`, a publisher is a source of UI. When new sandbox for 
 - `script` – JavaScript bundle that includes everything is needed to build an UI (i.e. JavaScript, CSS, templates etc.). When `script` type is using, `rempl` injects itself before script evaluation. Therefore no need to include rempl source to subscriber.
 - `url` – url of page subscriber. In this case `rempl` should be included to page by author.
 
+```js
+createPublisher('...', () => {
+  return { type: 'script', value: 'console.log("Hi!")' };
+});
+createPublisher('...', () =>
+  fetch('some-file.js')
+    .then((res) => res.text())
+    .then((value) => ({ type: 'script', value }))
+);
+createPublisher('...', async () => {
+  const res = await fetch('some-file.js');
+  const value = await res.text();
+  return { type: 'script', value };
+});
+createPublisher('...', () => {
+  return { type: 'url', value: 'http://...' };
+});
+```
+
 ## API
 
 ### Publisher
@@ -138,8 +157,8 @@ For tools based on `rempl`, a publisher is a source of UI. When new sandbox for 
 ```js
 import { createPublisher } from 'rempl';
 
-const myTool = createPublisher('myTool', function (settings, callback) {
-  callback(null, 'script', 'alert("myTool UI inited")');
+const myTool = createPublisher('myTool', function (settings) {
+  return { type: 'script', value: 'alert("myTool UI inited")' };
 });
 
 setInterval(() => {

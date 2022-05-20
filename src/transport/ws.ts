@@ -3,7 +3,7 @@ import ReactiveValue from '../classes/ReactiveValue.js';
 import EndpointList from '../classes/EndpointList.js';
 import * as utils from '../utils/index.js';
 import { AnyFn, Unsubscribe } from '../utils/index.js';
-import { GetRemoteUICallback, GetRemoteUIFn, GetRemoteUISettings } from './event.js';
+import { GetRemoteUIInternalHandler, GetRemoteUISettings } from './types.js';
 import { TransportPublisher } from '../publisher/TransportPublisher.js';
 
 const endpoints: Record<string, WSTransport> = Object.create(null);
@@ -93,7 +93,11 @@ function onGetUI(
     this: WSTransport,
     id: string | null,
     settings: GetRemoteUISettings,
-    callback: GetRemoteUICallback
+    callback: (
+        error: string | null,
+        type?: 'url' | 'script',
+        value?: string | Record<string, string>
+    ) => void
 ) {
     const publisherMeta = this.publishersMap.get(id as string);
 
@@ -106,7 +110,16 @@ function onGetUI(
         return;
     }
 
-    publisherMeta.getRemoteUI.call(null, settings || {}, callback);
+    return publisherMeta
+        .getRemoteUI(settings || {})
+        .catch((error) => ({ error: String(error?.message) }))
+        .then((res) => {
+            if ('error' in res) {
+                callback(res.error);
+            } else {
+                callback(null, res.type, res.value);
+            }
+        });
 }
 
 function onData(this: WSTransport, id: string | null, ...args: unknown[]) {
@@ -144,7 +157,7 @@ export default class WSTransport {
     }
 
     publishers: string[] = [];
-    publishersMap = new Map<string, { getRemoteUI: GetRemoteUIFn }>();
+    publishersMap = new Map<string, { getRemoteUI: GetRemoteUIInternalHandler }>();
     dataCallbacks: Array<{ endpoint: string | null; fn: AnyFn }> = [];
 
     connected = new ReactiveValue(false);
@@ -225,7 +238,7 @@ export default class WSTransport {
             this.publishers.push(publisher.id);
             // todo точно всегда есть getRemoteUI
             this.publishersMap.set(publisher.id, {
-                getRemoteUI: publisher.getRemoteUI as GetRemoteUIFn,
+                getRemoteUI: publisher.getRemoteUI,
             });
         }
 

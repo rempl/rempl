@@ -36,23 +36,41 @@ function selectPublisher(publisherId: string | null = null) {
         if (selectedPublisherId) {
             view.selectPublisher(selectedPublisherId);
             view.show((host as Host).deactivate);
-            (transport as EventTransport).onInit({ id: selectedPublisherId }, function (papi) {
-                papi.getRemoteUI(function (error, type, content) {
-                    cleanupSandbox();
-                    sandbox = createSandbox(
-                        {
-                            container: view.getSandboxContainer(),
-                            type,
-                            content,
-                        },
-                        (api) => {
-                            papi.subscribe(api.send);
-                            api.subscribe(papi.send);
+            (transport as EventTransport).onInit(
+                { id: selectedPublisherId },
+                function initSandbox(papi) {
+                    papi.getRemoteUI((error, type, content) => {
+                        const sandboxContainerEl = view.getSandboxContainer();
+
+                        cleanupSandbox();
+
+                        if (error) {
+                            const errorEl = document.createElement('div');
+                            errorEl.append('Error on loading UI: ', error);
+                            errorEl.setAttribute(
+                                'style',
+                                'margin:10px;padding:5px 10px;border-radius:3px;border:1px solid #eba8a8;color:#f34040;background:#ffe0e0;'
+                            );
+
+                            sandboxContainerEl.innerHTML = '';
+                            sandboxContainerEl.append(errorEl);
+                        } else {
+                            sandbox = createSandbox(
+                                {
+                                    container: sandboxContainerEl,
+                                    type,
+                                    content,
+                                },
+                                (api) => {
+                                    papi.subscribe(api.send);
+                                    api.subscribe(papi.send);
+                                }
+                            );
+                            sandbox.setConnected(true);
                         }
-                    );
-                    sandbox.setConnected(true);
-                });
-            });
+                    });
+                }
+            );
         } else {
             view.hide();
             cleanupSandbox();

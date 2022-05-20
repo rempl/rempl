@@ -1,8 +1,11 @@
 ## next
 
-- Added `connectPublisherWs(uri?: string)` function
+- Added `connectPublisherWs(uri?: string)` function for manual connection to a WebSocket server
 - Removed `Publisher#connectWs()` method, use `connectPublisherWs()` instead
-- Fixes crash on library load when some globals are not available, like `document`, `localStorage`, `parent` etc.
+- Changed `createPublisher()` second parameter to return a value instead of calling a callback, e.g. `createPublisher('...', () => ({{ type: "script", value: "..." }))`
+- Improved tree-shaking of the lib (`socket.io-client` is still an issue that will be fixes in next releases)
+- Fixes crashes on library load when some globals are not available, like `document`, `localStorage`, `parent` etc.
+- Isolated styles & markup of buildin views with Shadow DOM
 
 ## 1.0.0-alpha.20 (May 12, 2022)
 
