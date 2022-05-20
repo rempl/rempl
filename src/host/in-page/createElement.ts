@@ -1,16 +1,16 @@
 /* eslint-env browser */
-type Options = {
+type Options<TRef extends string> = {
     tagName?: string;
-    ref?: string;
+    ref?: TRef;
     style?: Record<string, string>;
     events?: Record<string, () => void>;
-    children?: Array<string | Options>;
+    children?: Array<string | Options<TRef>>;
 } & {
     [key: string]: any;
 };
 
-export default function (config: Options) {
-    function createElement(options: Options) {
+export default function <TRef extends string>(config: Options<TRef>) {
+    function createElement(options: Options<TRef>) {
         const element = document.createElement(options.tagName || 'div');
 
         for (const [name, value] of Object.entries(options)) {
@@ -59,5 +59,5 @@ export default function (config: Options) {
 
     const map: Record<string, HTMLElement> = {};
     map.element = createElement(config);
-    return map;
+    return map as { [key in TRef | 'element']: HTMLElement };
 }

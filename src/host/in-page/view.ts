@@ -1,23 +1,22 @@
 /* eslint-env browser */
 
 import createElement from './createElement.js';
-import { AnyFn } from '../../utils/index.js';
 import styles from './style.js';
 
 type Side = 'left' | 'top' | 'bottom' | 'right' | 'fit the page';
 type View = {
-    wrapper: HTMLDivElement;
-    element: HTMLDivElement;
-    tabs: HTMLDivElement;
-    buttons: HTMLDivElement;
-    sandbox: HTMLDivElement;
+    wrapper: HTMLElement;
+    element: HTMLElement;
+    tabs: HTMLElement;
+    buttons: HTMLElement;
+    sandbox: HTMLElement;
 };
 
 let publishers: string[] = [];
 let selectedPublisher: string | null = null;
 let selectPublisher: (id?: string) => void = () => {};
 let view: View | null = null;
-let onClose: AnyFn;
+let onClose: () => void;
 
 // settings persistance
 const settings: Record<string, any> = {};
@@ -121,14 +120,14 @@ function getView(): View {
         view = {
             wrapper: wrapperEl,
             ...content,
-        } as View;
+        };
         updatePublisherList();
     }
 
     return view;
 }
 
-function showView(closeCallback: AnyFn): void {
+function showView(closeCallback: () => void): void {
     const { wrapper } = getView();
 
     onClose = closeCallback;
@@ -151,15 +150,15 @@ export default {
     show: showView,
     hide: hideView,
     softHide: softHideView,
-    getSandboxContainer(): HTMLDivElement {
+    getSandboxContainer() {
         return getView().sandbox;
     },
-    setPublisherList(publisherList: string[], selectPublisherFn: (id?: string) => void): void {
+    setPublisherList(publisherList: string[], selectPublisherFn: (id?: string) => void) {
         publishers = publisherList;
         selectPublisher = selectPublisherFn;
         updatePublisherList();
     },
-    selectPublisher(id: string): void {
+    selectPublisher(id: string) {
         if (selectedPublisher !== id) {
             selectedPublisher = id;
 
