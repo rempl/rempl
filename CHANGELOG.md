@@ -1,3 +1,7 @@
+## next
+
+- Fixed a crash on UI init in sandbox when a bundle declares variables with a name as a readonly globals referring to a window object like `top`, `parent` etc.
+
 ## 1.0.0-alpha.21 (May 20, 2022)
 
 - Added `connectPublisherWs(uri?: string)` function for manual connection to a WebSocket server

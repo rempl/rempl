@@ -35,8 +35,10 @@ if (parent !== globalThis) {
 export default function createSandbox(settings: Settings, callback: OnInitCallback) {
     function initSandbox(sandboxWindow: Sandbox) {
         if (settings.type === 'script') {
-            for (const name in settings.content) {
-                (sandboxWindow as Global).eval(settings.content[name] + '\n//# sourceURL=' + name);
+            for (const [sourceURL, source] of Object.entries(settings.content)) {
+                (sandboxWindow as Global).eval(
+                    `(function(){${source}})()\n//# sourceURL=${sourceURL}`
+                );
             }
         }
 
