@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
-import { GetRemoteUIHandler } from '../transport/types.js';
+import { GetRemoteUIHandler } from '../types.js';
 
 export function scriptFromFile(filename: string, includeRempl = false): GetRemoteUIHandler {
     const remplPath = path.join(

@@ -1,12 +1,9 @@
+import { DataMessage } from '../types.js';
+import { AnyFn, subscribe } from '../utils/index.js';
 import Namespace from './Namespace.js';
 import Endpoint, { Packet } from './Endpoint.js';
-import { AnyFn, subscribe } from '../utils/index.js';
 
-export type DataPacket = {
-    type: string;
-    ns?: string;
-    payload: unknown;
-};
+export type SubscriberPacket = DataMessage | Packet;
 
 const subscribers = new Map<SubscriberNamespace, AnyFn[]>();
 
@@ -54,10 +51,10 @@ export class Subscriber extends Endpoint<SubscriberNamespace> {
         });
     }
 
-    processInput(packet: Packet, callback: AnyFn) {
+    processInput(packet: SubscriberPacket, callback: AnyFn) {
         switch (packet.type) {
             case 'data': {
-                const { ns, payload } = packet as DataPacket;
+                const { ns, payload } = packet;
                 const nsSubscribers = subscribers.get(this.ns(ns || '*'));
 
                 if (nsSubscribers) {
@@ -67,7 +64,7 @@ export class Subscriber extends Endpoint<SubscriberNamespace> {
             }
 
             default:
-                super.processInput(packet, callback);
+                super.processInput(packet as Packet, callback); // FIXME!!!
         }
     }
 }

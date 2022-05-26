@@ -1,11 +1,15 @@
 import WSTransport from '../transport/ws.js';
 import { TransportPublisher } from './TransportPublisher.js';
-import { GetRemoteUIHandler, Options, WsSettings } from './types.js';
+import { GetRemoteUIHandler, PublisherOptions, PublisherWsSettings } from '../types.js';
 
 const publishers = new Map<string, TransportPublisher>();
 let ws: WSTransport | null = null;
 
-export function getPublisher(id: string, getRemoteUI: GetRemoteUIHandler, options?: Options) {
+export function getPublisher(
+    id: string,
+    getRemoteUI: GetRemoteUIHandler,
+    options?: PublisherOptions
+) {
     let publisher = publishers.get(id);
 
     if (publisher) {
@@ -50,7 +54,7 @@ export function resolveWsUri(
 export function connect(
     auto: boolean,
     createWsTransport: (uri: string) => WSTransport,
-    fetchWsSettings: () => WsSettings,
+    fetchWsSettings: () => PublisherWsSettings,
     uri?: string
 ) {
     if (ws === null) {

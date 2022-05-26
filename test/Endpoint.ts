@@ -5,20 +5,21 @@ describe('Endpoint', () => {
     describe('getRemoteMethod()', () => {
         it('should return a function', () => {
             const endpoint = new Endpoint();
-            const method = endpoint.getRemoteMethod('foo');
+            const method = endpoint.ns('*').getRemoteMethod('foo');
 
             equal(typeof method, 'function');
         });
 
         it('should invoke callRemote when remote method is available', () => {
             const endpoint = new Endpoint();
-            const method = endpoint.getRemoteMethod('foo');
+            const method = endpoint.ns('*').getRemoteMethod('foo');
             const cb = () => {};
             let callRemoteArgs = null;
 
             endpoint.setRemoteApi({ '*': ['foo'] });
             endpoint.namespaces['*'].callRemote = (...args) => {
                 callRemoteArgs = args;
+                return Promise.resolve();
             };
             method(1, 2, cb);
 
@@ -27,7 +28,7 @@ describe('Endpoint', () => {
 
         it('should warn when invoke callRemote and remote method is not available', () => {
             const endpoint = new Endpoint('test');
-            const method = endpoint.getRemoteMethod('foo');
+            const method = endpoint.ns('*').getRemoteMethod('foo');
 
             return rejects(
                 () => method(1, 2),
@@ -37,7 +38,7 @@ describe('Endpoint', () => {
 
         it('should update available property on remote API changes', () => {
             const endpoint = new Endpoint();
-            const method = endpoint.getRemoteMethod('foo');
+            const method = endpoint.ns('*').getRemoteMethod('foo');
 
             equal(method.available, false);
 

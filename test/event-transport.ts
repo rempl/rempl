@@ -21,7 +21,7 @@ describe('EventTransport', () => {
                 {
                     from: 'foo:1',
                     to: 'bar:connect',
-                    payload: { initiator: 'foo', inited: false, endpoints: [] },
+                    payload: { type: 'handshake', initiator: 'foo', inited: false, endpoints: [] },
                 },
             ]);
             done();
@@ -37,23 +37,23 @@ describe('EventTransport', () => {
                 {
                     from: 'foo:1',
                     to: 'bar:connect',
-                    payload: { initiator: 'foo', inited: false, endpoints: [] },
+                    payload: { type: 'handshake', initiator: 'foo', inited: false, endpoints: [] },
                 },
                 {
                     from: 'bar:1',
                     to: 'foo:connect',
-                    payload: { initiator: 'bar', inited: false, endpoints: [] },
+                    payload: { type: 'handshake', initiator: 'bar', inited: false, endpoints: [] },
                 },
                 {
                     from: 'bar:1',
                     to: 'foo:connect',
-                    payload: { initiator: 'bar', inited: true, endpoints: [] },
+                    payload: { type: 'handshake', initiator: 'bar', inited: true, endpoints: [] },
                 },
                 { from: 'bar:1', to: 'foo:1', payload: { type: 'connect', endpoints: [] } },
                 {
                     from: 'foo:1',
                     to: 'bar:connect',
-                    payload: { initiator: 'foo', inited: true, endpoints: [] },
+                    payload: { type: 'handshake', initiator: 'foo', inited: true, endpoints: [] },
                 },
                 { from: 'foo:1', to: 'bar:1', payload: { type: 'connect', endpoints: [] } },
             ]);
@@ -69,7 +69,7 @@ describe('EventTransport', () => {
                 {
                     from: 'foo:1',
                     to: 'bar:connect',
-                    payload: { initiator: 'foo', inited: false, endpoints: [] },
+                    payload: { type: 'handshake', initiator: 'foo', inited: false, endpoints: [] },
                 },
             ]);
 
@@ -80,12 +80,22 @@ describe('EventTransport', () => {
                     {
                         from: 'bar:1',
                         to: 'foo:connect',
-                        payload: { initiator: 'bar', inited: false, endpoints: [] },
+                        payload: {
+                            type: 'handshake',
+                            initiator: 'bar',
+                            inited: false,
+                            endpoints: [],
+                        },
                     },
                     {
                         from: 'foo:1',
                         to: 'bar:connect',
-                        payload: { initiator: 'foo', inited: true, endpoints: [] },
+                        payload: {
+                            type: 'handshake',
+                            initiator: 'foo',
+                            inited: true,
+                            endpoints: [],
+                        },
                     },
                     { from: 'foo:1', to: 'bar:1', payload: { type: 'connect', endpoints: [] } },
                     { from: 'bar:1', to: 'foo:1', payload: { type: 'connect', endpoints: [] } },
@@ -104,12 +114,12 @@ describe('EventTransport', () => {
                 {
                     from: 'foo:1',
                     to: 'bar:connect',
-                    payload: { initiator: 'foo', inited: false, endpoints: [] },
+                    payload: { type: 'handshake', initiator: 'foo', inited: false, endpoints: [] },
                 },
                 {
                     from: 'bar:1',
                     to: 'baz:connect',
-                    payload: { initiator: 'bar', inited: false, endpoints: [] },
+                    payload: { type: 'handshake', initiator: 'bar', inited: false, endpoints: [] },
                 },
             ]);
 
@@ -125,7 +135,7 @@ describe('EventTransport', () => {
                 {
                     from: 'foo:1',
                     to: 'bar:connect',
-                    payload: { initiator: 'foo', inited: false, endpoints: [] },
+                    payload: { type: 'handshake', initiator: 'foo', inited: false, endpoints: [] },
                 },
             ]);
 
@@ -135,7 +145,12 @@ describe('EventTransport', () => {
                     {
                         from: 'bar:1',
                         to: 'baz:connect',
-                        payload: { initiator: 'bar', inited: false, endpoints: [] },
+                        payload: {
+                            type: 'handshake',
+                            initiator: 'bar',
+                            inited: false,
+                            endpoints: [],
+                        },
                     },
                 ]);
                 done();
@@ -152,12 +167,12 @@ describe('EventTransport', () => {
                 {
                     from: 'foo:1',
                     to: 'bar:connect',
-                    payload: { initiator: 'foo', inited: false, endpoints: [] },
+                    payload: { type: 'handshake', initiator: 'foo', inited: false, endpoints: [] },
                 },
                 {
                     from: 'baz:1',
                     to: 'foo:connect',
-                    payload: { initiator: 'baz', inited: false, endpoints: [] },
+                    payload: { type: 'handshake', initiator: 'baz', inited: false, endpoints: [] },
                 },
             ]);
 
@@ -173,7 +188,7 @@ describe('EventTransport', () => {
                 {
                     from: 'foo:1',
                     to: 'bar:connect',
-                    payload: { initiator: 'foo', inited: false, endpoints: [] },
+                    payload: { type: 'handshake', initiator: 'foo', inited: false, endpoints: [] },
                 },
             ]);
 
@@ -183,7 +198,12 @@ describe('EventTransport', () => {
                     {
                         from: 'baz:1',
                         to: 'foo:connect',
-                        payload: { initiator: 'baz', inited: false, endpoints: [] },
+                        payload: {
+                            type: 'handshake',
+                            initiator: 'baz',
+                            inited: false,
+                            endpoints: [],
+                        },
                     },
                 ]);
                 done();
@@ -205,40 +225,60 @@ describe('EventTransport', () => {
                 {
                     from: 'foo:1',
                     to: 'bar:connect',
-                    payload: { initiator: 'foo', inited: false, endpoints: [] },
+                    payload: { type: 'handshake', initiator: 'foo', inited: false, endpoints: [] },
                 },
                 {
                     from: 'bar:1',
                     to: 'foo:connect',
-                    payload: { initiator: 'bar', inited: false, endpoints: [] },
+                    payload: { type: 'handshake', initiator: 'bar', inited: false, endpoints: [] },
                 },
                 {
                     from: 'bar:2',
                     to: 'foo:connect',
-                    payload: { initiator: 'bar', inited: false, endpoints: [] },
+                    payload: { type: 'handshake', initiator: 'bar', inited: false, endpoints: [] },
                 },
                 {
                     from: 'bar:1',
                     to: 'foo:connect',
-                    payload: { initiator: 'bar', inited: true, endpoints: ['bar1'] },
+                    payload: {
+                        type: 'handshake',
+                        initiator: 'bar',
+                        inited: true,
+                        endpoints: ['bar1'],
+                    },
                 },
                 { from: 'bar:1', to: 'foo:1', payload: { type: 'connect', endpoints: ['bar1'] } },
                 {
                     from: 'bar:2',
                     to: 'foo:connect',
-                    payload: { initiator: 'bar', inited: true, endpoints: ['bar2'] },
+                    payload: {
+                        type: 'handshake',
+                        initiator: 'bar',
+                        inited: true,
+                        endpoints: ['bar2'],
+                    },
                 },
                 { from: 'bar:2', to: 'foo:1', payload: { type: 'connect', endpoints: ['bar2'] } },
                 {
                     from: 'foo:1',
                     to: 'bar:connect',
-                    payload: { initiator: 'foo', inited: true, endpoints: ['foo'] },
+                    payload: {
+                        type: 'handshake',
+                        initiator: 'foo',
+                        inited: true,
+                        endpoints: ['foo'],
+                    },
                 },
                 { from: 'foo:1', to: 'bar:1', payload: { type: 'connect', endpoints: ['foo'] } },
                 {
                     from: 'foo:1',
                     to: 'bar:connect',
-                    payload: { initiator: 'foo', inited: true, endpoints: ['foo'] },
+                    payload: {
+                        type: 'handshake',
+                        initiator: 'foo',
+                        inited: true,
+                        endpoints: ['foo'],
+                    },
                 },
                 { from: 'foo:1', to: 'bar:2', payload: { type: 'connect', endpoints: ['foo'] } },
             ]);
@@ -258,17 +298,21 @@ describe('EventTransport', () => {
         new scope.EventTransport('bar', 'foo').sync(bar1);
         new scope.EventTransport('bar', 'foo').sync(bar2);
 
-        foo.provide('test', (data) => {
+        foo.ns('*').provide('test', (data) => {
             return data;
         });
 
         scope.await(() => {
-            bar1.callRemote('test', 'bar1-test').then((ret) => {
-                bar1Ret.push(ret);
-            });
-            bar2.callRemote('test', 'bar2-test').then((ret) => {
-                bar2Ret.push(ret);
-            });
+            bar1.ns('*')
+                .callRemote('test', 'bar1-test')
+                .then((ret) => {
+                    bar1Ret.push(ret);
+                });
+            bar2.ns('*')
+                .callRemote('test', 'bar2-test')
+                .then((ret) => {
+                    bar2Ret.push(ret);
+                });
 
             scope.await((messages) => {
                 deepEqual(messages, [

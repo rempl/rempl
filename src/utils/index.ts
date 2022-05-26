@@ -26,9 +26,9 @@ export function genUID(len?: number): string {
     return result.substr(0, len);
 }
 
-export type Unsubscribe = () => void;
+export type UnsubscribeFn = () => void;
 
-export function subscribe<TItem>(list: TItem[], item: TItem): Unsubscribe {
+export function subscribe<TItem>(list: TItem[], item: TItem): UnsubscribeFn {
     list.push(item);
 
     return () => {

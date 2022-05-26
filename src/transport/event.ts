@@ -3,29 +3,29 @@
 import ReactiveValue from '../classes/ReactiveValue.js';
 import EndpointList from '../classes/EndpointList.js';
 import EndpointListSet from '../classes/EndpointListSet.js';
-import Endpoint from '../classes/Endpoint.js';
-import Namespace from '../classes/Namespace.js';
 import * as utils from '../utils/index.js';
-import { globalThis, AnyFn, Unsubscribe } from '../utils/index.js';
-import { GetRemoteUIInternalHandler, GetRemoteUISettings } from './types.js';
+import { globalThis, AnyFn, UnsubscribeFn } from '../utils/index.js';
+import {
+    HandshakeEventMessagePayload,
+    EventMessagePayload,
+    GetRemoteUIInternalHandler,
+    CallbackEventMessagePayload,
+} from '../types.js';
+import { EventMessage } from '../types.js';
+import { Publisher } from '../classes/Publisher.js';
+import { Subscriber } from '../classes/Subscriber.js';
 
 const DEBUG = false;
 const DEBUG_PREFIX = '[rempl][event-transport] ';
 
-export type TransportEndpoint = (Endpoint<Namespace> | { id?: string }) & {
+export type TransportEndpoint = (Publisher | Subscriber | { id?: string }) & {
     getRemoteUI?: GetRemoteUIInternalHandler;
-};
-
-export type ConnectPayload = {
-    initiator: string;
-    inited: boolean;
-    endpoints: string[];
 };
 
 export type OnInitCallbackArg = {
     connected: ReactiveValue<boolean>;
+    subscribe(fn: AnyFn): UnsubscribeFn;
     getRemoteUI(callback?: AnyFn): void;
-    subscribe(fn: AnyFn): Unsubscribe;
     send(...args: unknown[]): void;
 };
 
@@ -42,36 +42,6 @@ export type CallbackPayload<TArgs extends unknown[]> = {
     callback(...args: TArgs): void;
     data: TArgs;
 };
-
-export type OnDataPayload =
-    | {
-          type: 'connect';
-          endpoints: string[];
-      }
-    | {
-          type: 'endpoints';
-          data: [string[]];
-      }
-    | {
-          type: 'disconnect';
-      }
-    | {
-          type: 'callback';
-          callback: string;
-          data: unknown[];
-      }
-    | {
-          type: 'data';
-          data: unknown;
-          callback: AnyFn;
-          endpoint: string;
-      }
-    | {
-          type: 'getRemoteUI';
-          endpoint: string;
-          data: GetRemoteUISettings[];
-          callback: AnyFn;
-      };
 
 const allTransports: EventTransport[] = [];
 
@@ -147,7 +117,8 @@ export default class EventTransport {
     }
 
     _handshake(inited: boolean) {
-        const payload: ConnectPayload = {
+        const payload: HandshakeEventMessagePayload = {
+            type: 'handshake',
             initiator: this.name,
             inited,
             endpoints: this.ownEndpoints.value,
@@ -181,7 +152,7 @@ export default class EventTransport {
         }
     }
 
-    _onConnect(from: string, payload: ConnectPayload) {
+    _onConnect(from: string, payload: HandshakeEventMessagePayload) {
         if (!payload.inited) {
             this._handshake(true);
         }
@@ -203,7 +174,7 @@ export default class EventTransport {
         this.inited = true;
     }
 
-    _onData(from: string, payload: OnDataPayload) {
+    _onData(from: string, payload: EventMessagePayload) {
         if (DEBUG) {
             console.log(DEBUG_PREFIX + 'receive from ' + this.connectTo, payload.type, payload);
         }
@@ -228,11 +199,13 @@ export default class EventTransport {
             }
 
             case 'callback': {
-                const callback = this.sendCallbacks.get(payload.callback);
+                if (payload.callback) {
+                    const callback = this.sendCallbacks.get(payload.callback);
 
-                if (typeof callback === 'function') {
-                    callback(...payload.data);
-                    this.sendCallbacks.delete(payload.callback);
+                    if (typeof callback === 'function') {
+                        callback(...payload.data);
+                        this.sendCallbacks.delete(payload.callback);
+                    }
                 }
                 break;
             }
@@ -253,6 +226,10 @@ export default class EventTransport {
                 break;
             }
             case 'getRemoteUI': {
+                if (!payload.endpoint) {
+                    return;
+                }
+
                 const getUI = this.endpointGetUI.get(payload.endpoint);
 
                 if (typeof getUI !== 'function') {
@@ -262,10 +239,12 @@ export default class EventTransport {
                             payload.endpoint
                     );
 
-                    this._wrapCallback(
-                        from,
-                        payload.callback
-                    )('Wrong endpoint – ' + payload.endpoint);
+                    if (payload.callback) {
+                        this._wrapCallback(
+                            from,
+                            payload.callback
+                        )('Wrong endpoint – ' + payload.endpoint);
+                    }
                 } else {
                     if (payload.callback) {
                         const callback = this._wrapCallback(from, payload.callback);
@@ -298,9 +277,9 @@ export default class EventTransport {
         }
     }
 
-    _wrapCallback<TArgs extends unknown[]>(to: string, callback: (...args: TArgs) => void) {
-        return (...args: TArgs) => {
-            const callbackPayload: CallbackPayload<TArgs> = {
+    _wrapCallback(to: string, callback: string) {
+        return (...args: unknown[]) => {
+            const callbackPayload: CallbackEventMessagePayload = {
                 type: 'callback',
                 callback,
                 data: args,
@@ -309,17 +288,19 @@ export default class EventTransport {
         };
     }
 
-    _send(to: string, payload: unknown) {
+    _send(to: string, payload: HandshakeEventMessagePayload | EventMessagePayload) {
         if (DEBUG) {
             console.log(DEBUG_PREFIX + 'emit event', to, payload);
         }
 
         if (typeof this.realm.postMessage === 'function') {
-            this.realm.postMessage({
+            const message: EventMessage = {
                 from: this.inputChannelId,
                 to,
                 payload,
-            });
+            };
+
+            this.realm.postMessage(message);
         }
     }
 
@@ -330,16 +311,11 @@ export default class EventTransport {
         });
     }
 
-    sendToEndpoint(endpoint: string | null, type: string, ...args: unknown[]) {
-        // if (endpoint !== this.remoteName && this.remoteEndpoints.value.indexOf(endpoint) === -1) {
-        //     // console.warn(this.name, endpoint, this.remoteName, this.remoteEndpoints.value);
-        //     if (1||DEBUG) {
-        //         console.warn(DEBUG_PREFIX + '' + this.name + ' send({ type: `' + type + '` }) to endpoint is cancelled since no `' + endpoint + '` in remote endpoint list [' + this.remoteEndpoints.value.join(', ') + ']', arguments[2]);
-        //     }
-        //     return;
-        // }
-
-        let callback: string | boolean = false;
+    sendToEndpoint<
+        M extends Extract<EventMessagePayload, { endpoint: string | null }>,
+        K extends M['type']
+    >(endpoint: string | null, type: K, ...args: any) {
+        let callback: string | null = null;
 
         if (args.length && typeof args[args.length - 1] === 'function') {
             callback = utils.genUID();
@@ -354,12 +330,7 @@ export default class EventTransport {
         });
     }
 
-    send(payload: unknown) {
-        // if (!this.inited) {
-        //     console.warn(DEBUG_PREFIX + 'send() call on init is prohibited');
-        //     return;
-        // }
-
+    send(payload: EventMessagePayload) {
         for (const channelId in this.connections) {
             this._send(channelId, payload);
         }
@@ -390,7 +361,7 @@ export default class EventTransport {
         return this;
     }
 
-    sync(endpoint: Endpoint<Namespace>) {
+    sync(endpoint: Publisher | Subscriber) {
         const channel = utils.genUID(8) + ':' + this.connectTo;
 
         this.onInit(endpoint, (api) => {

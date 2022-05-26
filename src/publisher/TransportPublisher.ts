@@ -1,16 +1,16 @@
 import { Publisher } from '../classes/Publisher.js';
 import {
     GetRemoteUIHandler,
-    Options,
+    PublisherOptions,
     GetRemoteUIInternalResult,
     GetRemoteUISettings,
-} from './types.js';
+} from '../types.js';
 
 export class TransportPublisher extends Publisher {
     getRemoteUI: (settings: GetRemoteUISettings) => Promise<GetRemoteUIInternalResult>;
-    options: Options;
+    options: PublisherOptions;
 
-    constructor(id: string, getRemoteUI: GetRemoteUIHandler, options?: Options) {
+    constructor(id: string, getRemoteUI: GetRemoteUIHandler, options?: PublisherOptions) {
         super(id);
 
         this.options = options || {};

@@ -2,8 +2,8 @@
 import ReactiveValue from '../classes/ReactiveValue.js';
 import EndpointList from '../classes/EndpointList.js';
 import * as utils from '../utils/index.js';
-import { AnyFn, Unsubscribe } from '../utils/index.js';
-import { GetRemoteUIInternalHandler, GetRemoteUISettings } from './types.js';
+import { AnyFn } from '../utils/index.js';
+import { GetRemoteUIInternalHandler, GetRemoteUISettings } from '../types.js';
 import { TransportPublisher } from '../publisher/TransportPublisher.js';
 
 const endpoints: Record<string, WSTransport> = Object.create(null);
@@ -59,7 +59,7 @@ function normalizeUri(uri: string) {
         });
 }
 
-function subscribe(this: WSTransport, endpoint: string | null, fn: AnyFn): Unsubscribe {
+function subscribe(this: WSTransport, endpoint: string | null, fn: AnyFn) {
     return utils.subscribe(this.dataCallbacks, {
         endpoint,
         fn,

@@ -1,6 +1,6 @@
 /* eslint-env browser */
 
-import { GetRemoteUIHandler, GetRemoteUISettings } from '../../transport/types.js';
+import { GetRemoteUIHandler, GetRemoteUISettings } from '../../types.js';
 
 declare const rempl: () => void;
 

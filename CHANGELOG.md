@@ -1,6 +1,8 @@
 ## next
 
 - Fixed a crash on UI init in sandbox when a bundle declares variables with a name as a readonly globals referring to a window object like `top`, `parent` etc.
+- Changed `createPublisher()` to return a root namespace (`ns('*')`) instead of a `Publisher`'s instance
+- Changed `getSubscriber()` and `getSelfSubscriber()` to return a root namespace (`ns('*')`) instead of a `Subscriber`'s instance
 
 ## 1.0.0-alpha.21 (May 20, 2022)
 

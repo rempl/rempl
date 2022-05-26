@@ -1,5 +1,6 @@
+import { CallMessage } from '../types.js';
 import { AnyFn } from '../utils/index.js';
-import Endpoint, { CallPacket, Packet } from './Endpoint.js';
+import Endpoint from './Endpoint.js';
 
 export type Method<T extends unknown[]> = (...args: T) => unknown;
 export type MethodsMap = Record<string, Method<unknown[]>>;
@@ -75,21 +76,18 @@ export default class Namespace {
             );
         }
 
-        const callPacket: CallPacket = {
-            type: 'call',
-            ns: this.name,
-            method,
-            args,
-        };
-
         return new Promise((resolve) => {
-            Namespace.send(this.owner, [
-                callPacket,
-                (...args: unknown[]) => {
-                    resolve(args[0]);
-                    callback?.(...args);
-                },
-            ]);
+            const callPacket: CallMessage = {
+                type: 'call',
+                ns: this.name,
+                method,
+                args,
+            };
+
+            this.owner.send(callPacket, (...args: unknown[]) => {
+                resolve(args[0]);
+                callback?.(...args);
+            });
         });
     }
 
@@ -181,15 +179,6 @@ export default class Namespace {
             }
 
             cursor = cursor.listeners;
-        }
-    }
-
-    static send(
-        owner: Endpoint<Namespace>,
-        args: [Packet, (((...args: unknown[]) => void) | null)?]
-    ): void {
-        for (const { send } of owner.channels) {
-            send(...args);
         }
     }
 }

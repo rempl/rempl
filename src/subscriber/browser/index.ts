@@ -30,7 +30,10 @@ export function getSubscriber() {
         subscriber = createSubscriber();
     }
 
-    return subscriber;
+    return Object.assign(subscriber.ns('*'), {
+        connected: subscriber.connected,
+        ns: subscriber.ns.bind(subscriber),
+    });
 }
 
 export function getSelfSubscriber(id: string) {
@@ -38,5 +41,8 @@ export function getSelfSubscriber(id: string) {
 
     EventTransport.get('rempl-self-subscriber', 'rempl-self-publisher').sync(subscriber);
 
-    return subscriber;
+    return Object.assign(subscriber.ns('*'), {
+        connected: subscriber.connected,
+        ns: subscriber.ns.bind(subscriber),
+    });
 }

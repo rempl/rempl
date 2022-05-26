@@ -1,3 +1,9 @@
+import {
+    CallMessage,
+    RemoteMethodsMessage,
+    GetProvidedMethodsMessage,
+    MethodsMap,
+} from '../types.js';
 import { AnyFn } from '../utils/index.js';
 import Namespace from './Namespace.js';
 import ReactiveValue from './ReactiveValue.js';
@@ -9,29 +15,13 @@ export type Channel = {
     send: AnyFn;
 };
 
-export type API = Record<string, string[]>;
+export type Packet = CallMessage | RemoteMethodsMessage | GetProvidedMethodsMessage;
 
-export type CallPacket = {
-    type: 'call';
-    ns?: string;
-    method: string;
-    args: unknown[];
-};
-export type RemoteMethodsPacket = {
-    type: 'remoteMethods';
-    methods: API;
-};
-export type GetProvidedMethodsPacket = {
-    type: 'getProvidedMethods';
-};
-
-export type Packet = {
-    type: string;
-    [key: string]: unknown;
-};
 export default class Endpoint<TNamespace extends Namespace> {
     id: string | null;
-    namespaces: Record<string, TNamespace>;
+    namespaces: {
+        [key: string]: TNamespace;
+    };
     get namespaceClass() {
         return Namespace;
     }
@@ -53,52 +43,54 @@ export default class Endpoint<TNamespace extends Namespace> {
         }, this);
 
         // TODO: rework
-        const defaultNS = this.ns('*');
-        const methodNames: (keyof TNamespace)[] = [];
+        // const defaultNS = this.ns('*');
+        // const methodNames: (keyof TNamespace)[] = [];
 
-        for (
-            let cursor = defaultNS;
-            cursor && cursor != Object.prototype;
-            cursor = Object.getPrototypeOf(cursor)
-        ) {
-            methodNames.push(...(Object.getOwnPropertyNames(cursor) as (keyof TNamespace)[]));
-        }
+        // for (
+        //     let cursor = defaultNS;
+        //     cursor && cursor != Object.prototype;
+        //     cursor = Object.getPrototypeOf(cursor)
+        // ) {
+        //     methodNames.push(...(Object.getOwnPropertyNames(cursor) as (keyof TNamespace)[]));
+        // }
 
-        for (const method of methodNames) {
-            // todo rework in the next version
-            if (typeof defaultNS[method] === 'function') {
-                // @ts-ignore
-                this[method] = defaultNS[method].bind(defaultNS);
-            }
-        }
+        // for (const method of methodNames) {
+        //     // todo rework in the next version
+        //     if (typeof defaultNS[method] === 'function') {
+        //         // @ts-ignore
+        //         this[method] = defaultNS[method].bind(defaultNS);
+        //     }
+        // }
     }
 
     getName() {
         return this.type + (this.id ? '#' + this.id : '');
     }
 
-    ns(name: string) {
-        if (!this.namespaces[name]) {
-            this.namespaces[name] = new this.namespaceClass(name, this) as TNamespace;
+    ns<K extends string>(name: K) {
+        let namespace = this.namespaces[name];
+
+        if (!namespace) {
+            namespace = Object.assign(new this.namespaceClass(name, this) as TNamespace);
+            this.namespaces[name] = namespace;
         }
 
-        return this.namespaces[name];
+        return namespace;
+    }
+
+    send<T = Packet>(packet: T, callback: ((...args: unknown[]) => void) | null = null): void {
+        for (const { send } of this.channels) {
+            send(packet, callback);
+        }
     }
 
     requestRemoteApi() {
-        const getProvidedMethodsPacket: GetProvidedMethodsPacket = {
-            type: 'getProvidedMethods',
-        };
-
-        Namespace.send(this, [
-            getProvidedMethodsPacket,
-            (methods) => {
-                this.setRemoteApi(methods as API);
-            },
-        ]);
+        this.send({ type: 'getProvidedMethods' } as const, (methods) => {
+            this.setRemoteApi(methods as MethodsMap);
+        });
     }
 
-    setRemoteApi(api?: API) {
+    setRemoteApi(api?: MethodsMap) {
         const changed = [];
 
         if (!api) {
@@ -135,7 +127,7 @@ export default class Endpoint<TNamespace extends Namespace> {
     }
 
     getProvidedApi() {
-        const api: API = {};
+        const api: MethodsMap = Object.create(null);
 
         for (const name in this.namespaces) {
             api[name] = Object.keys(this.namespaces[name].methods).sort();
@@ -148,11 +140,10 @@ export default class Endpoint<TNamespace extends Namespace> {
         if (!this.providedMethodsUpdateTimer) {
             this.providedMethodsUpdateTimer = setTimeout(() => {
                 this.providedMethodsUpdateTimer = null;
-                const remoteMethodsPacket: RemoteMethodsPacket = {
+                this.send({
                     type: 'remoteMethods',
                     methods: this.getProvidedApi(),
-                };
-                Namespace.send(this, [remoteMethodsPacket]);
+                });
             }, 0);
         }
     }
@@ -160,7 +151,7 @@ export default class Endpoint<TNamespace extends Namespace> {
     processInput(packet: Packet, callback: AnyFn) {
         switch (packet.type) {
             case 'call': {
-                const thePacket = packet as CallPacket;
+                const thePacket = packet;
                 const ns = this.ns(thePacket.ns || '*');
 
                 if (!ns.isMethodProvided(thePacket.method)) {
@@ -177,7 +168,7 @@ export default class Endpoint<TNamespace extends Namespace> {
             }
 
             case 'remoteMethods': {
-                const thePacket = packet as RemoteMethodsPacket;
+                const thePacket = packet;
                 this.setRemoteApi(thePacket.methods);
                 break;
             }
