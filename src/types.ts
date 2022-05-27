@@ -1,3 +1,15 @@
+import type { Publisher } from './classes/Publisher.js';
+
+export type { Endpoint } from './classes/Endpoint.js';
+export type { EndpointList } from './classes/EndpointList.js';
+export type { EndpointListSet } from './classes/EndpointListSet.js';
+export type { Namespace } from './classes/Namespace.js';
+export type { ReactiveValue } from './classes/ReactiveValue.js';
+export type { Publisher, PublisherNamespace } from './classes/Publisher.js';
+export type { Subscriber, SubscriberNamespace } from './classes/Subscriber.js';
+export type { EventTransport } from './transport/event.js';
+export type { WsTransport } from './transport/ws.js';
+
 export type MethodsMap = Record<string, string[]>;
 
 // base messages
@@ -23,9 +35,9 @@ export type DataMessage = {
 };
 
 // event transport messages
-export type HandshakeEventMessagePayload = {
+export type EventTransportHandshakePayload = {
     type: 'handshake';
-    initiator: string;
+    initiator: EventTransportEndpoint;
     inited: boolean;
     endpoints: string[];
 };
@@ -38,7 +50,7 @@ export type DisconnectEventMessagePayload = {
 };
 export type EndpointsEventMessagePayload = {
     type: 'endpoints';
-    data: [string[]];
+    data: [endpoints: string[]];
 };
 export type CallbackEventMessagePayload = {
     type: 'callback';
@@ -48,27 +60,46 @@ export type CallbackEventMessagePayload = {
 export type DataEventMessagePayload = {
     type: 'data';
     endpoint: string | null;
-    data: unknown;
+    data: unknown[];
     callback: string | null;
 };
 export type GetRemoveUIEventMessagePayload = {
     type: 'getRemoteUI';
     endpoint: string | null;
-    data: GetRemoteUISettings[];
+    data: [settings: GetRemoteUISettings];
     callback: string | null;
 };
-export type EventMessagePayload =
+export type EventTransportMessagePayload =
     | ConnectEventMessagePayload
     | EndpointsEventMessagePayload
     | DisconnectEventMessagePayload
     | CallbackEventMessagePayload
     | DataEventMessagePayload
     | GetRemoveUIEventMessagePayload;
-export type EventMessage = {
-    from: string;
-    to: string;
-    payload: HandshakeEventMessagePayload | EventMessagePayload;
+export type EventTransportEndpoint =
+    | 'rempl-sandbox'
+    | 'rempl-subscriber'
+    | 'rempl-inpage-publisher'
+    | 'rempl-inpage-host'
+    | 'rempl-browser-extension-publisher'
+    | 'rempl-browser-extension-host'
+    | 'rempl-self-publisher'
+    | 'rempl-self-subscriber'
+    | 'rempl-env-publisher'
+    | 'rempl-env-subscriber';
+export type EventTransportConnectTo = `${EventTransportEndpoint}:connect`;
+export type EventTransportChannelId = `${EventTransportEndpoint}/${string}`;
+export type EventTransportHandshakeMessage = {
+    from: EventTransportChannelId;
+    to: EventTransportConnectTo;
+    payload: EventTransportHandshakePayload;
 };
+export type EventTransportDataMessage = {
+    from: EventTransportChannelId;
+    to: EventTransportChannelId;
+    payload: EventTransportMessagePayload;
+};
+export type EventTransportMessage = EventTransportHandshakeMessage | EventTransportDataMessage;
 
 //
 // Remote UI
@@ -105,4 +136,22 @@ export type PublisherOptions = { ws?: string };
 export type PublisherWsSettings = {
     explicit: string | undefined;
     implicit: string;
+};
+
+//
+// Host
+//
+
+export type Host = {
+    activate(publisher?: Publisher | string): void;
+    deactivate(publisher?: Publisher | string): void;
+};
+
+//
+// Sandbox
+//
+
+export type Sandbox = {
+    setConnected(state: boolean): void;
+    destroy(): void;
 };

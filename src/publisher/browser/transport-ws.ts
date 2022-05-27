@@ -1,7 +1,7 @@
 /* eslint-env browser */
 
 import socketIO from 'socket.io-client/dist/socket.io.slim.js';
-import WsTransport from '../../transport/ws.js';
+import { WsTransport } from '../../transport/ws.js';
 import { postIdentifyMessage, startIdentify, stopIdentify } from './identify/index.js';
 import { globalThis, top } from '../../utils/index.js';
 

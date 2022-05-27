@@ -1,13 +1,8 @@
 /* eslint-env browser */
-import EventTransport from '../../transport/event.js';
-import createSandbox from '../../sandbox/browser/index.js';
-import { Publisher } from '../../classes/Publisher.js';
+import { Host } from '../../types.js';
+import { EventTransport } from '../../transport/event.js';
+import { createSandbox } from '../../sandbox/browser/index.js';
 import view from './view.js';
-
-type Host = {
-    activate(publisher?: Publisher | string): void;
-    deactivate(publisher?: Publisher | string): void;
-};
 
 let publishers: string[] = [];
 let selectedPublisherId: string | null = null;
@@ -78,7 +73,7 @@ function selectPublisher(publisherId: string | null = null) {
     }
 }
 
-export default function getHost() {
+export function getHost() {
     if (host !== null) {
         return host;
     }
@@ -117,9 +112,7 @@ export default function getHost() {
                 view.softHide();
                 // tear down subscriber in 15 sec
                 clearTimeout(teardownTimer);
-                teardownTimer = setTimeout(function () {
-                    selectPublisher();
-                }, 15000);
+                teardownTimer = setTimeout(() => selectPublisher(), 15000);
             }
         },
     });

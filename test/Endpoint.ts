@@ -1,5 +1,5 @@
 import { equal, deepEqual, rejects } from 'assert';
-import Endpoint from '../src/classes/Endpoint.js';
+import { Endpoint } from '../src/classes/Endpoint.js';
 
 describe('Endpoint', () => {
     describe('getRemoteMethod()', () => {

@@ -1,9 +1,9 @@
 import { CallMessage } from '../types.js';
 import { AnyFn } from '../utils/index.js';
-import Endpoint from './Endpoint.js';
+import { Endpoint } from './Endpoint.js';
 
 export type Method<T extends unknown[]> = (...args: T) => unknown;
-export type MethodsMap = Record<string, Method<unknown[]>>;
+export type NamespaceMethods = Record<string, Method<unknown[]>>;
 export type Wrapper = ((...args: unknown[]) => Promise<unknown>) & { available: boolean };
 export type ListenerCallback = (methods: string[]) => void;
 export type Listener = {
@@ -12,10 +12,10 @@ export type Listener = {
     listeners: Listener | null;
 };
 
-export default class Namespace {
+export class Namespace {
     name: string;
     owner: Endpoint<Namespace>;
-    methods: MethodsMap = Object.create(null);
+    methods: NamespaceMethods = Object.create(null);
     remoteMethodWrappers: Record<string, Wrapper> = Object.create(null);
     remoteMethods: string[] = [];
     listeners: Listener | null = null;
@@ -31,7 +31,7 @@ export default class Namespace {
     }
 
     provide<TReturn extends unknown[]>(
-        methodName: string | MethodsMap,
+        methodName: string | NamespaceMethods,
         fn?: Method<TReturn>
     ): void {
         if (typeof methodName === 'string') {

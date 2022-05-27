@@ -1,5 +1,5 @@
 import { deepEqual } from 'assert';
-import Endpoint from '../src/classes/Endpoint.js';
+import { Endpoint } from '../src/classes/Endpoint.js';
 import { createScope } from './helpers/event-transport.js';
 
 describe('EventTransport', () => {

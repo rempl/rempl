@@ -1,17 +1,17 @@
 // @ts-ignore
-import ReactiveValue from '../classes/ReactiveValue.js';
-import EndpointList from '../classes/EndpointList.js';
+import { ReactiveValue } from '../classes/ReactiveValue.js';
+import { EndpointList } from '../classes/EndpointList.js';
 import * as utils from '../utils/index.js';
 import { AnyFn } from '../utils/index.js';
 import { GetRemoteUIInternalHandler, GetRemoteUISettings } from '../types.js';
 import { TransportPublisher } from '../publisher/TransportPublisher.js';
 
-const endpoints: Record<string, WSTransport> = Object.create(null);
+const endpoints: Record<string, WsTransport> = Object.create(null);
 const INFO_UPDATE_TIME = 100;
 const DEBUG = false;
 const DEBUG_PREFIX = '[rempl][ws-transport] ';
 
-export type SelfInfo = Pick<WSTransport, 'id' | 'sessionId' | 'type' | 'publishers'>;
+export type SelfInfo = Pick<WsTransport, 'id' | 'sessionId' | 'type' | 'publishers'>;
 
 export type API = {
     connected: ReactiveValue<boolean>;
@@ -59,18 +59,18 @@ function normalizeUri(uri: string) {
         });
 }
 
-function subscribe(this: WSTransport, endpoint: string | null, fn: AnyFn) {
+function subscribe(this: WsTransport, endpoint: string | null, fn: AnyFn) {
     return utils.subscribe(this.dataCallbacks, {
         endpoint,
         fn,
     });
 }
 
-function send(this: WSTransport, endpoint: string | null, callback?: AnyFn) {
+function send(this: WsTransport, endpoint: string | null, callback?: AnyFn) {
     this.send('rempl:from publisher', endpoint, callback);
 }
 
-function onConnect(this: WSTransport) {
+function onConnect(this: WsTransport) {
     clearInterval(this.sendInfoTimer as number);
 
     this.connected.set(true);
@@ -90,7 +90,7 @@ function onConnect(this: WSTransport) {
 }
 
 function onGetUI(
-    this: WSTransport,
+    this: WsTransport,
     id: string | null,
     settings: GetRemoteUISettings,
     callback: (
@@ -122,7 +122,7 @@ function onGetUI(
         });
 }
 
-function onData(this: WSTransport, id: string | null, ...args: unknown[]) {
+function onData(this: WsTransport, id: string | null, ...args: unknown[]) {
     if (!this.publishersMap.has(id as string)) {
         if (DEBUG) {
             console.error(DEBUG_PREFIX + 'Publisher `' + id + "` isn't registered");
@@ -138,7 +138,7 @@ function onData(this: WSTransport, id: string | null, ...args: unknown[]) {
     });
 }
 
-function onDisconnect(this: WSTransport) {
+function onDisconnect(this: WsTransport) {
     if (DEBUG) {
         console.log(DEBUG_PREFIX + 'disconnected');
     }
@@ -147,8 +147,8 @@ function onDisconnect(this: WSTransport) {
     this.connected.set(false);
 }
 
-export default class WSTransport {
-    static get(endpoint: string, socketIO: any): WSTransport {
+export class WsTransport {
+    static get(endpoint: string, socketIO: any): WsTransport {
         if (endpoint in endpoints) {
             return endpoints[endpoint];
         }

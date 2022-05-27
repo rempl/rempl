@@ -1,10 +1,10 @@
 /* eslint-env browser */
-import EventTransport, { OnInitCallback } from '../../transport/event.js';
-import { genUID } from '../../utils/index.js';
-import { globalThis, parent } from '../../utils/global.js';
+import { Sandbox } from '../../types.js';
+import { OnInitCallback, EventTransport } from '../../transport/event.js';
+import { globalThis, parent, genUID } from '../../utils/index.js';
 
 type Global = typeof globalThis;
-type Sandbox = Window | Global;
+type SandboxWindow = Window | Global;
 type Settings =
     | {
           type: 'script';
@@ -32,8 +32,8 @@ if (parent !== globalThis) {
     });
 }
 
-export default function createSandbox(settings: Settings, callback: OnInitCallback) {
-    function initSandbox(sandboxWindow: Sandbox) {
+export function createSandbox(settings: Settings, callback: OnInitCallback) {
+    function initSandbox(sandboxWindow: SandboxWindow) {
         if (settings.type === 'script') {
             for (const [sourceURL, source] of Object.entries(settings.content)) {
                 (sandboxWindow as Global).eval(
@@ -118,8 +118,8 @@ export default function createSandbox(settings: Settings, callback: OnInitCallba
         (settings.container || document.documentElement).appendChild(iframe);
     }
 
-    return {
-        setConnected(state: boolean) {
+    const sandbox: Sandbox = {
+        setConnected(state) {
             connected = state;
 
             if (transport) {
@@ -144,4 +144,6 @@ export default function createSandbox(settings: Settings, callback: OnInitCallba
             }
         },
     };
+
+    return sandbox;
 }

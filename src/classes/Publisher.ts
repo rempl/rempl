@@ -1,5 +1,5 @@
-import Namespace from './Namespace.js';
-import Endpoint from './Endpoint.js';
+import { Namespace } from './Namespace.js';
+import { Endpoint } from './Endpoint.js';
 import { SubscriberPacket } from './Subscriber.js';
 
 export type PipeFn = (...args: unknown[]) => unknown;

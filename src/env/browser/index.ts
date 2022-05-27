@@ -1,6 +1,6 @@
 /* eslint-env browser */
 import { globalThis, parent } from '../../utils/global.js';
-import EventTransport from '../../transport/event.js';
+import { EventTransport } from '../../transport/event.js';
 import { Publisher } from '../../classes/Publisher.js';
 import { Subscriber } from '../../classes/Subscriber.js';
 

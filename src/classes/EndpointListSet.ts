@@ -1,6 +1,6 @@
-import EndpointList from './EndpointList.js';
+import { EndpointList } from './EndpointList.js';
 
-export default class EndpointListSet extends EndpointList {
+export class EndpointListSet extends EndpointList {
     endpointLists = new Set<EndpointList>();
 
     constructor() {

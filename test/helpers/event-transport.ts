@@ -1,11 +1,12 @@
-import OriginalEventTransport from '../../src/transport/event.js';
+import { EventTransport as OriginalEventTransport } from '../../src/transport/event.js';
+import { EventTransportEndpoint } from '../../src/types.js';
 import { globalThis } from '../../src/utils/global.js';
 
 globalThis.addEventListener = () => {};
 
 function createScope() {
     class EventTransport extends OriginalEventTransport {
-        constructor(from: string, to: string) {
+        constructor(from: EventTransportEndpoint, to: EventTransportEndpoint) {
             super(from, to, realm);
 
             transports.push(this);
@@ -21,7 +22,7 @@ function createScope() {
                         .replace(
                             new RegExp('"' + transport.inputChannelId + '"', 'g'),
                             function (m) {
-                                return m.replace(/:[^"]+/, ':' + replaceId.get(transport));
+                                return m.replace(/[:/][^"]+/, ':' + replaceId.get(transport));
                             }
                         )
                         .replace(/"callback":\s*"([^"]+)"/g, function (m: string, id: string) {

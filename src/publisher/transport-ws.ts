@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import socketIO from 'socket.io-client';
-import WsTransport from '../transport/ws.js';
+import { WsTransport } from '../transport/ws.js';
 
 const CLIENT_ID_FILENAME = path.resolve('.rempl_endpoint_id'); // FIXME: dirty solution
 

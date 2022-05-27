@@ -1,7 +1,7 @@
 /* eslint-env browser */
 import { opener, parent } from '../../utils/global.js';
 import { Subscriber } from '../../classes/Subscriber.js';
-import EventTransport from '../../transport/event.js';
+import { EventTransport } from '../../transport/event.js';
 import { setOverlayVisible } from './disconnected-overlay/index.js';
 
 let subscriber: Subscriber | null = null;

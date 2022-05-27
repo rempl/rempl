@@ -1,9 +1,9 @@
-import WSTransport from '../transport/ws.js';
+import { WsTransport } from '../transport/ws.js';
 import { TransportPublisher } from './TransportPublisher.js';
 import { GetRemoteUIHandler, PublisherOptions, PublisherWsSettings } from '../types.js';
 
 const publishers = new Map<string, TransportPublisher>();
-let ws: WSTransport | null = null;
+let ws: WsTransport | null = null;
 
 export function getPublisher(
     id: string,
@@ -53,7 +53,7 @@ export function resolveWsUri(
 
 export function connect(
     auto: boolean,
-    createWsTransport: (uri: string) => WSTransport,
+    createWsTransport: (uri: string) => WsTransport,
     fetchWsSettings: () => PublisherWsSettings,
     uri?: string
 ) {

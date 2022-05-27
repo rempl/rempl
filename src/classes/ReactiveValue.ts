@@ -5,7 +5,7 @@ export type Handler<T> = {
     handler: Handler<T> | null;
 };
 
-export default class ReactiveValue<T> {
+export class ReactiveValue<T> {
     value: T;
     handler: Handler<T> | null = null;
 

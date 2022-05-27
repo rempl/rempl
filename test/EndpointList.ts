@@ -1,5 +1,5 @@
 import { equal } from 'assert';
-import EndpointList from '../src/classes/EndpointList.js';
+import { EndpointList } from '../src/classes/EndpointList.js';
 
 describe('EndpointList', () => {
     it('should not update when content is the same', () => {

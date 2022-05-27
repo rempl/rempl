@@ -1,7 +1,7 @@
 import { DataMessage } from '../types.js';
 import { AnyFn, subscribe } from '../utils/index.js';
-import Namespace from './Namespace.js';
-import Endpoint, { Packet } from './Endpoint.js';
+import { Namespace } from './Namespace.js';
+import { Packet, Endpoint } from './Endpoint.js';
 
 export type SubscriberPacket = DataMessage | Packet;
 

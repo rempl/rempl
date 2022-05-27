@@ -1,17 +1,19 @@
 /* eslint-env browser */
 
-import ReactiveValue from '../classes/ReactiveValue.js';
-import EndpointList from '../classes/EndpointList.js';
-import EndpointListSet from '../classes/EndpointListSet.js';
+import { ReactiveValue } from '../classes/ReactiveValue.js';
+import { EndpointList } from '../classes/EndpointList.js';
+import { EndpointListSet } from '../classes/EndpointListSet.js';
 import * as utils from '../utils/index.js';
 import { globalThis, AnyFn, UnsubscribeFn } from '../utils/index.js';
 import {
-    HandshakeEventMessagePayload,
-    EventMessagePayload,
     GetRemoteUIInternalHandler,
-    CallbackEventMessagePayload,
+    EventTransportHandshakePayload,
+    EventTransportMessagePayload,
+    EventTransportConnectTo,
+    EventTransportEndpoint,
+    EventTransportChannelId,
 } from '../types.js';
-import { EventMessage } from '../types.js';
+import { EventTransportMessage } from '../types.js';
 import { Publisher } from '../classes/Publisher.js';
 import { Subscriber } from '../classes/Subscriber.js';
 
@@ -45,8 +47,12 @@ export type CallbackPayload<TArgs extends unknown[]> = {
 
 const allTransports: EventTransport[] = [];
 
-export default class EventTransport {
-    static get(name: string, connectTo: string, win?: Window | typeof globalThis): EventTransport {
+export class EventTransport {
+    static get(
+        name: EventTransportEndpoint,
+        connectTo: EventTransportEndpoint,
+        win?: Window | typeof globalThis
+    ): EventTransport {
         if (!win) {
             win = globalThis;
         }
@@ -61,11 +67,11 @@ export default class EventTransport {
         return transport || new EventTransport(name, connectTo, win);
     }
 
-    name: string;
-    connectTo: string;
+    name: EventTransportEndpoint;
+    connectTo: EventTransportEndpoint;
     realm: Window | typeof globalThis;
-    inputChannelId: string;
-    connections: Record<string, Connection> = Object.create(null);
+    inputChannelId: EventTransportChannelId;
+    connections = new Map<EventTransportChannelId, Connection>();
     connected = new ReactiveValue(false);
     endpointGetUI = new Map<string, GetRemoteUIInternalHandler>();
     ownEndpoints = new EndpointList();
@@ -76,7 +82,11 @@ export default class EventTransport {
     sendCallbacks = new Map<string, AnyFn>();
     inited = false;
 
-    constructor(name: string, connectTo: string, win?: Window | typeof globalThis) {
+    constructor(
+        name: EventTransportEndpoint,
+        connectTo: EventTransportEndpoint,
+        win?: Window | typeof globalThis
+    ) {
         if (allTransports.length === 0 && typeof addEventListener === 'function') {
             addEventListener(
                 'message',
@@ -93,7 +103,7 @@ export default class EventTransport {
 
         this.name = name;
         this.connectTo = connectTo;
-        this.inputChannelId = name + ':' + utils.genUID();
+        this.inputChannelId = `${name}/${utils.genUID()}`;
         this.realm = win || globalThis;
 
         this.ownEndpoints.on((endpoints) => {
@@ -117,34 +127,32 @@ export default class EventTransport {
     }
 
     _handshake(inited: boolean) {
-        const payload: HandshakeEventMessagePayload = {
+        this._send(`${this.connectTo}:connect`, {
             type: 'handshake',
             initiator: this.name,
             inited,
             endpoints: this.ownEndpoints.value,
-        };
-
-        this._send(this.connectTo + ':connect', payload);
+        });
     }
 
-    _onMessage(event: MessageEvent) {
-        const data = event.data || {};
-        const payload = data.payload || {};
-
+    _onMessage(event: MessageEvent<EventTransportMessage>) {
         if (event.source !== this.realm || event.target !== globalThis) {
             return;
         }
 
+        const data = event.data || {};
+        const connectTo: EventTransportConnectTo = `${this.name}:connect`;
+
         switch (data.to) {
-            case this.name + ':connect':
-                if (payload.initiator === this.connectTo) {
-                    this._onConnect(data.from, payload);
+            case connectTo:
+                if (data.payload?.initiator === this.connectTo) {
+                    this._onConnect(data.from, data.payload);
                 }
                 break;
 
             case this.inputChannelId:
-                if (data.from in this.connections) {
-                    this._onData(data.from, payload);
+                if (this.connections.has(data.from)) {
+                    this._onData(data.from, data.payload);
                 } else {
                     console.warn(DEBUG_PREFIX + 'unknown incoming connection', data.from);
                 }
@@ -152,19 +160,19 @@ export default class EventTransport {
         }
     }
 
-    _onConnect(from: string, payload: HandshakeEventMessagePayload) {
+    _onConnect(from: EventTransportChannelId, payload: EventTransportHandshakePayload) {
         if (!payload.inited) {
             this._handshake(true);
         }
 
-        if (from in this.connections === false) {
+        if (!this.connections.has(from)) {
             const endpoints = new EndpointList(payload.endpoints);
 
             this.remoteEndpoints.add(endpoints);
-            this.connections[from] = {
+            this.connections.set(from, {
                 ttl: Date.now(),
                 endpoints,
-            };
+            });
             this._send(from, {
                 type: 'connect',
                 endpoints: this.ownEndpoints.value,
@@ -174,26 +182,26 @@ export default class EventTransport {
         this.inited = true;
     }
 
-    _onData(from: string, payload: EventMessagePayload) {
+    _onData(from: EventTransportChannelId, payload: EventTransportMessagePayload) {
         if (DEBUG) {
             console.log(DEBUG_PREFIX + 'receive from ' + this.connectTo, payload.type, payload);
         }
 
         switch (payload.type) {
             case 'connect': {
-                this.connections[from].endpoints.set(payload.endpoints);
+                this.connections.get(from)?.endpoints.set(payload.endpoints);
                 this.connected.set(true);
                 this.initCallbacks.splice(0).forEach((args) => this.onInit(...args));
                 break;
             }
 
             case 'endpoints': {
-                this.connections[from].endpoints.set(payload.data[0]);
+                this.connections.get(from)?.endpoints.set(payload.data[0]);
                 break;
             }
 
             case 'disconnect': {
-                this.connections[from].endpoints.set([]);
+                this.connections.get(from)?.endpoints.set([]);
                 this.connected.set(false);
                 break;
             }
@@ -277,24 +285,24 @@ export default class EventTransport {
         }
     }
 
-    _wrapCallback(to: string, callback: string) {
-        return (...args: unknown[]) => {
-            const callbackPayload: CallbackEventMessagePayload = {
+    _wrapCallback(to: EventTransportChannelId, callback: string) {
+        return (...args: unknown[]) =>
+            this._send(to, {
                 type: 'callback',
                 callback,
                 data: args,
-            };
-            this._send(to, callbackPayload);
-        };
+            });
     }
 
-    _send(to: string, payload: HandshakeEventMessagePayload | EventMessagePayload) {
+    _send(to: EventTransportConnectTo, payload: EventTransportHandshakePayload): void;
+    _send(to: EventTransportChannelId, payload: EventTransportMessagePayload): void;
+    _send(to: EventTransportConnectTo | EventTransportChannelId, payload: any): void {
         if (DEBUG) {
             console.log(DEBUG_PREFIX + 'emit event', to, payload);
         }
 
         if (typeof this.realm.postMessage === 'function') {
-            const message: EventMessage = {
+            const message: EventTransportMessage = {
                 from: this.inputChannelId,
                 to,
                 payload,
@@ -312,7 +320,7 @@ export default class EventTransport {
     }
 
     sendToEndpoint<
-        M extends Extract<EventMessagePayload, { endpoint: string | null }>,
+        M extends Extract<EventTransportMessagePayload, { endpoint: string | null }>,
         K extends M['type']
     >(endpoint: string | null, type: K, ...args: any) {
         let callback: string | null = null;
@@ -330,8 +338,8 @@ export default class EventTransport {
         });
     }
 
-    send(payload: EventMessagePayload) {
-        for (const channelId in this.connections) {
+    send(payload: EventTransportMessagePayload) {
+        for (const channelId of this.connections.keys()) {
             this._send(channelId, payload);
         }
     }

@@ -5,10 +5,10 @@ import {
     MethodsMap,
 } from '../types.js';
 import { AnyFn } from '../utils/index.js';
-import Namespace from './Namespace.js';
-import ReactiveValue from './ReactiveValue.js';
-import EndpointListSet from './EndpointListSet.js';
-import EndpointList from './EndpointList.js';
+import { Namespace } from './Namespace.js';
+import { ReactiveValue } from './ReactiveValue.js';
+import { EndpointListSet } from './EndpointListSet.js';
+import { EndpointList } from './EndpointList.js';
 
 export type Channel = {
     type: string;
@@ -17,7 +17,7 @@ export type Channel = {
 
 export type Packet = CallMessage | RemoteMethodsMessage | GetProvidedMethodsMessage;
 
-export default class Endpoint<TNamespace extends Namespace> {
+export class Endpoint<TNamespace extends Namespace> {
     id: string | null;
     namespaces: {
         [key: string]: TNamespace;

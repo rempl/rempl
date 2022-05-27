@@ -1,5 +1,5 @@
 import { GetRemoteUIHandler, PublisherOptions } from '../../types.js';
-import EventTransport from '../../transport/event.js';
+import { EventTransport } from '../../transport/event.js';
 import { getPublisher, connect } from '../factory.js';
 import { createBrowserWsTransport, fetchWsSettings } from './transport-ws.js';
 
