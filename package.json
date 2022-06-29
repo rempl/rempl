@@ -1,6 +1,6 @@
 {
     "name": "rempl",
-    "version": "1.0.0-alpha.21",
+    "version": "1.0.0-alpha.22",
     "description": "Framework for moderated access with custom UI to remote JavaScript runtime",
     "repository": "rempl/rempl",
     "license": "MIT",
@@ -16,6 +16,7 @@
     "browser": "./lib/browser.js",
     "exports": {
         ".": {
+            "types": "./lib/browser.d.ts",
             "node": {
                 "types": "./lib/node.d.ts",
                 "require": "./lib/node.cjs",
@@ -37,7 +38,7 @@
         "test": "npm run test:esm && npm run test:cjs",
         "test:esm": "mocha lib-test/*.js",
         "test:cjs": "mocha lib-test/*.cjs",
-        "build": "npm run build:transpile && npm run build:bundle",
+        "build": "npm run build:transpile && npm run build:bundle && npm run ts-emit-types",
         "build:clean": "node scripts/clean.cjs",
         "build:bundle": "node scripts/build.cjs",
         "build:server-assets": "node node_modules/basisjs-tools-build/bin/build -c server/client/build.config",
