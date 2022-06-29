@@ -219,7 +219,7 @@ export class EventTransport {
             }
 
             case 'data': {
-                let args = Array.prototype.slice.call(payload.data);
+                let args = payload.data;
                 const callback = payload.callback;
 
                 if (callback) {
