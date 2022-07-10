@@ -1,3 +1,17 @@
+## next
+
+- Reworked sandbox init:
+  - UI is loading into a [sandboxed](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-sandbox) frame with `allow-scripts allow-forms allow-popups allow-modals` features enabled. That prevents access to [data storage/cookies](https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy#cross-origin_data_storage_access) and some JavaScript APIs from UI scripts (because `allow-same-origin` is not enabled) but puts UI scripts in the same conditions across environments (e.g. a regular page, a page in "incognito mode", a devtools page etc).
+  - Added `sandboxSrc` option for `createSandbox()` to specify a sandbox page URL, needed to define a specific origin e.g. in devtools
+  - Added `rempl/sanbox-init` endpoint which exposes a code to inject into a sandbox page to init UI scripts, e.g.
+    ```html
+    <!DOCTYPE html>
+    <script>
+      import { initSandboxScript } from 'rempl/sandbox-init';
+      initSandboxScript();
+    </script>
+    ```
+
 ## 1.0.0-alpha.22 (June 29, 2022)
 
 - Fixed crash on UI init in a sandbox when a bundle declares variables with a name as a readonly globals referring to a window object like `top`, `parent` etc.

@@ -28,6 +28,11 @@
                 "import": "./lib/browser.js"
             }
         },
+        "./sandbox-init": {
+            "types": "./lib/sandbox/browser/sandbox-init.d.ts",
+            "require": "./lib/sandbox/browser/sandbox-init.cjs",
+            "import": "./lib/sandbox/browser/sandbox-init.js"
+        },
         "./dist/*": "./dist/*.js",
         "./package.json": "./package.json"
     },

@@ -2,6 +2,7 @@
 import { Sandbox } from '../../types.js';
 import { OnInitCallback, EventTransport } from '../../transport/event.js';
 import { globalThis, parent, genUID } from '../../utils/index.js';
+import { initSandboxScript } from './sandbox-init.js';
 
 type Global = typeof globalThis;
 type SandboxWindow = Window | Global;
@@ -9,6 +10,7 @@ type Settings =
     | {
           type: 'script';
           content: Record<string, string>;
+          sandboxSrc?: string;
           window?: Window;
           container?: HTMLElement;
       }
@@ -23,23 +25,29 @@ const initEnvSubscriberMessage = new WeakMap();
 
 // TODO: make tree-shaking friendly
 if (parent !== globalThis) {
-    addEventListener('message', function (event: MessageEvent<any>) {
-        const data = event.data || {};
+    addEventListener(
+        'message',
+        function (event: MessageEvent<any>) {
+            const data = event.data || {};
 
-        if (event.source && data.to === 'rempl-env-publisher:connect') {
-            initEnvSubscriberMessage.set(event.source, data);
-        }
-    });
+            if (event.source && data.to === 'rempl-env-publisher:connect') {
+                initEnvSubscriberMessage.set(event.source, data);
+            }
+        },
+        true
+    );
 }
 
 export function createSandbox(settings: Settings, callback: OnInitCallback) {
     function initSandbox(sandboxWindow: SandboxWindow) {
         if (settings.type === 'script') {
-            for (const [sourceURL, source] of Object.entries(settings.content)) {
-                (sandboxWindow as Global).eval(
-                    `(function(){${source}})()\n//# sourceURL=${sourceURL}`
-                );
-            }
+            sandboxWindow.postMessage(
+                {
+                    action: 'rempl-sandbox-init-scripts',
+                    scripts: settings.content,
+                },
+                '*'
+            );
         }
 
         if (parent !== globalThis && sandboxWindow !== globalThis) {
@@ -60,7 +68,7 @@ export function createSandbox(settings: Settings, callback: OnInitCallback) {
                         case 'rempl-env-subscriber:connect':
                         case toSandbox:
                             toEnv = data.from;
-                            sandboxWindow.postMessage(data);
+                            sandboxWindow.postMessage(data, '*');
                             break;
 
                         case 'rempl-env-publisher:connect':
@@ -108,11 +116,20 @@ export function createSandbox(settings: Settings, callback: OnInitCallback) {
         iframe = document.createElement('iframe');
         iframe.name = genUID(); // to avoid cache
         iframe.onload = () => iframe?.contentWindow && initSandbox(iframe.contentWindow);
+        iframe.setAttribute('sandbox', 'allow-scripts allow-forms allow-popups allow-modals');
 
         if (settings.type === 'url') {
             iframe.src = settings.content;
+        } else if (settings.sandboxSrc) {
+            iframe.src = settings.sandboxSrc;
         } else {
-            iframe.srcdoc = '<!doctype html>';
+            iframe.srcdoc = '<!doctype html><script>(' + String(initSandboxScript) + ')()</script>';
+            // iframe.src = URL.createObjectURL(
+            //     new Blob(
+            //         ['<!doctype html><script>(' + String(initSandboxScript) + ')()</script>'],
+            //         { type: 'text/html' }
+            //     )
+            // );
         }
 
         (settings.container || document.documentElement).appendChild(iframe);

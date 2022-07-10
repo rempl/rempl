@@ -193,7 +193,7 @@ async function transpileAll(options) {
     const { watch = false, types = false, bundle = false } = options || {};
 
     await transpile({
-        entryPoints: ['src/node.ts', 'src/browser.ts'],
+        entryPoints: ['src/node.ts', 'src/browser.ts', 'src/sandbox/browser/sandbox-init.ts'],
         outputDir: './lib',
         format: 'esm',
         watch,

@@ -308,7 +308,7 @@ export class EventTransport {
                 payload,
             };
 
-            this.realm.postMessage(message);
+            this.realm.postMessage(message, '*');
         }
     }
 
