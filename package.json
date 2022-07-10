@@ -1,6 +1,6 @@
 {
     "name": "rempl",
-    "version": "1.0.0-alpha.22",
+    "version": "1.0.0-alpha.23",
     "description": "Framework for moderated access with custom UI to remote JavaScript runtime",
     "repository": "rempl/rempl",
     "license": "MIT",
