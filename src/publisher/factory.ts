@@ -34,18 +34,10 @@ export function resolveWsUri(
     switch (uri) {
         case 'implicit':
         case undefined:
-            uri = settings.explicit || settings.implicit;
-            break;
+            return settings.explicit || settings.implicit;
 
         case 'explicit':
-            uri = settings.explicit;
-
-            // when no explicit setting do nothing
-            if (uri === undefined) {
-                return;
-            }
-
-            break;
+            return settings.explicit;
     }
 
     return uri;
@@ -58,7 +50,7 @@ export function connect(
     uri?: string
 ) {
     if (ws === null) {
-        uri = resolveWsUri(fetchWsSettings(), uri);
+        uri = auto ? fetchWsSettings().explicit : resolveWsUri(fetchWsSettings(), uri);
 
         if (typeof uri === 'string') {
             ws = createWsTransport(uri);

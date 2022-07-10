@@ -1,5 +1,6 @@
 ## next
 
+- Disabled implicit auto-connection to WS server by default
 - Reworked sandbox init:
   - UI is loading into a [sandboxed](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-sandbox) frame with `allow-scripts allow-forms allow-popups allow-modals` features enabled. That prevents access to [data storage/cookies](https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy#cross-origin_data_storage_access) and some JavaScript APIs from UI scripts (because `allow-same-origin` is not enabled) but puts UI scripts in the same conditions across environments (e.g. a regular page, a page in "incognito mode", a devtools page etc).
   - Added `sandboxSrc` option for `createSandbox()` to specify a sandbox page URL, needed to define a specific origin e.g. in devtools
