@@ -111,6 +111,7 @@ For most cases you need a WebSocket transport. In this case a WS server is requi
 - Browsers [[repo](https://github.com/rempl/host-chromium-extension)]
   - [Chromium based browsers](https://chrome.google.com/webstore/detail/rempl/hcikjlholajopgbgfmmlbmifdfbkijdj) (Google Chrome, Edge, Opera)
   - [Firefox](https://addons.mozilla.org/af/firefox/addon/rempl/)
+  - [Edge](https://microsoftedge.microsoft.com/addons/detail/rempl/fdjblokocclgcookheppjmfmgfkppmaa)
 - Editors
   - [Atom](https://atom.io/packages/rempl) [[repo](https://github.com/rempl/host-atom)]
   - VS Code (planned)
