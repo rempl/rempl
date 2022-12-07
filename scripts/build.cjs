@@ -115,7 +115,7 @@ async function buildBundle(options) {
         fs.writeFileSync(outfileEsm, bundleEsm);
     }
 
-    console.log(`Bundle ${outfile || '<output>'} built in ${Date.now() - startTime}`);
+    console.log(`Bundle ${outfile || '<output>'} built in ${Date.now() - startTime}ms`);
 
     if (!outfile) {
         return {
