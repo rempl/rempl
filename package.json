@@ -1,14 +1,13 @@
 {
     "name": "rempl",
-    "version": "1.0.0-alpha.23",
+    "version": "1.0.0-alpha.24",
     "description": "Framework for moderated access with custom UI to remote JavaScript runtime",
     "repository": "rempl/rempl",
     "license": "MIT",
     "author": "Roman Dvornov",
     "contributors": [
         "Roman Dvornov <rdvornov@gmail.com>",
-        "Sergey Melyukov <s.melukov@gmail.com>",
-        "Anastasia Goryacheva <a.e.goryacheva@gmail.com>"
+        "Sergey Melyukov <s.melukov@gmail.com>"
     ],
     "type": "module",
     "main": "./lib/node.js",

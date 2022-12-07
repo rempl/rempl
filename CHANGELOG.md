@@ -1,4 +1,4 @@
-## next
+## 1.0.0-alpha.24 (December 7, 2022)
 
 - [Trusted Types](https://w3c.github.io/trusted-types/dist/spec) related fixes
 - Bump `socket.io-client` to fix security issue
