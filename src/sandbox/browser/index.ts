@@ -1,7 +1,7 @@
 /* eslint-env browser */
 import { Sandbox } from '../../types.js';
 import { OnInitCallback, EventTransport } from '../../transport/event.js';
-import { globalThis, parent, genUID } from '../../utils/index.js';
+import { globalThis, trustedEmptyHTML, parent, genUID } from '../../utils/index.js';
 import { initSandboxScript } from './sandbox-init.js';
 
 type Global = typeof globalThis;
@@ -155,8 +155,8 @@ export function createSandbox(settings: Settings, callback: OnInitCallback) {
 
             if (iframe !== null) {
                 iframe.remove();
-                iframe.setAttribute('srcdoc', '');
-                iframe.setAttribute('src', '');
+                iframe.setAttribute('srcdoc', trustedEmptyHTML);
+                iframe.setAttribute('src', trustedEmptyHTML);
                 iframe = null;
             }
         },

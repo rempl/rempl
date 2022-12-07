@@ -1,4 +1,7 @@
+import { globalThis } from './global.js';
 export * from './global.js';
+
+export const trustedEmptyHTML = globalThis.trustedTypes?.emptyHTML;
 
 export type Fn<TArgs extends unknown[], TReturn, TThis = unknown> = (
     this: TThis,

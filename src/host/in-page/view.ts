@@ -1,5 +1,6 @@
 /* eslint-env browser */
 
+import { trustedEmptyHTML } from '../../utils/index.js';
 import createElement from './createElement.js';
 import styles from './style.js';
 
@@ -35,7 +36,7 @@ function updateTabSelectedState(tabEl: HTMLElement) {
 function updatePublisherList() {
     const { tabs } = getView();
 
-    tabs.innerHTML = '';
+    tabs.innerHTML = trustedEmptyHTML;
 
     for (const publisher of publishers) {
         const { element } = createElement({

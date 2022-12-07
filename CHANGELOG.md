@@ -1,3 +1,7 @@
+## next
+
+- [Trusted Types](https://w3c.github.io/trusted-types/dist/spec) related fixes
+
 ## 1.0.0-alpha.23 (July 10, 2022)
 
 - Disabled implicit auto-connection to WS server by default

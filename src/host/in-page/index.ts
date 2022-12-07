@@ -1,5 +1,6 @@
 /* eslint-env browser */
 import { Host } from '../../types.js';
+import { trustedEmptyHTML } from '../../utils/index.js';
 import { EventTransport } from '../../transport/event.js';
 import { createSandbox } from '../../sandbox/browser/index.js';
 import view from './view.js';
@@ -47,7 +48,7 @@ function selectPublisher(publisherId: string | null = null) {
                                 'margin:10px;padding:5px 10px;border-radius:3px;border:1px solid #eba8a8;color:#f34040;background:#ffe0e0;'
                             );
 
-                            sandboxContainerEl.innerHTML = '';
+                            sandboxContainerEl.innerHTML = trustedEmptyHTML;
                             sandboxContainerEl.append(errorEl);
                         } else {
                             sandbox = createSandbox(
