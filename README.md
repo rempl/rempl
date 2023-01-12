@@ -10,6 +10,7 @@ The general idea behind `Rempl` is to simplify moderated remote access to JavaSc
 Built on `Rempl`:
 
 - [React Render Tracker](https://github.com/lahmatiy/react-render-tracker) – a tool to discover performance issues related to unintentional re-renders and unmounts
+- [Effector DevTools](https://github.com/fnpen/effector-devtools) – a tool to power-up Effector development workflow, track state changes, events and effects.
 
 ## Install
 
